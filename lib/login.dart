@@ -63,56 +63,6 @@ class _CoolLoadingIndicatorState extends State<CoolLoadingIndicator>
   }
 }
 
-class Entering extends StatefulWidget {
-  const Entering({ Key? key }) : super(key: key);
-
-  @override
-  _EnteringState createState() => _EnteringState();
-}
-
-class _EnteringState extends State<Entering> with TickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-    Timer(Duration(seconds: 2), () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage())));
-  }
-  
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 2),
-    vsync: this,
-  )..repeat(reverse: true);
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeIn,
-  );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-  final _formKey = GlobalKey<FormState>();
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: FadeTransition(
-        opacity: _animation,
-        child: Column(children: [
-          Padding(padding: EdgeInsets.symmetric(), child: Icon(Icons.music_note, size: 75, color: Colors.blue,textDirection: TextDirection.ltr) ),
-          Padding(padding: EdgeInsets.only(bottom: 25.0),
-          child: Text(
-            "Getting Things Ready", 
-            style: TextStyle(fontSize: 15, color: Colors.blue, ),
-            textDirection: TextDirection.ltr
-          )
-          ),
-          ], 
-        ),
-      )
-      );
-  }
-}
 class LoginPage extends StatefulWidget{
   @override 
   static var user=_LoginPageState.user;
@@ -312,12 +262,7 @@ class _LoginPageState extends State<LoginPage> {
             height:MediaQuery.of(context).size.height*0.07,
             
             );
-          }
-            
-          
-
-
-                 
+          }    
             
           return Scaffold(
             body: 

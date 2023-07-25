@@ -41,142 +41,37 @@ class StarRating extends StatelessWidget {
   }
 }
 
-class ProfileBubble extends StatelessWidget {
-  final VoidCallback onProfilePressed;
-
-  ProfileBubble({required this.onProfilePressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        IconButton(
-          icon: Icon(Icons.person, color: Colors.white),
-          onPressed: onProfilePressed,
-        ),
-        Positioned(
-          top: -5,
-          right: -5,
-          child: BubbleShape(
-            arrowSize: 10,
-            arrowPosition: 0.7,
-            child: Icon(Icons.person, color: Colors.white, size: 30),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class BubbleShape extends StatelessWidget {
-  final Widget child;
-  final double arrowSize;
-  final double arrowPosition;
-
-  BubbleShape({required this.child, this.arrowSize = 20, this.arrowPosition = 0.5});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: BubblePainter(
-        arrowSize: arrowSize,
-        arrowPosition: arrowPosition,
-      ),
-      child: ClipPath(
-        clipper: BubbleClipper(
-          arrowSize: arrowSize,
-          arrowPosition: arrowPosition,
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
-class BubblePainter extends CustomPainter {
-  final double arrowSize;
-  final double arrowPosition;
-
-  BubblePainter({this.arrowSize = 20, this.arrowPosition = 0.5});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white;
-    final path = Path();
-
-    final double arrowBasePosition = size.width * arrowPosition;
-
-    path.moveTo(arrowBasePosition, 0);
-    path.lineTo(arrowBasePosition - arrowSize / 2, -arrowSize);
-    path.lineTo(arrowBasePosition + arrowSize / 2, -arrowSize);
-    path.lineTo(arrowBasePosition, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
-class BubbleClipper extends CustomClipper<Path> {
-  final double arrowSize;
-  final double arrowPosition;
-
-  BubbleClipper({this.arrowSize = 20, this.arrowPosition = 0.5});
-
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-
-    final double arrowBasePosition = size.width * arrowPosition;
-
-    path.moveTo(arrowBasePosition, 0);
-    path.lineTo(arrowBasePosition - arrowSize / 2, -arrowSize);
-    path.lineTo(arrowBasePosition + arrowSize / 2, -arrowSize);
-    path.lineTo(arrowBasePosition, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return false;
-  }
-}
-
 void showProfileMenu(BuildContext context) {
   final RenderBox appBarRenderBox = context.findRenderObject() as RenderBox;
   final Offset appBarOffset = appBarRenderBox.localToGlobal(Offset.zero);
 
-  final bubbleSize = Size(120, 80);
+  final double gapOnRight = 0; // Replace this with the desired gap on the right side
+
+  final screenWidth=MediaQuery. of(context). size. width;
+
+  final double rightOffset = screenWidth-gapOnRight;
+  final Offset tapPosition = appBarRenderBox.localToGlobal(Offset.zero);
 
   showMenu(
     context: context,
     position: RelativeRect.fromLTRB(
-      appBarOffset.dx + appBarRenderBox.size.width - bubbleSize.width,
-      appBarOffset.dy - bubbleSize.height - 5, // Adjust the offset to leave some gap for the profile button
-      appBarOffset.dx + appBarRenderBox.size.width,
-      appBarOffset.dy - 5, // Adjust the offset to leave some gap for the profile button
+      rightOffset,
+      tapPosition.dy + kToolbarHeight,
+      screenWidth,
+      0,
     ),
     items: [
       PopupMenuItem(
-        value: "logout",
-        child: Text("Log Out"),
+        value: "settings",
+        child: Text("Settings"),
       ),
       PopupMenuItem(
         value: "learn_more",
         child: Text("Learn More"),
+      ),
+      PopupMenuItem(
+        value: "logout",
+        child: Text("Log Out", style:TextStyle(color:Colors.red)),
       ),
     ],
     shape: RoundedRectangleBorder(
@@ -184,7 +79,7 @@ void showProfileMenu(BuildContext context) {
     ),
   ).then((value) {
     if (value == "logout") {
-      // Handle logout action
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
       print("Logging out...");
     } else if (value == "learn_more") {
       // Handle learn more action
