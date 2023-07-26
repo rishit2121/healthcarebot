@@ -10,6 +10,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'main.dart';
 import 'package:flutter_animated_button/flutter_animated_button.dart';
 
@@ -65,22 +66,35 @@ class _CoolLoadingIndicatorState extends State<CoolLoadingIndicator>
 
 class LoginPage extends StatefulWidget{
   @override 
-  static var user=_LoginPageState.user;
+  static var user1=_LoginPageState.user1;
   static var pwd= _LoginPageState.pwd;
   _LoginPageState createState() => _LoginPageState();
 }
 class _LoginPageState extends State<LoginPage> {
-  
-  String title="Login";
+  var _timer;
+  String title="Sign In";
   String other_title="Sign Up";
   String hint_txt="Dont have a account?";
   String other_hint_txt="Already have a account?";
   String msg="";
-  static var user="";
+  static var user1="";
   static var pwd="";
   final _formKey = GlobalKey<FormState>();
   final myController=TextEditingController();
+  final myControllerEmail=TextEditingController();
   final myControllerPwd=TextEditingController();
+  var acs = ActionCodeSettings(
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be whitelisted in the Firebase Console.
+    url: 'https://www.example.com/finishSignUp?cartId=1234',
+    // This must be true
+    handleCodeInApp: true,
+    iOSBundleId: 'com.example.ios',
+    androidPackageName: 'com.example.android',
+    // installIfNotAvailable
+    androidInstallApp: true,
+    // minimumVersion
+    androidMinimumVersion: '12');
   @override 
   void initState(){
     super.initState();
@@ -113,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
           Widget buildTitle(BuildContext context) {
             return Container(width:MediaQuery.of(context).size.width*1, child:Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width*0.1 ),child:Text("$title", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 30),)));
           }  
-          Widget buildUsername(BuildContext context){
+          Widget buildEmail(BuildContext context){
             return Container(
               width:MediaQuery.of(context).size.width*0.9,
               child:TextField(
@@ -121,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: new TextStyle(
                         fontFamily: "Poppins",),
               decoration: new InputDecoration(
-                labelText: "Enter Username",
+                labelText: "Enter Email",
                 fillColor: Colors.white,
                 border: new OutlineInputBorder(
                   borderRadius: new BorderRadius.circular(10.0),
@@ -130,9 +144,35 @@ class _LoginPageState extends State<LoginPage> {
               ),
                         //fillColor: Colors.green
               ),
-              controller:myController,
+              controller:myControllerEmail,
             )
             );
+          }
+          Widget buildUsername(BuildContext context,x){
+            if(title=='Sign Up'){
+              return Container(
+                width:MediaQuery.of(context).size.width*0.9,
+                child:TextField(
+                keyboardType: TextInputType.emailAddress,
+                        style: new TextStyle(
+                          fontFamily: "Poppins",),
+                decoration: new InputDecoration(
+                  labelText: "Enter Username",
+                  fillColor: Colors.white,
+                  border: new OutlineInputBorder(
+                    borderRadius: new BorderRadius.circular(10.0),
+                    borderSide: new BorderSide(
+                  ),
+                ),
+                          //fillColor: Colors.green
+                ),
+                controller:myController,
+              )
+              );
+            }
+            else{
+              return Container(height:MediaQuery.of(context).size.height*x);
+            }
           }
           Widget buildPassword(BuildContext context){
             return Container(
@@ -170,6 +210,9 @@ class _LoginPageState extends State<LoginPage> {
                 style:TextStyle(color:Colors.blue)),
                 ),
                 onPressed:() {
+                  if(title=='Sign Up'){
+                    try {_timer.cancel();}catch(e){print(e);}
+                  }
                   setState(() {
                     String temp=other_title;
                     other_title=title;
@@ -200,60 +243,120 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: 50,
               borderWidth: 2,
               text:"Enter",
-              onPress:() {
-                if(title=="Login"){
-                  try{
-                    if(data[myController.text]['pwd']==myControllerPwd.text){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context)=>ChatScreen()),
-                      );
-                      user=myController.text;
-                      pwd=myControllerPwd.text;
-                      setState(() {
-                        msg="";
+              onPress:() async {
+                if(title=="Sign In"){
+                  try {
+                    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                      email: myControllerEmail.text,
+                      password: myControllerPwd.text
+                    );
+                    await FirebaseAuth.instance.currentUser?.reload();
+                    final user = FirebaseAuth.instance.currentUser;
+                    print(user?.emailVerified);
+                    if (user?.emailVerified==true) {
+                      print('yay');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context)=>ChatScreen()),
+                        );
+                        setState(() {
+                          msg="";
+                          user1=myController.text;
+                          pwd=myControllerPwd.text; 
+                        });
+                            
+                    }else{
+                      print("Yea they aint verified");
+                      setState((){
+                        msg="Your Email Is not verified yet.";
                       });
                     }
-                    else{
-                      setState(() {
-                        msg="Password or Username is Incorrect";
+                  } on FirebaseAuthException catch (e) {
+                      if (e.code == 'weak-password') {
+                        setState((){
+                          msg='The password provided is too weak.';
+                        });
+                      } else if (e.code == 'email-already-in-use') {
+                        setState((){
+                          msg='The account already exists for that email.';
+                        });
+                      }else{
+                        setState(() {
+                          msg=e.code;
+                        });
+                      }
+                    } catch (e) {
+                      setState((){
+                          print(e);
                       });
-                      
-                    }
-                  // ignore: avoid_types_as_parameter_names
-                  }catch(Exception){
-                    setState(() {
-                      msg="Username does not exist";
-                    });
-                    
-                  }
+                  }    
                 }
                 if(title=="Sign Up"){
-                  if(data[myController.text]==null){
-                    login.doc("login").set(
-                      {myController.text:{'pwd':myControllerPwd.text}},
-                      SetOptions(merge:true),
+                    try {
+                      final FirebaseAuth _auth = FirebaseAuth.instance;
+                      final credential = await _auth.createUserWithEmailAndPassword(
+                        email: myControllerEmail.text,
+                        password: myControllerPwd.text,
                       );
-                    login.doc("${myController.text}").set(
-                      {myController.text:{'pwd':myControllerPwd.text}},
-                      SetOptions(merge:true),
-                    );
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context)=>ChatScreen()),
-                    );
-                    setState(() {
-                      msg="";
-                      user=myController.text;
-                      pwd=myControllerPwd.text; 
-                    });
-                  }
-                  else{
-                    setState(() {
-                      msg="This username already exists";
-                    });
-                    
-                  }
+                      await credential.user!.sendEmailVerification();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            scrollable: true,
+                            title: const Text("Verification"),
+                             content: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:Text("A verification email was sent to your account. Please verify and you can log in.")
+                             )
+                          );
+                        }
+                      );
+                      _timer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+                        if(DateTime.now().hour ==24){ //Stop if  hour equal to 24
+                          timer.cancel();
+                        }
+                        await FirebaseAuth.instance.currentUser?.reload();
+                        final user = FirebaseAuth.instance.currentUser;
+                        print(user?.emailVerified);
+                          if (user?.emailVerified==true) {
+                            print('yay');
+                            login.doc("${myControllerEmail.text}").set(
+                              {'User':myController.text},
+                              SetOptions(merge:true),
+                            );
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context)=>ChatScreen()),
+                            );
+                            setState(() {
+                              msg="";
+                              user1=myController.text;
+                              pwd=myControllerPwd.text; 
+                            });
+                            timer.cancel();
+                          }
+                          else{
+                            print('not yet');
+                          }
+                        });
+                    } on FirebaseAuthException catch (e) {
+                      if (e.code == 'weak-password') {
+                        setState((){
+                          msg='The password provided is too weak.';
+                        });
+                      } else if (e.code == 'email-already-in-use') {
+                        setState((){
+                          msg='The account already exists for that email.';
+                        });
+                      }else{
+                        setState((){
+                          msg=e.code;
+                        });
+                      }
+                    } catch (e) {
+                      print(e);
+                    }
                 }
                 
 
@@ -271,14 +374,16 @@ class _LoginPageState extends State<LoginPage> {
               padding(context, 0.2),
               buildTitle(context),
               buildMessage(context),
-              padding(context, 0.1),
-              buildUsername(context),
+              padding(context, 0.05),
+              buildUsername(context, 0.05),
+              padding(context, 0.05),
+              buildEmail(context),
               padding(context, 0.05),
               buildPassword(context),
               padding(context, 0.05),
               buildEnter(context),  //0.03
-              padding(context,0.23), 
-              buildSwitch(context),  //0.03       
+              padding(context,0.16), 
+              buildSwitch(context),  //0.03  
 
 
               ])));
