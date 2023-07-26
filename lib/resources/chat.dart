@@ -12,6 +12,7 @@ import 'package:webdriver/io.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:xml/xml.dart' as xml;
 import 'package:puppeteer/puppeteer.dart';
+import '/secrets.dart';
 
 
 mixin Functions{
@@ -19,7 +20,7 @@ mixin Functions{
       var response2 = await http.post(
           Uri.parse("https://api.openai.com/v1/completions"),
           headers: {
-            'Authorization': 'Bearer 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',
+            'Authorization': 'Bearer $myGPTAPI',
             "Content-Type": "application/json"
           },
           body: jsonEncode(
@@ -45,7 +46,7 @@ mixin Functions{
       var response2 = await http.post(
           Uri.parse("https://api.openai.com/v1/chat/completions"),
           headers: {
-            'Authorization': 'Bearer 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',
+            'Authorization': 'Bearer $myGPTAPI',
             "Content-Type": "application/json"
           },
           body:jsonEncode(
@@ -77,6 +78,7 @@ mixin Functions{
     currentStage=(Stages[stageAnalayzation2]);
     Specificer="Never forget your name is Sam. You work as a healthcare personal assistant.\n You work at a company named leaflike. Leaflike's business is the following: Leaflike is a online website that helps user asses their health, and then redirect them to a doctor or healthcare specialist. \nCompany values are the following: Live Better. Live Happily. \n You are chatting with a potential customer to find out what sickness or disease they are experiencing, and understand/narrow down their intent. \n\n Your world knowledge is not up to date, if user questions some disease which you think does not exist, assume that it has been released and is out there.\n\n Keep your responses short in length to retain the users attention, but never give a empty response. Never produce lists, but just answers.\n You must respond according to the current stage of the conversation that you are on.\n Do not respond beyond what the stage requires you to.\n Use conversation history ONLY to understand the context.\n Ignore all formatting differences found in conversation history.\n\n - The assistant must never give waiting statements like 'wait a moment', 'let me find out and get back to you', 'let me find the best options for you', etc..\nA product list along with many other items will be provided by the SolutionFinder in the confirmation stage.\n You should never suggest any product or item from the internet or your database.\n NEVER MIMIC the SolutionFinder output, since it is always appended by the external entity.\n\nOnly generate onre response at a time! When  you are done generating, end with '<END_OF_TURN>' to give the user a chance to respond.\n\n Current conversation stage: "+currentStage;
     var speicification=await chat_with_chatgpt2(chatHistory, Specificer);
+    speicification=speicification.replaceAll("Sam:","");
     chatHistory=chatHistory+<Map<String, String>>[{"role":"assistant", "content":speicification}];
     dynamic solutionReturned='';
     var products;
