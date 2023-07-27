@@ -7,6 +7,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'login.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'package:jumping_dot/jumping_dot.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
 
 class StarRating extends StatelessWidget {
   final double rating;
@@ -40,6 +46,8 @@ class StarRating extends StatelessWidget {
     );
   }
 }
+
+
 
 void showProfileMenu(BuildContext context) {
   final RenderBox appBarRenderBox = context.findRenderObject() as RenderBox;
@@ -97,23 +105,24 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.blue,
+      elevation:0,
+      backgroundColor: Color.fromARGB(255, 237, 237, 237),
       leading: IconButton(
-        icon: Icon(Icons.menu, color: Colors.white),
+        icon: Icon(Icons.menu, color: Color.fromARGB(255, 11, 178, 255)),
         onPressed: () {
           // Handle menu icon press here
         },
       ),
       title: Text(
         title,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.black, fontWeight:FontWeight.bold),
       ),
       actions: [
         Stack(
             alignment: Alignment.topRight,
             children: [
               IconButton(
-                icon: Icon(Icons.person, color: Colors.white),
+                icon: Icon(Icons.person, color: Color.fromARGB(255, 11, 178, 255)),
                 onPressed: () => onProfilePressed(),
               ), // Indicator dot to show the presence of the bubble
             ],
@@ -133,7 +142,7 @@ class ChatScreen extends StatefulWidget with Functions {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  List<Message> messages = [
+  List messages = [
     Message(sender: 'Bot', text: 'Hello, my name is Sam, and I am your healthcare assistant. How may I help you today?', list:[]),
   ];
   var chat_history='\nSam: Hello, my name is Sam, and I am your healthcare assistant. How may I help you today? <END_OF_TURN>';
@@ -145,10 +154,14 @@ class _ChatScreenState extends State<ChatScreen> {
     Doctor(name: 'Dr. Mark Johnson', specialty: 'Pediatrics'),
     Doctor(name: 'Dr. Sarah Brown', specialty: 'Orthopedics'),
   ];
-  var _scrollController = ScrollController();
   int currentDoctorIndex = 0;
   int currentProductIndex = 0;
   var currentPhotoIndex=0;
+  ScrollController _scrollController=ScrollController();
+
+  _scrollToBottom() {
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+  }
 
   void _sendMessage() {
     if (_textEditingController.text.isNotEmpty) {
@@ -156,6 +169,7 @@ class _ChatScreenState extends State<ChatScreen> {
         String text = _textEditingController.text;
         Message newMessage = Message(sender: 'You', text: text, list:[]);
         messages.add(newMessage);
+        _scrollToBottom();
         var scrollPosition = _scrollController.position;
         if (scrollPosition.viewportDimension < scrollPosition.maxScrollExtent) {
           _scrollController.animateTo(
@@ -174,6 +188,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
   Future<void> _simulateBotResponse() async{
     // Simulating a delayed bot response
+    setState(() {
+      messages.add(true);
+    });
     List<dynamic> response = await Functions.responser(chat_history);
     var sentence=response[0];
     sentence=sentence.replaceAll('<END_OF_TURN>', '');
@@ -189,7 +206,13 @@ class _ChatScreenState extends State<ChatScreen> {
         messages.add(doctorMessage);
         messages.add(productMessage);
       }
+      messages.remove(true);
     });
+     Future.delayed(Duration(seconds: 6), () {
+        setState(() {
+          _scrollToBottom();
+       });
+      });
   }
 
   @override
@@ -201,7 +224,9 @@ class _ChatScreenState extends State<ChatScreen> {
             showProfileMenu(context);
           },
         ),
-      body: Column(
+      body: Container(
+        decoration: BoxDecoration(color:Color.fromARGB(255, 237, 237, 237)),
+        child:Column(
         children: <Widget>[
           Expanded(
             child: ListView.builder(
@@ -210,7 +235,27 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: messages.length,
               itemBuilder: (BuildContext context, int index) {
                 final message = messages[index];
-                if (message.sender == 'You') {
+                if (message==true){
+                  return Container(
+                    width:MediaQuery. of(context). size. width*0.1,
+                    child:Stack(
+                      children:[
+                        Container(
+                          width:MediaQuery. of(context). size. width*0.1,
+                          child:SpinKitThreeBounce(
+                            color: Colors.black,
+                            size: 10.0,
+                          )
+                        ),
+                        Container(
+                          width:MediaQuery. of(context). size. width*0.1,
+                          child:Icon(Icons.messenger_outline_outlined)
+                        )
+                      ]
+                    )
+                  );
+                }
+                else if (message.sender == 'You') {
                   return _buildMessageBubble(message);
                 } else if (message.sender == 'Bot') {
                   return _buildBotMessageBubble(message);
@@ -223,23 +268,33 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 8.0),
+            width:MediaQuery. of(context). size. width,
+            height:MediaQuery. of(context). size. height*0.15,
+             decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),
             child: Row(
               children: <Widget>[
                 Expanded(
                   child: TextField(
                     controller: _textEditingController,
                     decoration: InputDecoration(
+                      border: InputBorder.none,
                       hintText: 'Type your message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
                       contentPadding: EdgeInsets.all(12.0),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: Icon(Icons.send, color:Color.fromARGB(255, 11, 178, 255)),
                   onPressed: _sendMessage,
                 ),
               ],
@@ -247,6 +302,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
+    )
     );
   }
 
@@ -268,7 +324,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Colors.lightBlueAccent,
+              color: Color.fromARGB(255, 11, 178, 255),
               borderRadius: BorderRadius.circular(16.0),
             ),
             child: Text(
@@ -302,7 +358,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16.0),
             ),
             child: Text(
@@ -335,7 +391,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: Column(
@@ -407,7 +463,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: Column(
@@ -460,7 +516,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 SizedBox(height: 8.0),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.grey[400], // Match the container background color
+                    primary: Color.fromARGB(255, 245, 245, 245), // Match the container background color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0), // Adjust the button border radius
                     ),
@@ -565,7 +621,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   fontSize: 30,
                                                   fontWeight: FontWeight.w900
                                                 ),
-                                              ),
+                                               ),
                                               Container(height:length*0.005),
                                               StarRating(
                                                 rating: message.list[currentProductIndex]['product_rating'],
@@ -712,7 +768,7 @@ class ChatApp extends StatelessWidget {
           ),
         ),
         appBarTheme: AppBarTheme(
-          color: Colors.blue,
+          color: Colors.white,
           textTheme: TextTheme(
             headline6: TextStyle(
               fontSize: 22.0,

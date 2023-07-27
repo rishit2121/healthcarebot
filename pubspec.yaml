@@ -52,6 +52,7 @@ dependencies:
   flutter_spinkit: ^5.2.0
   animated_button: ^0.2.0
   flutter_animated_button: ^2.0.3
+  jumping_dot: ^0.0.6
 
 dev_dependencies:
   flutter_test:
