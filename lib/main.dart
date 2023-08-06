@@ -15,6 +15,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'resources/chat_fitness.dart';
 import 'fitnessBot.dart';
 
 
@@ -1120,7 +1121,13 @@ class _PlannerState extends State<Planner>{
   final String user;
   late Map data;
   List workoutRoutines = ['Upper Body', 'Lower Body', 'Cardio'];
-  var value=DateTime.now().toString().replaceAll('00:00:00.000','');
+  var value = DateTime.now().subtract(Duration(
+      hours: DateTime.now().hour,
+      minutes: DateTime.now().minute,
+      seconds: DateTime.now().second,
+      milliseconds: DateTime.now().millisecond,
+      microseconds: DateTime.now().microsecond,
+  )).toString();
   CollectionReference login = FirebaseFirestore.instance.collection('audios');
   void initState(){
     super.initState();
@@ -1305,7 +1312,7 @@ class _PlannerState extends State<Planner>{
               onPressed:(){
                 showDialog(
                   context: context,
-                  builder: (BuildContext context) => ChatDialog()
+                  builder: (BuildContext context) =>ChatDialog()
                 );
               },
               child: Icon(Icons.chat),
