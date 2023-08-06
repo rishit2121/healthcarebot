@@ -12,6 +12,34 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'fitnessBot.dart';
+
+
+
+Future<List> fetchExercises() async {
+  final url = Uri.parse('https://exercisedb.p.rapidapi.com/exercises'); //BEST_MATCH also
+
+  final headers = {
+    'X-RapidAPI-Key': '24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3',
+    'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com',
+  };
+
+  final response = await http.get(url, headers: headers);
+
+  if (response.statusCode == 200) {
+    // Request succeeded, parse the response
+    var data = json.decode(response.body);
+    // Handle the data
+    return(data);
+  } else {
+    // Request failed
+    print('Request failed with status: ${response.statusCode}');
+    return([]);
+  }
+}
 
 
 class StarRating extends StatelessWidget {
@@ -148,13 +176,6 @@ class _ChatScreenState extends State<ChatScreen> {
   var chat_history='\nSam: Hello, my name is Sam, and I am your healthcare assistant. How may I help you today? <END_OF_TURN>';
   var chat_history2=[{"role": "assistant", "content": "Hello, my name is Sam, and I am your healthcare assistant. How may I help you today?"},];
   TextEditingController _textEditingController = TextEditingController();
-  List<Doctor> doctors = [
-    Doctor(name: 'Dr. John Doe', specialty: 'Cardiology'),
-    Doctor(name: 'Dr. Jane Smith', specialty: 'Dermatology'),
-    Doctor(name: 'Dr. Mark Johnson', specialty: 'Pediatrics'),
-    Doctor(name: 'Dr. Sarah Brown', specialty: 'Orthopedics'),
-  ];
-  int currentDoctorIndex = 0;
   int currentProductIndex = 0;
   var currentPhotoIndex=0;
   ScrollController _scrollController=ScrollController();
@@ -169,7 +190,6 @@ class _ChatScreenState extends State<ChatScreen> {
         String text = _textEditingController.text;
         Message newMessage = Message(sender: 'You', text: text, list:[]);
         messages.add(newMessage);
-        _scrollToBottom();
         var scrollPosition = _scrollController.position;
         if (scrollPosition.viewportDimension < scrollPosition.maxScrollExtent) {
           _scrollController.animateTo(
@@ -182,6 +202,7 @@ class _ChatScreenState extends State<ChatScreen> {
         chat_history2=chat_history2+[{"role": "user", "content": newMessage.text}];
         _textEditingController.clear();
         // Simulate bot response
+         _scrollToBottom();
         _simulateBotResponse();
       });
     }
@@ -201,9 +222,7 @@ class _ChatScreenState extends State<ChatScreen> {
     setState((){
       messages.add(botMessage);
       if(response[2]=='3'){
-        Message doctorMessage = Message(sender: 'Doctor', text: "Heres a few doctors  you can visit:", list:response[1]);
         Message productMessage = Message(sender: 'Shopper', text: "Heres a few items  you can buy:", list:response[3]);
-        messages.add(doctorMessage);
         messages.add(productMessage);
       }
       messages.remove(true);
@@ -259,8 +278,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   return _buildMessageBubble(message);
                 } else if (message.sender == 'Bot') {
                   return _buildBotMessageBubble(message);
-                } else if (message.sender == 'Doctor') {
-                  return _buildDoctorListMessage(message);
                 } else {
                   return _buildProductListMessage(message);
                 }
@@ -374,75 +391,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildDoctorListMessage(Message message) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            message.sender,
-            style: TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 4.0),
-          Container(
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  message.text,
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                SizedBox(height: 8.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.arrow_back),
-                      onPressed: () {
-                        setState(() {
-                          if (currentDoctorIndex > 0) {
-                            currentDoctorIndex--;
-                          }
-                        });
-                      },
-                    ),
-                    Text(
-                      doctors[currentDoctorIndex].name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.arrow_forward),
-                      onPressed: () {
-                        setState(() {
-                          if (currentDoctorIndex < doctors.length - 1) {
-                            currentDoctorIndex++;
-                          }
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8.0),
-                Text(
-                  'Specialty: ${doctors[currentDoctorIndex].specialty}',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildProductListMessage(Message message) {
     double width = MediaQuery. of(context). size. width;
@@ -707,12 +655,7 @@ class Message {
 
   Message({required this.sender, required this.text, required this.list});
 }
-class Doctor {
-  final String name;
-  final String specialty;
 
-  Doctor({required this.name, required this.specialty});
-}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -741,45 +684,708 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginPage()
+      home: MyHomePage(user:"rishit.agrawal121@gmail.com")
     );
   }
 }
 
+class RoutineCard extends StatelessWidget {
+  final Map routineName;
 
-class ChatApp extends StatelessWidget {
+  RoutineCard({required this.routineName});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chat App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        accentColor: Colors.amber,
-        textTheme: TextTheme(
-          bodyText1: TextStyle(
-            fontSize: 16.0,
-            color: Colors.black,
-          ),
-         
-          headline6: TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        appBarTheme: AppBarTheme(
-          color: Colors.white,
-          textTheme: TextTheme(
-            headline6: TextStyle(
-              fontSize: 22.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
       ),
-      home: ChatScreen(),
+      child: Padding(
+      padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                routineName['name'],
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+               'Target: ${routineName['target']}',
+               style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Body Part: ${routineName['bodyPart']}',
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Equipment: ${routineName['equipment']}',
+                 style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height:20),
+              Center(
+                child: Image.network(
+                  '${routineName['gifUrl']}', // Replace with your actual image URL
+                  height: MediaQuery. of(context). size. height*0.3,
+                  width: MediaQuery. of(context). size. height*0.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+}
+
+class AddExercisePage extends StatefulWidget {
+  @override
+  _AddExercisePageState createState() => _AddExercisePageState();
+}
+
+class _AddExercisePageState extends State<AddExercisePage> {
+  // Dummy data for exercises
+  var _dataFuture;
+  var bob="NO";
+  var temp;
+  List _searchResult = []; 
+  void initState() {
+    super.initState();
+    _dataFuture = fetchExercises();
+    _dataFuture.then((items) {
+      setState(() {
+        _searchResult = List.from(items); // Create a new list with the same contents as items
+      });
+    });
+  }
+
+  List<Map> selectedExercises = [];
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Add Exercises'),
+      ),
+      body: FutureBuilder<List>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else {
+            final items = snapshot.data;
+            void _sortExercises(index) {
+              temp=_searchResult[index];
+              items!.remove(_searchResult[index]);
+              items.insert(0,temp);
+              _searchResult.removeAt(index);
+              _searchResult.insert(0,temp);
+            }
+
+            void _filterSearchResults(String query) {
+              if (query.isNotEmpty) {
+                var tempList = [];
+                items!.forEach((item) {
+                  if (item['name'].toLowerCase().contains(query.toLowerCase()) || item['target'].toLowerCase().contains(query.toLowerCase()) || item['bodyPart'].toLowerCase().contains(query.toLowerCase()) || item['equipment'].toLowerCase().contains(query.toLowerCase())) {
+                    tempList.add(item);
+                  }
+                });
+                setState(() {
+                  _searchResult = tempList.toList(); // Create a new list instance with filtered items
+                  bob="YEA";
+                });
+                print(_searchResult.length);
+                print(bob);
+              } else {
+                setState(() {
+                  _searchResult = items!.toList();
+                });
+              }
+            }
+            return SingleChildScrollView(
+              child:Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: TextField(
+                      onChanged: (value) {
+                        _filterSearchResults(value);
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                    Stack(
+                      children:[
+                            Container(
+                              height:MediaQuery. of(context). size. height*0.75,
+                              child: ListView.builder(
+                                itemCount: _searchResult.length,
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        // Toggle exercise selection
+                                        if (selectedExercises.contains(_searchResult[index])) {
+                                          selectedExercises.remove(_searchResult[index]);
+                                        } else {
+                                          selectedExercises.add(_searchResult[index]);
+                                        }
+                                        _sortExercises(index);
+                                      });
+                                    },
+                                    child:Card(
+                                      elevation: 4,
+                                      margin: EdgeInsets.all(16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            ListTile(
+                                              title:Text(
+                                                _searchResult[index]['name'],
+                                                style: TextStyle(
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              trailing: selectedExercises.contains(_searchResult[index])
+                                                ? Icon(Icons.check, color: Colors.green)
+                                                : Icon(Icons.add, color:Colors.blue,),
+                                            ),
+                                            SizedBox(height: 10),
+                                            Text(
+                                              'Target: ${_searchResult[index]['target']}',
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            SizedBox(height: 5),
+                                            Text(
+                                              'Body Part: ${_searchResult[index]['bodyPart']}',
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            SizedBox(height: 5),
+                                            Text(
+                                              'Equipment: ${_searchResult[index]['equipment']}',
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            SizedBox(height:20),
+                                            Center(
+                                              child: Image.network(
+                                                '${_searchResult[index]['gifUrl']}', // Replace with your actual image URL
+                                                height: MediaQuery. of(context). size. height*0.3,
+                                                width: MediaQuery. of(context). size. height*0.3,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  );
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 16.0,
+                              right: 16.0,
+                              child:FloatingActionButton(
+                                onPressed: () {
+                                  // Save selected exercises and navigate back to the previous page
+                                  Navigator.pop(context, selectedExercises);
+                                },
+                                child: Icon(Icons.check),
+                              ),
+                            ),
+                          ]
+                  )
+                ],
+              )
+            );
+          }
+        }
+      )
     );
   }
 }
 
+// return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Add Exercises'),
+//       ),
+//       body: ListView.builder(
+//         itemCount: exercises.length,
+//         itemBuilder: (context, index) {
+//           String exercise = exercises[index];
+//           return ListTile(
+//             title: Text(exercise),
+//             trailing: selectedExercises.contains(exercise)
+//                 ? Icon(Icons.check, color: Colors.green)
+//                 : Icon(Icons.add, color:Colors.blue,),
+//             onTap: () {
+//               setState(() {
+//                 // Toggle exercise selection
+//                 if (selectedExercises.contains(exercise)) {
+//                   selectedExercises.remove(exercise);
+//                 } else {
+//                   selectedExercises.add(exercise);
+//                 }
+//               });
+//             },
+//           );
+//         },
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () {
+//           // Save selected exercises and navigate back to the previous page
+//           Navigator.pop(context, selectedExercises);
+//         },
+//         child: Icon(Icons.check),
+//       ),
+//     );
+
+
+class SearchBarPage extends StatefulWidget {
+  const SearchBarPage({super.key});
+
+
+  @override
+  _SearchBarPageState createState() => _SearchBarPageState();
+}
+
+class _SearchBarPageState extends State<SearchBarPage> {
+late Future<List> _dataFuture;
+var bob="NO";
+List _searchResult = []; 
+void initState() {
+  super.initState();
+  _dataFuture = fetchExercises();
+  _dataFuture.then((items) {
+    setState(() {
+      _searchResult = List.from(items); // Create a new list with the same contents as items
+    });
+  });
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else {
+            final items = snapshot.data;
+
+            void _filterSearchResults(String query) {
+              if (query.isNotEmpty) {
+                var tempList = [];
+                items!.forEach((item) {
+                  if (item['name'].toLowerCase().contains(query.toLowerCase()) || item['target'].toLowerCase().contains(query.toLowerCase()) || item['bodyPart'].toLowerCase().contains(query.toLowerCase()) || item['equipment'].toLowerCase().contains(query.toLowerCase())) {
+                    tempList.add(item);
+                  }
+                });
+                setState(() {
+                  _searchResult = tempList.toList(); // Create a new list instance with filtered items
+                  bob="YEA";
+                });
+                print(_searchResult.length);
+                print(bob);
+              } else {
+                setState(() {
+                  _searchResult = items!.toList();
+                });
+              }
+            }
+            return Column(
+              children: [
+                Container(height:MediaQuery. of(context). size. height*0.1),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: TextField(
+                    onChanged: (value) {
+                      _filterSearchResults(value);
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _searchResult.length,
+                    itemBuilder: (context, index) {
+                       return Card(
+                        elevation: 4,
+                        margin: EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _searchResult[index]['name'],
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                'Target: ${_searchResult[index]['target']}',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Body Part: ${_searchResult[index]['bodyPart']}',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Equipment: ${_searchResult[index]['equipment']}',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height:20),
+                               Center(
+                                child: Image.network(
+                                  '${_searchResult[index]['gifUrl']}', // Replace with your actual image URL
+                                  height: MediaQuery. of(context). size. height*0.3,
+                                  width: MediaQuery. of(context). size. height*0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        }
+      )
+    );
+  }
+}
+
+
+
+class Planner extends StatefulWidget{
+  const Planner({
+    super.key,
+    required this.user
+  });
+  final user;
+  @override
+  _PlannerState createState()=> _PlannerState(user:user);
+}
+class _PlannerState extends State<Planner>{
+  _PlannerState({required this.user}) : super();
+  var _calendarController=DateRangePickerController();
+  final String user;
+  late Map data;
+  List workoutRoutines = ['Upper Body', 'Lower Body', 'Cardio'];
+  var value=DateTime.now().toString().replaceAll('00:00:00.000','');
+  CollectionReference login = FirebaseFirestore.instance.collection('audios');
+  void initState(){
+    super.initState();
+  }
+
+
+  Widget build(BuildContext context){
+    return FutureBuilder<DocumentSnapshot>(
+      
+      future: login.doc(user).get(),
+      builder:
+      (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return Text("Something went wrong");
+        }
+
+        if (snapshot.hasData && !snapshot.data!.exists) {
+          return Text("Document does not exist");
+        }
+
+        if (snapshot.connectionState == ConnectionState.done) {
+          data = snapshot.data!.data() as Map;
+          if (data['planner'] != null && data['planner'].containsKey(value)) {
+            workoutRoutines=data['planner'][value];
+          }else{
+            workoutRoutines=[];
+          }
+          void _navigateToAddExercisePage() async {
+            // Navigate to the AddExercisePage and wait for the result (selected exercises)
+            
+            final selectedExercises = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddExercisePage(),
+              ),
+            );
+
+            // Process the selected exercises (e.g., save them to the database or a routine)
+              if (selectedExercises != null && selectedExercises.isNotEmpty) {
+                // Handle the selected exercises here
+                // You can add them to a routine or save them in any way you want
+                print('Selected Exercises: $selectedExercises');
+                setState((){
+                  workoutRoutines.addAll(selectedExercises);
+                  data['planner'][value]=workoutRoutines;
+                });
+                await login.doc(user).update({
+                  'planner': data['planner']
+                });
+            }
+          }     
+          return Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child:Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(height:MediaQuery.of(context).size.height*0.05),
+                    Text(
+                      'Your Fitness Planner',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Placeholder for user's fitness goals and progress
+                    // You can add charts or progress indicators here
+
+                    SizedBox(height: 24),
+                    Text(
+                      'Workout Calendar',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.38,
+                      padding: EdgeInsets.all(16),
+                      child: SfDateRangePicker(
+                        controller: _calendarController,
+                        selectionMode: DateRangePickerSelectionMode.single, // Add this line
+                        onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                          setState(() {
+                            if (args.value is DateTime) {
+                              value = (args.value).toString();
+                              value = value.replaceAll(' 00:00:00.000', '');
+                              print(value);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Row(
+                      children:[
+                        Text(
+                          'My Routines',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Container(width:MediaQuery.of(context).size.width*0.42),
+                        FloatingActionButton(
+                          elevation:0.0,
+                          backgroundColor:Colors.white,
+                          onPressed: () {
+                            print('yay');
+                            _navigateToAddExercisePage();
+                          },
+                          child: Icon(Icons.add,color:Colors.blue),
+                        ),
+                      ]
+                    ),
+                    Stack(
+                    children:[
+                      SizedBox(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: workoutRoutines.length,
+                          itemBuilder: (context, index) {
+                            var routine = workoutRoutines[index];
+                            return Stack(
+                              children:[
+                                RoutineCard(routineName: routine),
+                                Positioned(
+                                  top:25,
+                                  right:25,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Handle the click event here
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Confirm Deletion'),
+                                            content: Text('Are you sure you want to delete this item?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () async{
+                                                  // Close the dialog without performing any action
+                                                  Navigator.of(context).pop();
+                                                  setState((){
+                                                    workoutRoutines.removeAt(index);
+                                                    data['planner'][value]=workoutRoutines;
+                                                  });
+                                                  await login.doc(user).update({
+                                                    'planner': data['planner']
+                                                  });
+                                                },
+                                                child: Text('Yes'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child:Icon(Icons.delete, color:Colors.red)
+                                  )
+                                ),
+                              ]
+                            );
+                            },
+                          ),
+                        ),
+                      ]
+                    )
+                  ],
+                ),
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed:(){
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => ChatDialog()
+                );
+              },
+              child: Icon(Icons.chat),
+            )
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({
+    super.key,
+    required this.user,
+  });
+  @override
+  final user;
+  _MyHomePageState createState() => _MyHomePageState(user:user);
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  _MyHomePageState({required this.user}) : super();
+  final user;
+  int _selectedIndex = 0;
+  final List<Widget> _widgetOptions = [
+    ChatScreen(),
+    Planner(user:"rishit.agrawal121@gmail.com"),
+    SearchBarPage(),
+    ChatScreen()
+  ];
+
+  void _onItemTapped(int index) async{
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _widgetOptions.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedLabelStyle: TextStyle(color:Colors.black),
+        unselectedLabelStyle: TextStyle(color:Colors.blue),
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.blue,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fitness_center,),
+            label: 'Fitness Planner',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sports_gymnastics,),
+            label: 'Exercises',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person,),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}

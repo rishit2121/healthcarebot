@@ -53,6 +53,9 @@ dependencies:
   animated_button: ^0.2.0
   flutter_animated_button: ^2.0.3
   jumping_dot: ^0.0.6
+  flutter_svg: ^1.1.6
+  table_calendar: ^3.0.9
+  syncfusion_flutter_datepicker: "20.4.44"
 
 dev_dependencies:
   flutter_test:

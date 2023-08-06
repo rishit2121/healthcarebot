@@ -257,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                       print('yay');
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=>ChatScreen()),
+                          MaterialPageRoute(builder: (context)=>MyHomePage(user:myControllerEmail)),
                         );
                         setState(() {
                           msg="";
@@ -327,7 +327,7 @@ class _LoginPageState extends State<LoginPage> {
                             );
                             Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context)=>ChatScreen()),
+                                MaterialPageRoute(builder: (context)=>MyHomePage(user:myControllerEmail)),
                             );
                             setState(() {
                               msg="";
