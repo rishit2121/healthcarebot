@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'main.dart';
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:loader_overlay/loader_overlay.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'main.dart';
 import 'package:flutter_animated_button/flutter_animated_button.dart';
 
 class CoolLoadingIndicator extends StatefulWidget {
@@ -65,7 +56,6 @@ class _CoolLoadingIndicatorState extends State<CoolLoadingIndicator>
 }
 
 class LoginPage extends StatefulWidget{
-  @override 
   static var user1=_LoginPageState.user1;
   static var pwd= _LoginPageState.pwd;
   _LoginPageState createState() => _LoginPageState();
@@ -79,7 +69,6 @@ class _LoginPageState extends State<LoginPage> {
   String msg="";
   static var user1="";
   static var pwd="";
-  final _formKey = GlobalKey<FormState>();
   final myController=TextEditingController();
   final myControllerEmail=TextEditingController();
   final myControllerPwd=TextEditingController();
@@ -116,11 +105,8 @@ class _LoginPageState extends State<LoginPage> {
           return Text("Document does not exist", textDirection: TextDirection.ltr,);
         }
 
-        if (snapshot.connectionState == ConnectionState.done) {
-          Map data = snapshot.data!.data() as Map;
-          
-          
-          
+        if (snapshot.connectionState == ConnectionState.done) {          
+             
           Widget buildMessage(BuildContext context) {
             return Text("${(msg)}");
           }  
@@ -246,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
               onPress:() async {
                 if(title=="Sign In"){
                   try {
-                    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
                       email: myControllerEmail.text,
                       password: myControllerPwd.text
                     );

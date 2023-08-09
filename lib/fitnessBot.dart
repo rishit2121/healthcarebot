@@ -1,21 +1,8 @@
 import 'package:flutter/material.dart';
 import 'resources/chat_fitness.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:rating_bar/rating_bar.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'login.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'resources/chat_fitness.dart';
 
 class Message {
   final String sender;
@@ -34,8 +21,9 @@ class _ChatDialogState extends State<ChatDialog> {
   List messages = [
     Message(sender: 'Bot', text: 'Hi, my name is Jack and I am your personal fitness assistant. How can I help yout today?', list:[]),
   ];
-  var chat_history='\nSam: Hello, my name is Sam, and I am your healthcare assistant. How may I help you today? <END_OF_TURN>';
-  var chat_history2=[{"role": "assistant", "content": "Hello, my name is Sam, and I am your healthcare assistant. How may I help you today?"},];
+  TextEditingController dateInputController = TextEditingController();
+  var chat_history='\nJack: Hello, my name is Jack, and I am your fitness assistant. How may I help you today? <END_OF_TURN>';
+  var chat_history2=[{"role": "assistant", "content": "Hello, my name is Jack, and I am your fitness assistant. How may I help you today?"},];
   TextEditingController _textEditingController = TextEditingController();
   int currentDoctorIndex=0;
   ScrollController _scrollController=ScrollController();
@@ -77,12 +65,13 @@ class _ChatDialogState extends State<ChatDialog> {
     sentence=sentence.replaceAll('<END_OF_TURN>', '');
     sentence=sentence.replaceAll('\n', '');
     Message botMessage = Message(sender: 'Bot', text: sentence, list:[]);
-    chat_history=chat_history+"\n"+"Sam: "+botMessage.text+" <END_OF_TURN>";
+    chat_history=chat_history+"\n"+"Jack: "+botMessage.text+" <END_OF_TURN>";
     chat_history2=chat_history2+[{"role": "assistant", "content": botMessage.text}];
     setState((){
       messages.add(botMessage);
       if(response[1]=='3'){
-        Message productMessage = Message(sender: 'Trainer', text: "Heres a few exercises to try:", list:response[2]);
+        Message productMessage = Message(sender: 'Trainer', text: "Heres a few exercises you can add to your routine:", list:response[2]);
+        print(response[2]);
         messages.add(productMessage);
       }
       messages.remove(true);
@@ -132,9 +121,11 @@ class _ChatDialogState extends State<ChatDialog> {
                   return _buildMessageBubble(message);
                 } else if (message.sender == 'Bot') {
                   return _buildBotMessageBubble(message);
-                }else {
+                }else if(message.sender=='Trainer'){
+                  print(messages);
                   return _buildExerciseListMessage(message);
                 }
+                return _buildExerciseListMessage(message);
               },
             ),
           ),
@@ -286,9 +277,13 @@ class _ChatDialogState extends State<ChatDialog> {
                         });
                       },
                     ),
-                    Text(
-                      message.list[currentDoctorIndex]['name'],
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Container(
+                      width: MediaQuery. of(context). size. width*0.35,
+                      child:Text(
+                        message.list[currentDoctorIndex]['name'],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        maxLines: 3,
+                      ),
                     ),
                     IconButton(
                       icon: Icon(Icons.arrow_forward),
@@ -306,6 +301,39 @@ class _ChatDialogState extends State<ChatDialog> {
                 Text(
                   'Specialty: ${message.list[currentDoctorIndex]['equipment']}',
                   style: TextStyle(fontSize: 16.0),
+                ),
+                // TextField(
+                //   controller: _dateController,
+                //   keyboardType: TextInputType.datetime, // Show numeric keyboard on mobile devices
+                //   decoration: InputDecoration(
+                //     hintText: 'Enter a date (yyyy-mm-dd)',
+                //     suffixIcon: Icon(Icons.calendar_today),
+                //   )
+                // )
+                Container(height:MediaQuery.of(context).size.height*0.025),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    hintText: 'Date',
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1)),
+                  ),
+                  controller: dateInputController,
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1950),
+                        lastDate: DateTime(2050));
+
+                    if (pickedDate != null) {
+                      dateInputController.text =pickedDate.toString();
+                    }
+                  },
                 ),
               ],
             ),

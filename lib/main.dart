@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'resources/chat.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:rating_bar/rating_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,13 +8,9 @@ import 'login.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'package:jumping_dot/jumping_dot.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'resources/chat_fitness.dart';
-import 'fitnessBot.dart';
+import '../fitnessBot.dart';
 
 
 
@@ -80,7 +74,6 @@ class StarRating extends StatelessWidget {
 
 void showProfileMenu(BuildContext context) {
   final RenderBox appBarRenderBox = context.findRenderObject() as RenderBox;
-  final Offset appBarOffset = appBarRenderBox.localToGlobal(Offset.zero);
 
   final double gapOnRight = 0; // Replace this with the desired gap on the right side
 
@@ -125,7 +118,7 @@ void showProfileMenu(BuildContext context) {
   });
 }
 
-class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Function() onProfilePressed;
 
@@ -692,8 +685,20 @@ class MyApp extends StatelessWidget {
 
 class RoutineCard extends StatelessWidget {
   final Map routineName;
+  final List ExerciseList;
+  String getGifUrlForExercise(String exerciseName) {
+    try {
+      print(ExerciseList);
+      print(exerciseName);
+      var exerciseData = ExerciseList.firstWhere((data) => data['name'] == exerciseName);
+      return exerciseData['gifUrl'];
+    } catch (e) {
+      return ''; // Return an empty string if exerciseName is not found
+    }
+  }
 
-  RoutineCard({required this.routineName});
+
+  RoutineCard({required this.routineName, required this.ExerciseList});
 
   @override
   Widget build(BuildContext context) {
@@ -733,7 +738,7 @@ class RoutineCard extends StatelessWidget {
               SizedBox(height:20),
               Center(
                 child: Image.network(
-                  '${routineName['gifUrl']}', // Replace with your actual image URL
+                  '${getGifUrlForExercise(routineName['name'])}', // Replace with your actual image URL
                   height: MediaQuery. of(context). size. height*0.3,
                   width: MediaQuery. of(context). size. height*0.3,
                 ),
@@ -808,8 +813,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
                   _searchResult = tempList.toList(); // Create a new list instance with filtered items
                   bob="YEA";
                 });
-                print(_searchResult.length);
-                print(bob);
               } else {
                 setState(() {
                   _searchResult = items!.toList();
@@ -1017,8 +1020,7 @@ void initState() {
                   _searchResult = tempList.toList(); // Create a new list instance with filtered items
                   bob="YEA";
                 });
-                print(_searchResult.length);
-                print(bob);
+
               } else {
                 setState(() {
                   _searchResult = items!.toList();
@@ -1119,37 +1121,34 @@ class _PlannerState extends State<Planner>{
   _PlannerState({required this.user}) : super();
   var _calendarController=DateRangePickerController();
   final String user;
-  late Map data;
-  List workoutRoutines = ['Upper Body', 'Lower Body', 'Cardio'];
-  var value = DateTime.now().subtract(Duration(
-      hours: DateTime.now().hour,
-      minutes: DateTime.now().minute,
-      seconds: DateTime.now().second,
-      milliseconds: DateTime.now().millisecond,
-      microseconds: DateTime.now().microsecond,
-  )).toString();
+  var data;
+  var now = DateTime.now();
+  var value = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toString().replaceAll(' 00:00:00.000', '');
+  late List workoutRoutines;
   CollectionReference login = FirebaseFirestore.instance.collection('audios');
   void initState(){
     super.initState();
   }
+  Future<List> futureData() async {
+    // Simulate fetching data from a source (e.g., Firestore)
+    return [await login.doc(user).get(), await fetchExercises()];
+  }
 
 
   Widget build(BuildContext context){
-    return FutureBuilder<DocumentSnapshot>(
+    return FutureBuilder(
       
-      future: login.doc(user).get(),
+      future: futureData(),
       builder:
-      (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+      (context,snapshot) {
         if (snapshot.hasError) {
           return Text("Something went wrong");
         }
-
-        if (snapshot.hasData && !snapshot.data!.exists) {
-          return Text("Document does not exist");
-        }
-
         if (snapshot.connectionState == ConnectionState.done) {
-          data = snapshot.data!.data() as Map;
+          final List? items= snapshot.data;
+          var exerciseItems=items![1];
+          print("ITEMS"+"$items");
+          data = (items![0] as DocumentSnapshot).data() as Map;
           if (data['planner'] != null && data['planner'].containsKey(value)) {
             workoutRoutines=data['planner'][value];
           }else{
@@ -1169,7 +1168,6 @@ class _PlannerState extends State<Planner>{
               if (selectedExercises != null && selectedExercises.isNotEmpty) {
                 // Handle the selected exercises here
                 // You can add them to a routine or save them in any way you want
-                print('Selected Exercises: $selectedExercises');
                 setState((){
                   workoutRoutines.addAll(selectedExercises);
                   data['planner'][value]=workoutRoutines;
@@ -1210,14 +1208,15 @@ class _PlannerState extends State<Planner>{
                       height: MediaQuery.of(context).size.height * 0.38,
                       padding: EdgeInsets.all(16),
                       child: SfDateRangePicker(
+                        initialSelectedDate:DateTime(now.year, now.month, now.day),
                         controller: _calendarController,
                         selectionMode: DateRangePickerSelectionMode.single, // Add this line
                         onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
                           setState(() {
                             if (args.value is DateTime) {
+                              print(value);
                               value = (args.value).toString();
                               value = value.replaceAll(' 00:00:00.000', '');
-                              print(value);
                             }
                           });
                         },
@@ -1237,7 +1236,6 @@ class _PlannerState extends State<Planner>{
                           elevation:0.0,
                           backgroundColor:Colors.white,
                           onPressed: () {
-                            print('yay');
                             _navigateToAddExercisePage();
                           },
                           child: Icon(Icons.add,color:Colors.blue),
@@ -1255,7 +1253,7 @@ class _PlannerState extends State<Planner>{
                             var routine = workoutRoutines[index];
                             return Stack(
                               children:[
-                                RoutineCard(routineName: routine),
+                                RoutineCard(routineName: routine, ExerciseList:exerciseItems),
                                 Positioned(
                                   top:25,
                                   right:25,
@@ -1341,7 +1339,6 @@ class MyHomePage extends StatefulWidget {
     super.key,
     required this.user,
   });
-  @override
   final user;
   _MyHomePageState createState() => _MyHomePageState(user:user);
 }
