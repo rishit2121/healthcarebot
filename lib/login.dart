@@ -4,6 +4,7 @@ import 'main.dart';
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_animated_button/flutter_animated_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CoolLoadingIndicator extends StatefulWidget {
   @override
@@ -241,6 +242,8 @@ class _LoginPageState extends State<LoginPage> {
                     print(user?.emailVerified);
                     if (user?.emailVerified==true) {
                       print('yay');
+                      SharedPreferences pref =await SharedPreferences.getInstance();
+                      pref.setString("email", "${myControllerEmail.text}");
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context)=>MyHomePage(user:myControllerEmail)),
@@ -311,6 +314,8 @@ class _LoginPageState extends State<LoginPage> {
                               {'User':myController.text},
                               SetOptions(merge:true),
                             );
+                            SharedPreferences pref =await SharedPreferences.getInstance();
+                            pref.setString("email", "${myControllerEmail.text}");
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context)=>MyHomePage(user:myControllerEmail)),

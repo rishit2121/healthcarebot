@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import '../fitnessBot.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -36,6 +37,31 @@ Future<List> fetchExercises() async {
   }
 }
 
+Future<List> fetchNews() async {
+  final headers = {
+    'X-BingApis-SDK': 'true',
+    'X-RapidAPI-Key': '24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3',
+    'X-RapidAPI-Host': 'bing-news-search1.p.rapidapi.com',
+  };
+
+  var response = await http.get(
+    Uri.parse(
+        'https://bing-news-search1.p.rapidapi.com/news/search?q=Health&count=80&setLang=EN&textFormat=Raw&safeSearch=Off&originalImg=true&sortBy=Date'),
+    headers: headers,
+  );
+
+  if (response.statusCode == 200) {
+    // Request succeeded, parse the response
+    var data = json.decode(response.body);
+    // Handle the data
+    print(data['value']);
+    return(data["value"]);
+  } else {
+    // Request failed
+    print('Request failed with status: ${response.statusCode}');
+    return([]);
+  }
+}
 
 class StarRating extends StatelessWidget {
   final double rating;
@@ -654,33 +680,13 @@ class Message {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  SharedPreferences prefs =await SharedPreferences.getInstance();
+  var email=prefs.getString("email");
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((value) => runApp(MyApp()));
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Readerly',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(user:"rishit.agrawal121@gmail.com")
-    );
-  }
+      .then((value) => runApp(MaterialApp(
+        title: 'Readerly',
+        debugShowCheckedModeBanner: false,
+        home: email==null?LoginPage():MyHomePage(user:email),)));
 }
 
 class RoutineCard extends StatelessWidget {
@@ -1310,7 +1316,7 @@ class _PlannerState extends State<Planner>{
               onPressed:(){
                 showDialog(
                   context: context,
-                  builder: (BuildContext context) =>ChatDialog()
+                  builder: (BuildContext context) =>ChatDialog(data:data, user:user)
                 );
               },
               child: Icon(Icons.chat),
@@ -1327,11 +1333,114 @@ class _PlannerState extends State<Planner>{
 
 
 
+class NewsPage extends StatefulWidget {
+  @override
+  _NewsPageState createState() => _NewsPageState();
+}
 
+class _NewsPageState extends State<NewsPage> {
+  late Future<List> newsArticles;
 
+  @override
+  void initState() {
+    super.initState();
+    newsArticles = fetchNews();
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('News Articles'),
+      ),
+      body: FutureBuilder<List>(
+        future: newsArticles,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error fetching news articles'));
+          } else if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final article = snapshot.data![index];
+                return NewsArticleCard(article: article);
+              },
+            );
+          } else {
+            return Center(child: Text('No news articles available'));
+          }
+        },
+      ),
+    );
+  }
+}
 
+class NewsArticleCard extends StatelessWidget {
+  final Map<String, dynamic> article;
 
+  NewsArticleCard({required this.article});
+
+  @override
+  Widget build(BuildContext context) {
+    final DateTime articleDateTime = DateTime.parse(article['datePublished']);
+    final String formattedDate =
+        '${articleDateTime.year}-${articleDateTime.month.toString().padLeft(2, '0')}-${articleDateTime.day.toString().padLeft(2, '0')}';
+    final String imageUrl = article['image'] != null &&
+            article['image']['thumbnail'] != null
+        ? article['image']['thumbnail']['contentUrl']
+        : (article['contentUrl'] != null
+            ? article['contentUrl']
+            : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
+    return Card(
+      margin: EdgeInsets.all(10),
+      child: InkWell(
+        onTap: () {
+          // Handle article link click
+          // You can navigate to the article link using 'article['link']'
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(imageUrl),
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    article['name'],
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    article['description'],
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Date: ${formattedDate}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        'News Article',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 class MyHomePage extends StatefulWidget {
@@ -1351,7 +1460,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ChatScreen(),
     Planner(user:"rishit.agrawal121@gmail.com"),
     SearchBarPage(),
-    ChatScreen()
+    NewsPage()
   ];
 
   void _onItemTapped(int index) async{
@@ -1371,8 +1480,8 @@ class _MyHomePageState extends State<MyHomePage> {
         unselectedItemColor: Colors.blue,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.health_and_safety_sharp),
+            label: 'Symptom Analyzer',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center,),

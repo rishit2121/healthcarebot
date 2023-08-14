@@ -3,6 +3,7 @@ import 'resources/chat_fitness.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Message {
   final String sender;
@@ -13,11 +14,17 @@ class Message {
 }
 
 class ChatDialog extends StatefulWidget with Fitness_Functions {
+  late final data;
+  late final user;
   @override
-  _ChatDialogState createState() => _ChatDialogState();
+  ChatDialog({required this.user, required this.data});
+  _ChatDialogState createState() => _ChatDialogState(data:data, user:user);
 }
 
 class _ChatDialogState extends State<ChatDialog> {
+  _ChatDialogState({required this.user, required this.data}) : super();
+  final user;
+  final data;
   List messages = [
     Message(sender: 'Bot', text: 'Hi, my name is Jack and I am your personal fitness assistant. How can I help yout today?', list:[]),
   ];
@@ -335,6 +342,24 @@ class _ChatDialogState extends State<ChatDialog> {
                     }
                   },
                 ),
+                TextButton(onPressed: () async {
+                  dateInputController.text = dateInputController.text.split(' ')[0];
+                  var selectedExercises=data['planner'];
+                  print("SELECTED ONES"+"$selectedExercises");
+                  setState((){
+
+                    
+                    if(!selectedExercises.containsKey(dateInputController.text)){
+                      selectedExercises[dateInputController.text]=[];
+                    }
+                    selectedExercises[dateInputController.text].add(message.list[currentDoctorIndex]);
+                    print(selectedExercises[dateInputController.text]);
+                  });
+                  await FirebaseFirestore.instance.collection('audios').doc(user).update({
+                    'planner': selectedExercises
+                  });
+                }, 
+                child: Text("Add"))
               ],
             ),
           ),
