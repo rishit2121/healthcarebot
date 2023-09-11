@@ -2138,7 +2138,7 @@ class PostList extends StatelessWidget {
   }
 
   void _showPostDetailsAndComments(
-      BuildContext context, String postId, String text, String userId) {
+      BuildContext context, String postId, String text, String userId, String currentUser) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2178,7 +2178,7 @@ class PostList extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           _showCommentPopup(context, postId,
-                              userName); // Show the comment popup
+                              currentUser); // Show the comment popup
                         },
                         child: Text('Add Comment'),
                       ),
@@ -2221,7 +2221,7 @@ class PostList extends StatelessWidget {
                   await FirebaseFirestore.instance.collection('comments').add({
                     'postId': postId,
                     'userId': currentUser,
-                    'userName': name, // Replace with actual user ID
+                    'userName': await UserName(name), // Replace with actual user ID
                     'text': commentText,
                     'timestamp': FieldValue.serverTimestamp(),
                   });
@@ -2260,7 +2260,10 @@ class PostList extends StatelessWidget {
             var postLikesCount = post['likesCount'] ?? 0;
             var text = post['text'];
             var userId = post['userId'];
+            print(userId);
+            print(currentUser);
             bool isAuthor = userId == currentUser;
+            print(isAuthor);
             var dateTime = post['timestamp'];
             var formattedDate;
             if (dateTime != null) {
@@ -2275,7 +2278,7 @@ class PostList extends StatelessWidget {
                     child: GestureDetector(
                         onTap: () {
                           _showPostDetailsAndComments(
-                              context, post.id, text, userId);
+                              context, post.id, text, userId, currentUser);
                         },
                         child: Card(
                           elevation:
@@ -2370,7 +2373,7 @@ class PostList extends StatelessWidget {
                   child: GestureDetector(
                       onTap: () {
                         _showPostDetailsAndComments(
-                            context, post.id, text, userId);
+                            context, post.id, text, userId, currentUser);
                       },
                       child: Card(
                         elevation:

@@ -185,8 +185,8 @@ class CongratulationsPage extends StatelessWidget {
                     onPressed: () async {
                       final List<Widget> _widgetOptions = [
                         ChatScreen(user:"${myControllerEmail.text}"),
-                        Planner(user:"$myControllerEmail"),
-                        PostPage(currentUser:"$myControllerEmail"),
+                        Planner(user:"${myControllerEmail.text}"),
+                        PostPage(currentUser:"${myControllerEmail.text}"),
                         NewsPage(),
                         ProfilePage(user:"${myControllerEmail.text}"),
                       ];
@@ -564,7 +564,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (user?.emailVerified==true) {
                             print('yay');
                             login.doc("${myControllerEmail.text}").set(
-                              {'User':myController.text, 'Credits':5},
+                              {'User':myController.text, 'Credits':5, 'planner':{}},
                               SetOptions(merge:true),
                             );
                             SharedPreferences pref =await SharedPreferences.getInstance();
