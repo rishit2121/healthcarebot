@@ -6,6 +6,214 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_animated_button/flutter_animated_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+class QuestionPageTemplate extends StatelessWidget {
+  final String question;
+  final questionIndex;
+  var questions;
+  var questionnaire;
+  var myControllerEmail;
+  final AnswerController = TextEditingController();
+  QuestionPageTemplate({
+    required this.myControllerEmail,
+    required this.question,
+    required this.questionIndex,
+    required this.questions,
+    required this.questionnaire,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blue[100],
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Health Question'),
+        backgroundColor: Colors.blue,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 8.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    question,
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  SizedBox(height: 24.0),
+                  questions[questionIndex]['answerValue'] == true
+                      ? Column(children: [
+                          TextFormField(
+                            // Customize the text field as needed
+                            controller:AnswerController,
+                            decoration: InputDecoration(labelText: 'Your Answer'),
+                          ),
+                          Container(height:MediaQuery.of(context).size.height*0.07),
+                          ElevatedButton(
+                            onPressed: () {
+                               questionnaire.responses.add({'question':question, "answer":AnswerController.text});
+                               print(questionnaire.responses);
+                              _navigateToNextQuestion(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.transparent,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 15.0),
+                              side: BorderSide(color: Colors.blue, width: 2.0),
+                              textStyle: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            child: Container(
+                              width: 150.0,
+                              alignment: Alignment.center,
+                              child: Text('Continue', style:TextStyle(color:Colors.black)),
+                            ),
+                          ),
+                        ]
+                      )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                questionnaire.responses.add({});
+                                _navigateToNextQuestion(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.green,
+                              ),
+                              child: Text('Yes'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                questionnaire.responses.add(false);
+                                _navigateToNextQuestion(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.red,
+                              ),
+                              child: Text('No'),
+                            ),
+                          ],
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToNextQuestion(BuildContext context) {
+    if (questionIndex < questions.length - 1) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => QuestionPageTemplate(
+            question: questions[questionIndex + 1]['question'],
+            questionIndex: questionIndex + 1,
+            questionnaire: questionnaire,
+            questions: questions,
+            myControllerEmail: myControllerEmail,
+          ),
+        ),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CongratulationsPage(myControllerEmail:myControllerEmail, questionnaire:questionnaire),
+        ),
+      );
+    }
+  }
+}
+
+
+class CongratulationsPage extends StatelessWidget {
+  var myControllerEmail;
+  var questionnaire;
+  CongratulationsPage({required this.myControllerEmail, required this.questionnaire});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.green[100], // Background color
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Congratulations'),
+        backgroundColor: Colors.green, // App bar color
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 8.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Congratulations!',
+                    style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    'You have successfully completed the questionnaire.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18.0,),
+                  ),
+                  SizedBox(height: 24.0),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final List<Widget> _widgetOptions = [
+                        ChatScreen(user:"${myControllerEmail.text}"),
+                        Planner(user:"$myControllerEmail"),
+                        PostPage(currentUser:"$myControllerEmail"),
+                        NewsPage(),
+                        ProfilePage(user:"${myControllerEmail.text}"),
+                      ];
+                      print(myControllerEmail);
+                      await FirebaseFirestore.instance.collection('audios').doc("${myControllerEmail.text}").update({
+                        'Information': questionnaire.responses,
+                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context)=>MyHomePage(widgets:_widgetOptions)),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue, // Button color
+                    ),
+                    child: Text('Continue'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CoolLoadingIndicator extends StatefulWidget {
   @override
   _CoolLoadingIndicatorState createState() => _CoolLoadingIndicatorState();
@@ -55,7 +263,9 @@ class _CoolLoadingIndicatorState extends State<CoolLoadingIndicator>
     super.dispose();
   }
 }
-
+class HealthQuestionnaire {
+  List responses = [];
+}
 class LoginPage extends StatefulWidget{
   static var user1=_LoginPageState.user1;
   static var pwd= _LoginPageState.pwd;
@@ -73,6 +283,42 @@ class _LoginPageState extends State<LoginPage> {
   final myController=TextEditingController();
   final myControllerEmail=TextEditingController();
   final myControllerPwd=TextEditingController();
+  final List<Map<String, dynamic>> questions = [
+    {
+      'question': 'Do you have any allergies?',
+      'answerValue': true,
+    },
+    {
+      'question': 'How Old Are You??',
+      'answerValue': true,
+    },
+    {
+      'question': 'What gender are you?',
+      'answerValue': true,
+    },
+    {
+      'question': 'Do you smoke?',
+      'answerValue': true,
+    },
+    {
+      'question': 'Do you drink alcohol?',
+      'answerValue': true,
+    },
+    {
+      'question': 'Have you been diagnosed with any chronic medical conditions (e.g., diabetes, hypertension)?',
+      'answerValue': true,
+    },
+    {
+      'question': 'Are you currently taking any medications?',
+      'answerValue': true,
+    },
+    {
+      'question': 'Is there anything else you would like us to know about you?',
+      'answerValue': true,
+    },
+    // Add more questions here
+  ];
+
   var acs = ActionCodeSettings(
     // URL you want to redirect back to. The domain (www.example.com) for this
     // URL must be whitelisted in the Firebase Console.
@@ -244,9 +490,16 @@ class _LoginPageState extends State<LoginPage> {
                       print('yay');
                       SharedPreferences pref =await SharedPreferences.getInstance();
                       pref.setString("email", "${myControllerEmail.text}");
+                      final List<Widget> _widgetOptions = [
+                        ChatScreen(user:'${myControllerEmail.text}'),
+                        Planner(user:"${myControllerEmail.text}"),
+                        PostPage(currentUser:"${myControllerEmail.text}"),
+                        NewsPage(),
+                        ProfilePage(user:"${myControllerEmail.text}"),
+                      ];
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=>MyHomePage(user:myControllerEmail)),
+                          MaterialPageRoute(builder: (context)=>MyHomePage(widgets:_widgetOptions)),
                         );
                         setState(() {
                           msg="";
@@ -311,14 +564,20 @@ class _LoginPageState extends State<LoginPage> {
                           if (user?.emailVerified==true) {
                             print('yay');
                             login.doc("${myControllerEmail.text}").set(
-                              {'User':myController.text},
+                              {'User':myController.text, 'Credits':5},
                               SetOptions(merge:true),
                             );
                             SharedPreferences pref =await SharedPreferences.getInstance();
                             pref.setString("email", "${myControllerEmail.text}");
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context)=>MyHomePage(user:myControllerEmail)),
+                              context,
+                              MaterialPageRoute(builder: (context)=>QuestionPageTemplate(
+                                myControllerEmail:myControllerEmail,
+                                question: questions[0]['question'],
+                                questionIndex: 0,
+                                questionnaire: HealthQuestionnaire(),
+                                questions:questions
+                              ),),
                             );
                             setState(() {
                               msg="";
@@ -385,3 +644,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
