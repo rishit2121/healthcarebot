@@ -184,11 +184,12 @@ class CongratulationsPage extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () async {
                       final List<Widget> _widgetOptions = [
+                        HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:"${myControllerEmail.text}"),
                         Planner(user:"${myControllerEmail.text}"),
                         PostPage(currentUser:"${myControllerEmail.text}"),
                         NewsPage(),
-                        ProfilePage(user:"${myControllerEmail.text}"),
+                        // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
                       print(myControllerEmail);
                       await FirebaseFirestore.instance.collection('audios').doc("${myControllerEmail.text}").update({
@@ -196,7 +197,7 @@ class CongratulationsPage extends StatelessWidget {
                       });
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context)=>MyHomePage(widgets:_widgetOptions)),
+                        MaterialPageRoute(builder: (context)=>MyHomePage(widgets:_widgetOptions, selectedIndex:0)),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -226,13 +227,28 @@ class _CoolLoadingIndicatorState extends State<CoolLoadingIndicator>
 
   @override
   void initState() {
-    Timer(Duration(seconds: 2), () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage())));
     super.initState();
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
     )..repeat(reverse: true);
+
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+
+    // Check if the widget is still mounted before performing navigation
+    if (mounted) {
+      Timer(Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+        }
+      });
+    }
+  }
+
+  void dispose() {
+    _controller.dispose(); // Dispose the animation controller
+    super.dispose();
   }
 
   @override
@@ -255,12 +271,6 @@ class _CoolLoadingIndicatorState extends State<CoolLoadingIndicator>
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }
 class HealthQuestionnaire {
@@ -491,15 +501,16 @@ class _LoginPageState extends State<LoginPage> {
                       SharedPreferences pref =await SharedPreferences.getInstance();
                       pref.setString("email", "${myControllerEmail.text}");
                       final List<Widget> _widgetOptions = [
+                        HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:'${myControllerEmail.text}'),
                         Planner(user:"${myControllerEmail.text}"),
                         PostPage(currentUser:"${myControllerEmail.text}"),
                         NewsPage(),
-                        ProfilePage(user:"${myControllerEmail.text}"),
+                        // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)=>MyHomePage(widgets:_widgetOptions)),
+                          MaterialPageRoute(builder: (context)=>MyHomePage(widgets:_widgetOptions, selectedIndex:0)),
                         );
                         setState(() {
                           msg="";

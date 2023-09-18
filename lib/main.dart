@@ -158,8 +158,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(10),
+        ),
+      ),
+      backgroundColor:Colors.white,
+      elevation: 1,
+    //   flexibleSpace: Container(
+    //   decoration: const BoxDecoration(
+    //     gradient: LinearGradient(
+    //       begin: Alignment.topLeft,
+    //       end: Alignment.bottomRight,
+    //       colors: <Color>[Color.fromARGB(255, 202, 244, 255), Color.fromARGB(255, 209, 230, 255)]),
+    //   ),
+    // ),
       title: Row(
         children: [
           Icon(Icons.account_circle,
@@ -171,17 +184,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      // actions: [
-      //   Stack(
-      //       alignment: Alignment.topRight,
-      //       children: [
-      //         IconButton(
-      //           icon: Icon(Icons.person, color: Color.fromARGB(255, 11, 178, 255)),
-      //           onPressed: () => onProfilePressed(),
-      //         ), // Indicator dot to show the presence of the bubble
-      //       ],
-      //   )
-      // ],
     );
   }
 
@@ -304,29 +306,30 @@ class _ChatScreenState extends State<ChatScreen> {
             var data = (items as DocumentSnapshot).data() as Map;
             return Scaffold(
                 appBar: CustomAppBar(
-                  title: "  Healthcare Assistant",
+                  title: "  Eva",
                   onProfilePressed: () {
                     showProfileMenu(context);
                   },
                 ),
                 body: Container(
-                  decoration: BoxDecoration(color: Colors.white),
+                  decoration: BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
                   child: Column(
                     children: <Widget>[
                       Row(
                         children:<Widget>[
                           Container(width:MediaQuery.of(context).size.width*0.35),
-                          Text('Credits: ${data['Credits']}'),
-                          TextButton(child:Text("Add more"), onPressed:(){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
-                              ),
-                            );
-                          })
+                          // Text('Credits: ${data['Credits']}'),
+                          // TextButton(child:Text("Add more"), onPressed:(){
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //       builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
+                          //     ),
+                          //   );
+                          // })
                         ]
                        ),
+                      Container(height:MediaQuery.of(context).size.height*0.02),
                       Expanded(
                         child: ListView.builder(
                           controller: _scrollController,
@@ -365,6 +368,8 @@ class _ChatScreenState extends State<ChatScreen> {
                           border: Border(
                             top: BorderSide(
                                 color: Colors.grey), // Customize the top outline color
+                            bottom: BorderSide(
+                                color: Colors.grey),
                           ),
                         ),
                         child: Row(
@@ -414,8 +419,15 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Color(0xFF007BFF),
-              borderRadius: BorderRadius.circular(16.0),
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16), topLeft:Radius.circular(16)),
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.blue,
+                  Color.fromARGB(255, 128, 173, 255),
+                ],
+              ),
             ),
             child: Text(
               message.text,
@@ -437,7 +449,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            message.sender,
+            'Eva',
             style: TextStyle(
               fontSize: 14.0,
               fontWeight: FontWeight.bold,
@@ -448,8 +460,9 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Color.fromARGB(255, 214, 214, 214),
-              borderRadius: BorderRadius.circular(16.0),
+              color: Color.fromARGB(255, 215, 215, 215),
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16), topRight:Radius.circular(16)),
+
             ),
             child: Text(
               message.text,
@@ -769,11 +782,12 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var email = prefs.getString("email");
   final List<Widget> _widgetOptions = [
+    HomePage(user:"$email"),
     ChatScreen(user:"$email"),
     Planner(user: "$email"),
     PostPage(currentUser: "$email"),
     NewsPage(),
-    ProfilePage(user:"$email"),
+    // ProfilePage(user:"$email"),
   ];
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((value) => runApp(MaterialApp(
@@ -781,7 +795,7 @@ Future<void> main() async {
             debugShowCheckedModeBanner: false,
             home: (email == null || email == "")
                 ? LoginPage()
-                : MyHomePage(widgets: _widgetOptions),
+                : MyHomePage(widgets: _widgetOptions, selectedIndex:0),
           )));
 }
 
@@ -790,8 +804,6 @@ class RoutineCard extends StatelessWidget {
   final List ExerciseList;
   String getGifUrlForExercise(String exerciseName) {
     try {
-      print(ExerciseList);
-      print(exerciseName);
       var exerciseData =
           ExerciseList.firstWhere((data) => data['name'] == exerciseName);
       return exerciseData['gifUrl'];
@@ -897,7 +909,12 @@ class _AddExercisePageState extends State<AddExercisePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Add Exercises'),
+          elevation: 1,
+          iconTheme: IconThemeData(
+            color: Colors.black, //change your color here
+          ),
+          backgroundColor:Colors.white, 
+          title: Text('Add Exercises', style:TextStyle(color:Colors.black),),
         ),
         body: FutureBuilder<List>(
             future: _dataFuture,
@@ -969,15 +986,15 @@ class _AddExercisePageState extends State<AddExercisePage> {
                         ),
                       ),
                     ),
-                    if (_bannerAd != null)
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Container(
-                          width: _bannerAd!.size.width.toDouble(),
-                          height: _bannerAd!.size.height.toDouble(),
-                          child: AdWidget(ad: _bannerAd!),
-                        ),
-                      ),
+                    // if (_bannerAd != null)
+                    //   Align(
+                    //     alignment: Alignment.topCenter,
+                    //     child: Container(
+                    //       width: _bannerAd!.size.width.toDouble(),
+                    //       height: _bannerAd!.size.height.toDouble(),
+                    //       child: AdWidget(ad: _bannerAd!),
+                    //     ),
+                    //   ),
                     Stack(children: [
                       Container(
                         height: MediaQuery.of(context).size.height * 0.75,
@@ -1830,73 +1847,77 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
+
+
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+  MyHomePage({
     super.key,
     required this.widgets,
+    required this.selectedIndex,
   });
   final widgets;
-  _MyHomePageState createState() => _MyHomePageState(widgets: widgets);
+  var selectedIndex;
+  _MyHomePageState createState() => _MyHomePageState(widgets: widgets, selectedIndex:selectedIndex);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  _MyHomePageState({required this.widgets}) : super();
+  _MyHomePageState({required this.widgets, required this.selectedIndex}) : super();
   final widgets;
-  int _selectedIndex = 0;
+  var selectedIndex;
 
   void _onItemTapped(int index) async {
     setState(() {
-      _selectedIndex = index;
+      selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widgets.elementAt(_selectedIndex),
+      body: widgets.elementAt(selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         selectedLabelStyle:
-            TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-        unselectedLabelStyle: TextStyle(color: Color(0xFF007BFF)),
-        selectedItemColor: Color.fromARGB(255, 255, 255, 255),
-        unselectedItemColor: Color(0xFF007BFF),
+            TextStyle(color: Color(0xFF007BFF)),
+        unselectedLabelStyle: TextStyle(color: Colors.black),
+        selectedItemColor: Color(0xFF007BFF),
+        unselectedItemColor: Colors.black,
         items: [
           BottomNavigationBarItem(
+            icon: Icon(
+              Icons.home,
+            ),
+            label: 'Hub',
+            backgroundColor: Colors.white,
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.health_and_safety_sharp),
-            label: 'Symptom Analyzer',
-            backgroundColor: Colors.black,
+            label: 'Talk',
+            backgroundColor: Colors.white,
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.fitness_center,
             ),
             label: 'Fitness Planner',
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.white,
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.view_stream,
             ),
             label: 'Posts',
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.white,
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.book,
             ),
             label: 'News',
-            backgroundColor: Colors.black,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person,
-            ),
-            label: 'Profile',
-            backgroundColor: Colors.black,
+            backgroundColor: Colors.white,
           ),
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: selectedIndex,
         onTap: _onItemTapped,
       ),
     );
@@ -1921,7 +1942,7 @@ class _PostPageState extends State<PostPage> {
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * 0.02,
+            height: MediaQuery.of(context).size.height * 0.04,
           ),
           Container(
             width: MediaQuery.of(context).size.width * 0.97,
@@ -2303,11 +2324,12 @@ class PostList extends StatelessWidget {
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState ==
                                               ConnectionState.waiting) {
-                                            return Icon(Icons.favorite_border);
+                                            return Icon(Icons.favorite_border, color: Colors.blue.shade400,);
                                           }
                                           bool? userLiked = snapshot.data;
                                           return IconButton(
-                                            icon: Icon((userLiked ?? false)
+                                            icon: Icon(
+                                              (userLiked ?? false)
                                                 ? Icons.favorite
                                                 : Icons.favorite_border),
                                             onPressed: () async {
@@ -2321,6 +2343,7 @@ class PostList extends StatelessWidget {
                                                     post.id, currentUser);
                                               }
                                             },
+                                            color: Colors.blue.shade400,
                                           );
                                         }),
                                     SizedBox(width: 5),
@@ -2402,9 +2425,12 @@ class PostList extends StatelessWidget {
                                         }
                                         bool? userLiked = snapshot.data;
                                         return IconButton(
-                                          icon: Icon((userLiked ?? false)
+                                          icon: Icon(
+                                            color: Colors.blue.shade400,
+                                            (userLiked ?? false)
                                               ? Icons.favorite
-                                              : Icons.favorite_border),
+                                              : Icons.favorite_border
+                                          ),
                                           onPressed: () async {
                                             if (userLiked == true) {
                                               // Unlike the post
@@ -2681,7 +2707,7 @@ class _PostFormState extends State<PostForm> {
               maxLines: 2,
             ),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: Alignment.topRight,
               child: GestureDetector(
                 onTap: _createPost,
                 child: Icon(Icons.send, color: Colors.black),
@@ -2749,5 +2775,196 @@ class _AmountTextFieldState extends State<AmountTextField> {
     );
   }
 }
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.user});
+  final user;
+  @override
+  _HomePageState createState() => _HomePageState(user: user);
+}
 
+class _HomePageState extends State<HomePage> {
+  var user;
+  var data;
+  _HomePageState({required this.user}) : super();
+  var value =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          .toString()
+          .replaceAll(' 00:00:00.000', '');
+  late List workoutRoutines;
+  CollectionReference login = FirebaseFirestore.instance.collection('audios');
+  void initState() {
+    super.initState();
+  }
+
+  Future<List> futureData() async {
+    // Simulate fetching data from a source (e.g., Firestore)
+    return [await login.doc(user).get(), await fetchExercises()];
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder(
+        future: futureData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            final List? items = snapshot.data;
+            var exerciseItems = items![1];
+            print("ITEMS" + "$items");
+            data = (items![0] as DocumentSnapshot).data() as Map;
+            if (data['planner'] == null) {
+              data['planner'] = {};
+            }
+            if (data['planner'].containsKey(value)) {
+              workoutRoutines = data['planner'][value];
+            } else {
+              workoutRoutines = [];
+            }
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  // Welcome Message
+                  Container(height:MediaQuery.of(context).size.height*0.05),
+                  _buildTitle('My Space'),
+                  Divider(thickness:2.0),
+                  Container(height:MediaQuery.of(context).size.height*0.05),
+                  Row(children:[
+                    Image.network('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMvAKEOz5FALArsAuER1mYGQO1g3zM0N786g&usqp=CAU', height:MediaQuery.of(context).size.height*0.2,width:MediaQuery.of(context).size.height*0.2 ),
+                    Container(width:MediaQuery.of(context).size.width*0.2),
+                    Column(children:[
+                      Text('Not feeling well?\nHave a talk.'),
+                      _buildTalkButton(),
+                    ])
+                  ]),
+                  Container(height:MediaQuery.of(context).size.height*0.05),
+                  // _buildSectionTitle('Have a talk'),
+
+                  // Divider
+                  Divider(thickness:2.0),
+
+                  // Today's Exercises
+                  _buildSectionTitle("Today's Exercises"),
+                  Container(height:MediaQuery.of(context).size.height*0.02),
+                  Container(
+                    height:MediaQuery.of(context).size.height*0.5,
+                    child: SingleChildScrollView(child:ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: workoutRoutines.length,
+                      itemBuilder: (context, index) {
+                        var routine = workoutRoutines[index];
+                        return Stack(children: [
+                          RoutineCard(
+                              routineName: routine,
+                              ExerciseList: exerciseItems)
+                        ]
+                        );
+                      }
+                    )
+                    )
+                  ),
+                  Container(height:MediaQuery.of(context).size.height*0.02),
+                  // You can add your exercise list here
+
+                  // Divider
+                  Divider(thickness:2.0),
+
+                  // Random Quote
+                  _buildSectionTitle('Quote Of The Day'),
+                  Container(height:MediaQuery.of(context).size.height*0.025),
+                  _buildRandomQuote(),
+
+                  // Divider
+                  Divider(thickness:2.0),
+                ],
+              ),
+            );
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      )
+    );
+  }
+
+  Widget _buildSectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+  Widget _buildTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionSubtitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 16,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTalkButton() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(widgets:[
+                HomePage(user:"$user"),
+                ChatScreen(user:"$user"),
+                Planner(user: "$user"),
+                PostPage(currentUser: "$user"),
+                NewsPage(),
+                // ProfilePage(user:"$email"),
+              ], selectedIndex:1),
+            ),
+          );
+        },
+        child: Text('Start'),
+      ),
+    );
+  }
+
+  Widget _buildRandomQuote() {
+    // You can add your random quote widget here
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Text(
+        "ALL IS GOOD",
+        style: TextStyle(
+          fontSize: 16,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+  }
+}
 
