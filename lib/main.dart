@@ -18,6 +18,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'ad_helper.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 Future<List> fetchExercises() async {
   final url = Uri.parse(
@@ -59,7 +61,6 @@ Future<List> fetchNews() async {
     // Request succeeded, parse the response
     var data = json.decode(response.body);
     // Handle the data
-    print(data['value']);
     return (data["value"]);
   } else {
     // Request failed
@@ -141,10 +142,8 @@ void showProfileMenu(BuildContext context) {
     if (value == "logout") {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => LoginPage()));
-      print("Logging out...");
     } else if (value == "learn_more") {
       // Handle learn more action
-      print("Learn more pressed...");
     }
   });
 }
@@ -180,7 +179,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           SizedBox(width: 8.0), // Add some space between the icon and title
           Text(
             title,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            style: GoogleFonts.raleway(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -206,16 +205,16 @@ class _ChatScreenState extends State<ChatScreen> {
     Message(
         sender: 'Bot',
         text:
-            'Hello, my name is Sam, and I am your healthcare assistant. How may I help you today?',
+            'Hello, my name is Eva, and I am your healthcare assistant. How may I help you today?',
         list: []),
   ];
   var chat_history =
-      '\nSam: Hello, my name is Sam, and I am your healthcare assistant. How may I help you today? <END_OF_TURN>';
+      '\nEva: Hello, my name is Eva, and I am your healthcare assistant. How may I help you today? <END_OF_TURN>';
   var chat_history2 = [
     {
       "role": "assistant",
       "content":
-          "Hello, my name is Sam, and I am your healthcare assistant. How may I help you today?"
+          "Hello, my name is Eva, and I am your healthcare assistant. How may I help you today?"
     },
   ];
   TextEditingController _textEditingController = TextEditingController();
@@ -227,10 +226,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
-  Future<void> _sendMessage(credits, user) async {
-    if(credits>0){
+  Future<void> _sendMessage( user) async {//credits later
       if (_textEditingController.text.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+        // await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
         setState(() {
           String text = _textEditingController.text;
           Message newMessage = Message(sender: 'You', text: text, list: []);
@@ -255,7 +253,6 @@ class _ChatScreenState extends State<ChatScreen> {
           _simulateBotResponse();
         });
       }
-    }
   }
 
   Future<void> _simulateBotResponse() async {
@@ -263,13 +260,13 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       messages.add(true);
     });
-    List<dynamic> response = await Functions.responser(chat_history);
+    List<dynamic> response = await Functions.responser2(chat_history2);
     var sentence = response[0];
     sentence = sentence.replaceAll('<END_OF_TURN>', '');
     sentence = sentence.replaceAll('\n', '');
     Message botMessage = Message(sender: 'Bot', text: sentence, list: []);
     chat_history =
-        chat_history + "\n" + "Sam: " + botMessage.text + " <END_OF_TURN>";
+        chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
     chat_history2 = chat_history2 +
         [
           {"role": "assistant", "content": botMessage.text}
@@ -294,16 +291,16 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     
-    return FutureBuilder(
-        future:
-            FirebaseFirestore.instance.collection('audios').doc('$user').get(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text("Something went wrong");
-          }
-          if (snapshot.connectionState == ConnectionState.done) {
-            final items = snapshot.data;
-            var data = (items as DocumentSnapshot).data() as Map;
+    // return FutureBuilder(
+    //     future:
+    //         FirebaseFirestore.instance.collection('audios').doc('$user').get(),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.hasError) {
+    //         return Text("Something went wrong");
+    //       }
+    //       if (snapshot.connectionState == ConnectionState.done) {
+    //         final items = snapshot.data;
+    //         var data = (items as DocumentSnapshot).data() as Map;
             return Scaffold(
                 appBar: CustomAppBar(
                   title: "  Eva",
@@ -386,7 +383,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                             IconButton(
                               icon: Icon(Icons.send, color: Colors.black),
-                              onPressed:((){ _sendMessage(data['Credits'], user);}),
+                              onPressed:((){ _sendMessage(user);}), //Add data['Credits'] later
                             ),
                           ],
                         ),
@@ -394,11 +391,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     ],
                   ),
                 ));
-              }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        });      
+              // }
+        //   return Center(
+        //     child: CircularProgressIndicator(),
+        //   );
+        // });      
   }
 
   Widget _buildMessageBubble(Message message) {
@@ -517,6 +514,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           if (currentProductIndex > 0) {
                             currentProductIndex--;
                           }
+                          _scrollToBottom();
                         });
                       },
                     ),
@@ -536,6 +534,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           if (currentProductIndex < message.list.length - 1) {
                             currentProductIndex++;
                           }
+                          _scrollToBottom();
                         });
                       },
                     ),
@@ -785,12 +784,14 @@ Future<void> main() async {
     HomePage(user:"$email"),
     ChatScreen(user:"$email"),
     Planner(user: "$email"),
-    PostPage(currentUser: "$email"),
-    NewsPage(),
-    // ProfilePage(user:"$email"),
+    MoodPage(),
+    // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
   ];
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((value) => runApp(MaterialApp(
+            // theme:ThemeData(
+            //   fontFamily: GoogleFonts.raleway().fontFamily,
+            // ),
             title: 'Readerly',
             debugShowCheckedModeBanner: false,
             home: (email == null || email == "")
@@ -798,7 +799,75 @@ Future<void> main() async {
                 : MyHomePage(widgets: _widgetOptions, selectedIndex:0),
           )));
 }
+class SmallRoutineCard extends StatelessWidget {
+  final Map routineName;
+  final List ExerciseList;
+  Widget build(BuildContext context){
+    return  Column(
+      children:[
+        Row(
+          children: [
+            Container(width:MediaQuery.of(context).size.width*0.02,),
+            SizedBox(
+              width:MediaQuery.of(context).size.width*0.015,
+              height:MediaQuery.of(context).size.height*0.09,
+              child: const DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: Colors.blue
+                ),
+              ),
+            ),
+            Container(width:MediaQuery.of(context).size.width*0.04,),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children:[
+                Text(
+                  DateFormat('d').format(DateTime.parse("${routineName['date']} 00:00:00")),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  DateFormat('MMMM').format(DateTime.parse("${routineName['date']} 00:00:00")),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color:Colors.grey,
+                  ),
+                ),
+              ]
+            ),
+            Container(width:MediaQuery.of(context).size.width*0.065),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children:[
+                Text(
+                  '${routineName['name']}'.length > 16
+              ? '${routineName['name']}'.substring(0, 16) + "..." // Truncate text if it exceeds the character limit
+              : '${routineName['name']}',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Equipment: ${routineName['equipment']}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color:Colors.grey,
+                  ),
+                ),
+              ]
+            ),
+          ],
+        ),
+        Container(height:MediaQuery.of(context).size.height*0.035),
+      ]
+    );
+  }
 
+  SmallRoutineCard({required this.routineName, required this.ExerciseList});
+}
 class RoutineCard extends StatelessWidget {
   final Map routineName;
   final List ExerciseList;
@@ -834,6 +903,14 @@ class RoutineCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            SizedBox(height: 20),
+            Center(
+              child: Image.network(
+                '${getGifUrlForExercise(routineName['name'])}', // Replace with your actual image URL
+                height: MediaQuery.of(context).size.height * 0.3,
+                width: MediaQuery.of(context).size.height * 0.3,
+              ),
+            ),
             SizedBox(height: 10),
             Text(
               'Target: ${routineName['target']}',
@@ -848,14 +925,6 @@ class RoutineCard extends StatelessWidget {
             Text(
               'Equipment: ${routineName['equipment']}',
               style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            Center(
-              child: Image.network(
-                '${getGifUrlForExercise(routineName['name'])}', // Replace with your actual image URL
-                height: MediaQuery.of(context).size.height * 0.3,
-                width: MediaQuery.of(context).size.height * 0.3,
-              ),
             ),
           ],
         ),
@@ -1324,7 +1393,6 @@ class _PlannerState extends State<Planner> {
           if (snapshot.connectionState == ConnectionState.done) {
             final List? items = snapshot.data;
             var exerciseItems = items![1];
-            print("ITEMS" + "$items");
             data = (items![0] as DocumentSnapshot).data() as Map;
             if (data['planner'] == null) {
               data['planner'] = {};
@@ -1367,7 +1435,7 @@ class _PlannerState extends State<Planner> {
                             height: MediaQuery.of(context).size.height * 0.05),
                         Text(
                           'Your Fitness Planner',
-                          style: TextStyle(
+                          style: GoogleFonts.raleway(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1379,7 +1447,7 @@ class _PlannerState extends State<Planner> {
                         SizedBox(height: 24),
                         Text(
                           'Workout Calendar',
-                          style: TextStyle(
+                          style: GoogleFonts.raleway(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1397,7 +1465,6 @@ class _PlannerState extends State<Planner> {
                                 (DateRangePickerSelectionChangedArgs args) {
                               setState(() {
                                 if (args.value is DateTime) {
-                                  print(value);
                                   value = (args.value).toString();
                                   value = value.replaceAll(' 00:00:00.000', '');
                                 }
@@ -1408,7 +1475,7 @@ class _PlannerState extends State<Planner> {
                         Row(children: [
                           Text(
                             'My Routines',
-                            style: TextStyle(
+                            style: GoogleFonts.raleway(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1514,11 +1581,15 @@ class _PlannerState extends State<Planner> {
 }
 
 class NewsPage extends StatefulWidget {
+  const NewsPage({super.key, required this.totalData});
+  final totalData;
   @override
-  _NewsPageState createState() => _NewsPageState();
+  _NewsPageState createState() => _NewsPageState(totalData:totalData);
 }
 
 class _NewsPageState extends State<NewsPage> {
+  _NewsPageState({required this.totalData}) : super();
+  var totalData;
   late Future<List> newsArticles;
 
   @override
@@ -1531,33 +1602,24 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.black, //change your color here
+          ),
           elevation: 0,
           backgroundColor: Colors.white,
           title: Text('News Articles', style: TextStyle(color: Colors.black)),
         ),
         body: Container(
-          decoration: BoxDecoration(color: Colors.white),
-          child: FutureBuilder<List>(
-            future: newsArticles,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error fetching news articles'));
-              } else if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    final article = snapshot.data![index];
-                    return NewsArticleCard(article: article);
-                  },
-                );
-              } else {
-                return Center(child: Text('No news articles available'));
-              }
-            },
-          ),
-        ));
+          decoration: BoxDecoration(color: Colors.white), 
+            child:ListView.builder(
+              itemCount: totalData.length,
+              itemBuilder: (context, index) {
+                final article = totalData[index];
+                return NewsArticleCard(article: article);
+              },
+            ),
+          )
+        );
   }
 }
 
@@ -1643,13 +1705,12 @@ class _ProfilePageState extends State<ProfilePage> {
             return Text("Something went wrong");
           }
           if (snapshot.connectionState == ConnectionState.done) {
-            print(user);
             final items = snapshot.data;
             var data = (items as DocumentSnapshot).data() as Map;
             var questionAnswerList = data['Information'];
-            print(data);
             return Scaffold(
-                body: SingleChildScrollView(
+              appBar:AppBar(title:Text('Profile')),
+              body: SingleChildScrollView(
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.all(24.0),
@@ -1678,21 +1739,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         '${user}',
                         style: TextStyle(fontSize: 16.0),
-                      ),
-                      SizedBox(height: 24.0),
-                      ElevatedButton(
-                        onPressed: () async {
-                          SharedPreferences pref =
-                              await SharedPreferences.getInstance();
-                          pref.setString("email", "");
-                          FirebaseAuth.instance.signOut();
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginPage()));
-                        },
-                        child: Text('Log Out'),
-                      ),
+                      ),                      
                       Container(
                           height: MediaQuery.of(context).size.height * 0.025),
                       Divider(
@@ -1909,13 +1956,6 @@ class _MyHomePageState extends State<MyHomePage> {
             label: 'Posts',
             backgroundColor: Colors.white,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.book,
-            ),
-            label: 'News',
-            backgroundColor: Colors.white,
-          ),
         ],
         currentIndex: selectedIndex,
         onTap: _onItemTapped,
@@ -1973,7 +2013,7 @@ class _PostPageState extends State<PostPage> {
                     ),
                     child: Text(
                       'ALL POSTS',
-                      style: TextStyle(
+                      style: GoogleFonts.raleway(
                           fontSize: 16,
                           color: selectedTitle == 'Posts'
                               ? Colors.black
@@ -2206,7 +2246,7 @@ class PostList extends StatelessWidget {
                       SizedBox(height: 16),
                       Text('Comments:',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      CommentList(postId: postId),
+                      CommentList(postId: postId, user:currentUser),
                       SizedBox(height: 16),
                     ],
                   ),
@@ -2281,10 +2321,7 @@ class PostList extends StatelessWidget {
             var postLikesCount = post['likesCount'] ?? 0;
             var text = post['text'];
             var userId = post['userId'];
-            print(userId);
-            print(currentUser);
             bool isAuthor = userId == currentUser;
-            print(isAuthor);
             var dateTime = post['timestamp'];
             var formattedDate;
             if (dateTime != null) {
@@ -2498,8 +2535,20 @@ class PostList extends StatelessWidget {
 
 class CommentList extends StatelessWidget {
   final String postId;
+  final String user;
 
-  CommentList({required this.postId});
+  CommentList({required this.postId, required this.user});
+  Future<void> deleteComment(String docId) async {
+    // Remove the corresponding like document from the 'likes' collection
+    var querySnapshot =
+        await FirebaseFirestore.instance.collection('comments').get();
+
+    for (var doc in querySnapshot.docs) {
+      if (doc.id == docId) await doc.reference.delete();
+    }
+
+    // Update likesCount in the corresponding post documen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2527,6 +2576,14 @@ class CommentList extends StatelessWidget {
                 margin: EdgeInsets.symmetric(vertical: 4.0),
                 padding: EdgeInsets.all(8.0),
                 child: ListTile(
+                  trailing: comment['userId'] == user
+                    ? IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          deleteComment(comment.id);
+                        },
+                      )
+                    : null,
                   title: Text(comment['text']),
                   subtitle: Text('User: ${comment['userName']}'),
                 ),
@@ -2550,7 +2607,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     try {
       //STEP 1: Create Payment Intent
       paymentIntent = await createPaymentIntent('$amount', 'USD');
-      print(paymentIntent);
       //STEP 2: Initialize Payment Sheet
       await stripe.Stripe.instance
           .initPaymentSheet(
@@ -2593,7 +2649,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   displayPaymentSheet(var creditsToAdd) async {
       try {
-        print('CREDITS TO ADD: $creditsToAdd');
         await stripe.Stripe.instance.presentPaymentSheet().then((value) async {
           //Clear paymentIntent variable after successful payment
           paymentIntent = null;
@@ -2634,10 +2689,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             AmountTextField(
               onChanged: (amount) {
                 // Use the entered amount in your logic
-                print('Entered Amount: $amount');
                 setState((){
                   _amount=amount;
-                  print(_amount);
                 });
               },
             ),
@@ -2753,7 +2806,6 @@ class _AmountTextFieldState extends State<AmountTextField> {
 
     if (enteredText.isNotEmpty) {
       amount = double.tryParse(enteredText) ?? 0.0;
-      print(cents);
     }
 
     // Notify the parent widget about the changed amount in cents
@@ -2787,10 +2839,14 @@ class _HomePageState extends State<HomePage> {
   var data;
   _HomePageState({required this.user}) : super();
   var value =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
-          .toString()
-          .replaceAll(' 00:00:00.000', '');
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+          // .toString()
+          // .replaceAll(' 00:00:00.000', '');
+  String value2 = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toString().replaceAll(' 00:00:00.000', '');
+  late var combinedList=[];
+  late var newData={};
   late List workoutRoutines;
+  final ValueNotifier<String> selectedFeeling = ValueNotifier<String>('');
   CollectionReference login = FirebaseFirestore.instance.collection('audios');
   void initState() {
     super.initState();
@@ -2798,7 +2854,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<List> futureData() async {
     // Simulate fetching data from a source (e.g., Firestore)
-    return [await login.doc(user).get(), await fetchExercises()];
+    return [await login.doc(user).get(), await fetchExercises(), await fetchNews()];
   }
   @override
   Widget build(BuildContext context) {
@@ -2812,28 +2868,96 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.connectionState == ConnectionState.done) {
             final List? items = snapshot.data;
             var exerciseItems = items![1];
-            print("ITEMS" + "$items");
             data = (items![0] as DocumentSnapshot).data() as Map;
             if (data['planner'] == null) {
               data['planner'] = {};
             }
-            if (data['planner'].containsKey(value)) {
-              workoutRoutines = data['planner'][value];
-            } else {
-              workoutRoutines = [];
+            var article=snapshot.data![2];
+            final DateTime articleDateTime = DateTime.parse(article![0]['datePublished']);
+            List NewsData(int index){
+              final desc=article[index]['description'];
+              final name = article[index]['name'];
+              final url= article[index]['url'];
+              final String formattedDate =
+                '${articleDateTime.year}-${articleDateTime.month.toString().padLeft(2, '0')}-${articleDateTime.day.toString().padLeft(2, '0')}';
+              final String imageUrl = article![index]['image'] != null &&
+                      article[index]['image']['thumbnail'] != null
+                  ? article[index]['image']['thumbnail']['contentUrl']
+                  : (article[index]['contentUrl'] != null
+                      ? article[0]['contentUrl']
+                      : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
+              return([name, desc, formattedDate, imageUrl, url]);
             }
+            var thresholdDateString = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+            newData=data['planner'];
+            (newData).forEach((date, listOfDicts) {
+              DateTime dt1 = DateTime.parse("$date 00:00:00");
+              for(var i = 0; i < listOfDicts.length; i++){
+                  listOfDicts[i]['date']=date;
+              }
+              if (dt1.compareTo(thresholdDateString)>=0) {
+                combinedList.addAll(listOfDicts);
+              }
+            
+            combinedList.sort((a, b) {
+              DateTime dt1 = DateTime.parse("${a["date"]} 00:00:00");
+              DateTime dt2 = DateTime.parse("${b["date"]} 00:00:00");
+              return dt1.compareTo(dt2);
+            });
+            });
+            
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   // Welcome Message
                   Container(height:MediaQuery.of(context).size.height*0.05),
-                  _buildTitle('My Space'),
+                  Row(
+                    children:[
+                      _buildTitle('Welcome back,'),
+                      Text(
+                        '${data['User']}',
+                        style: GoogleFonts.raleway(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Spacer(),
+                      _buildProfile(),
+                    ]
+                  ),
+                  if (data[value2] == null) 
+                    Divider(thickness:1.0, color:Colors.black),
+                  if (data[value2] == null) 
+                    Container(height:MediaQuery.of(context).size.height*0.02),
+                  if (data[value2] == null) 
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'How are you feeling today?',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                          SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              buildFeelingEmoji('😡', 'Angry'),
+                              buildFeelingEmoji('😞', 'Sad'),
+                              buildFeelingEmoji('😐', 'Neutral'),
+                              buildFeelingEmoji('😄', 'Happy'),                              
+                            ],
+                          ),
+                        ],
+                      ),
                   Divider(thickness:2.0),
                   Container(height:MediaQuery.of(context).size.height*0.05),
                   Row(children:[
-                    Image.network('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMvAKEOz5FALArsAuER1mYGQO1g3zM0N786g&usqp=CAU', height:MediaQuery.of(context).size.height*0.2,width:MediaQuery.of(context).size.height*0.2 ),
-                    Container(width:MediaQuery.of(context).size.width*0.2),
+                    Container(height:MediaQuery.of(context).size.height*0.1, width:MediaQuery.of(context).size.width*0.05),
+                    Container(
+                      child: Image.asset('assets/Screen Shot 2023-09-29 at 7.48.08 PM.png'),  // Replace with the actual path to your screenshot image
+                    ),
+                    Container(width:MediaQuery.of(context).size.width*0.15),
                     Column(children:[
                       Text('Not feeling well?\nHave a talk.'),
                       _buildTalkButton(),
@@ -2846,33 +2970,330 @@ class _HomePageState extends State<HomePage> {
                   Divider(thickness:2.0),
 
                   // Today's Exercises
-                  _buildSectionTitle("Today's Exercises"),
-                  Container(height:MediaQuery.of(context).size.height*0.02),
-                  Container(
-                    height:MediaQuery.of(context).size.height*0.5,
-                    child: SingleChildScrollView(child:ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: workoutRoutines.length,
-                      itemBuilder: (context, index) {
-                        var routine = workoutRoutines[index];
-                        return Stack(children: [
-                          RoutineCard(
-                              routineName: routine,
-                              ExerciseList: exerciseItems)
-                        ]
-                        );
-                      }
-                    )
-                    )
-                  ),
-                  Container(height:MediaQuery.of(context).size.height*0.02),
+                  _buildSectionTitle("Upcoming Exercises"),
+                  Container(height:MediaQuery.of(context).size.height*0.01),
+                  if(combinedList.length==0)
+                    Container(height:MediaQuery.of(context).size.height*0.02),
+                  if(combinedList.length!=0)
+                    Container(
+                      height:MediaQuery.of(context).size.height*0.3,
+                      child: SingleChildScrollView(child:ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: combinedList.length,
+                        itemBuilder: (context, index) {
+                          var routine = combinedList[index];
+                          return Stack(children: [
+                            SmallRoutineCard(
+                                routineName: routine,
+                                ExerciseList: exerciseItems)
+                          ]
+                          );
+                        }
+                      )
+                      )
+                    ),
+                  Container(height:MediaQuery.of(context).size.height*0.01),
                   // You can add your exercise list here
 
                   // Divider
                   Divider(thickness:2.0),
-
+                  _buildSectionTitle("Latest News"),
+                  Container(height:MediaQuery.of(context).size.height*0.01),
                   // Random Quote
+                  Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap:(){
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return SingleChildScrollView(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Text(
+                                            '${NewsData(0)[0]}',
+                                            style: TextStyle(
+                                              fontSize: 24.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Image.network(
+                                            '${NewsData(0)[3]}', // Replace with your news image URL
+                                            fit: BoxFit.cover,
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Text(
+                                            '${NewsData(0)[1]}',
+                                            style: TextStyle(fontSize: 16.0),
+                                          ),
+                                          SizedBox(height: 16.0),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              launchUrl(Uri.parse(NewsData(0)[4]),
+                                                  mode: LaunchMode.externalApplication);
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              primary: Colors.transparent, // Transparent background
+                                              side:
+                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
+                                            ),
+                                            child: Text(
+                                              'Read More',
+                                              style: TextStyle(
+                                                color: Color(0xFF007BFF), // Text color
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child:ShadedContainer(
+                              color: NewsData(0)[3],
+                              child: ContainerContent(
+                                title: '${NewsData(0)[0]}',
+                                description: '${NewsData(0)[1]}',
+                              ),
+                            ),
+                          ),
+                          Container(height:MediaQuery.of(context).size.height*0.01),
+                          
+                          GestureDetector(
+                            onTap:(){
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return SingleChildScrollView(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Text(
+                                            '${NewsData(1)[0]}',
+                                            style: TextStyle(
+                                              fontSize: 24.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Image.network(
+                                            '${NewsData(1)[3]}', // Replace with your news image URL
+                                            fit: BoxFit.cover,
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Text(
+                                            '${NewsData(1)[1]}',
+                                            style: TextStyle(fontSize: 16.0),
+                                          ),
+                                          SizedBox(height: 16.0),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              launchUrl(Uri.parse(NewsData(1)[4]),
+                                                  mode: LaunchMode.externalApplication);
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              primary: Colors.transparent, // Transparent background
+                                              side:
+                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
+                                            ),
+                                            child: Text(
+                                              'Read More',
+                                              style: TextStyle(
+                                                color: Color(0xFF007BFF), // Text color
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child:ShadedContainer(
+                              color: NewsData(1)[3],
+                              child: ContainerContent(
+                                title: '${NewsData(1)[0]}',
+                                description: '${NewsData(1)[1]}',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(height:MediaQuery.of(context).size.height*0.01),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap:(){
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return SingleChildScrollView(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Text(
+                                            '${NewsData(2)[0]}',
+                                            style: TextStyle(
+                                              fontSize: 24.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Image.network(
+                                            '${NewsData(2)[3]}', // Replace with your news image URL
+                                            fit: BoxFit.cover,
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Text(
+                                            '${NewsData(2)[1]}',
+                                            style: TextStyle(fontSize: 16.0),
+                                          ),
+                                          SizedBox(height: 16.0),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              launchUrl(Uri.parse(NewsData(2)[4]),
+                                                  mode: LaunchMode.externalApplication);
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              primary: Colors.transparent, // Transparent background
+                                              side:
+                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
+                                            ),
+                                            child: Text(
+                                              'Read More',
+                                              style: TextStyle(
+                                                color: Color(0xFF007BFF), // Text color
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child:ShadedContainer(
+                              color: NewsData(2)[3],
+                              child: ContainerContent(
+                                title: '${NewsData(2)[0]}',
+                                description: '${NewsData(2)[1]}',
+                              ),
+                            ),
+                          ),
+                          Container(height:MediaQuery.of(context).size.height*0.01),
+                          GestureDetector(
+                            onTap:(){
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return SingleChildScrollView(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Text(
+                                            '${NewsData(3)[0]}',
+                                            style: TextStyle(
+                                              fontSize: 24.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Image.network(
+                                            '${NewsData(3)[3]}', // Replace with your news image URL
+                                            fit: BoxFit.cover,
+                                          ),
+                                          SizedBox(height: 12.0),
+                                          Text(
+                                            '${NewsData(3)[1]}',
+                                            style: TextStyle(fontSize: 16.0),
+                                          ),
+                                          SizedBox(height: 16.0),
+                                          OutlinedButton(
+                                            onPressed: () {
+                                              launchUrl(Uri.parse(NewsData(3)[4]),
+                                                  mode: LaunchMode.externalApplication);
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              primary: Colors.transparent, // Transparent background
+                                              side:
+                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
+                                            ),
+                                            child: Text(
+                                              'Read More',
+                                              style: TextStyle(
+                                                color: Color(0xFF007BFF), // Text color
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child:ShadedContainer(
+                              color: NewsData(3)[3],
+                              child: ContainerContent(
+                                title: '${NewsData(3)[0]}',
+                                description: '${NewsData(3)[1]}',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Container(height:MediaQuery.of(context).size.height*0.01),
+                  Row(
+                    children:[
+                      Container(width:MediaQuery.of(context).size.width*0.05),
+                      ElevatedButton(
+                        child:Text("View All"), 
+                        onPressed:(){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NewsPage(totalData:article),
+                              ),
+                            );
+                        }
+                      ),
+                      Container(width:MediaQuery.of(context).size.width*0.2),
+                    ]
+                  ),
+                  Container(height:MediaQuery.of(context).size.height*0.01),
+                  // You can add your exercise list here
+
+                  // Divider
+                  Divider(thickness:2.0),
                   _buildSectionTitle('Quote Of The Day'),
                   Container(height:MediaQuery.of(context).size.height*0.025),
                   _buildRandomQuote(),
@@ -2890,27 +3311,87 @@ class _HomePageState extends State<HomePage> {
       )
     );
   }
-
+  Widget buildFeelingEmoji(String emoji, String feeling) {
+    return GestureDetector(
+      onTap: () async {
+        setState((){
+          selectedFeeling.value = feeling;
+        });
+        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'$value2': selectedFeeling.value});
+      },
+      child: Container(
+        margin: EdgeInsets.all(10),
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          color: selectedFeeling.value == feeling ? Colors.blue : Colors.grey,
+        ),
+        child: Text(
+          emoji,
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
   Widget _buildSectionTitle(String text) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 20,
+        style: GoogleFonts.raleway(
+          fontSize: 26,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
+  Widget _buildProfile(){
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.person_rounded, color:Colors.blue),
+      onSelected: (value) async {
+        // Handle item selection here
+        if (value == 'Logout') {
+          SharedPreferences pref =
+              await SharedPreferences.getInstance();
+          pref.setString("email", "");
+          FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => LoginPage()));        
+        } else if (value == 'About') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfilePage(user:user),
+            ),
+          );
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        PopupMenuItem<String>(
+          value: 'About',
+          child: Text('About'),
+        ),
+        PopupMenuItem<String>(
+          value: 'Logout',
+          child: Text(
+            'Logout',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    );
+  }
   Widget _buildTitle(String text) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(16.0,16.0,5.0,16.0),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
+        style: GoogleFonts.raleway(
+          fontSize: 24, // Adjust the font size as needed
+           // Adjust the font weight as needed
+          // You can also set other text styles here
         ),
       ),
     );
@@ -2942,7 +3423,6 @@ class _HomePageState extends State<HomePage> {
                 ChatScreen(user:"$user"),
                 Planner(user: "$user"),
                 PostPage(currentUser: "$user"),
-                NewsPage(),
                 // ProfilePage(user:"$email"),
               ], selectedIndex:1),
             ),
@@ -2958,13 +3438,264 @@ class _HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Text(
-        "ALL IS GOOD",
+        "Today is your opportunity to build the tomorrow you want.\n\n -KEN POIROT",
         style: TextStyle(
           fontSize: 16,
           fontStyle: FontStyle.italic,
         ),
       ),
     );
+  }
+}
+class ShadedContainer extends StatelessWidget {
+  final color;
+  final Widget child;
+
+  ShadedContainer({required this.color, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width:MediaQuery.of(context).size.width*0.45,
+        height:MediaQuery.of(context).size.height*0.2,
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            colorFilter: ColorFilter.mode(
+              Colors.white.withOpacity(0.45), // Adjust the opacity value as needed
+              BlendMode.srcOver,
+            ),
+            image: NetworkImage("$color"),
+            fit: BoxFit.cover,
+          ),
+          borderRadius: BorderRadius.circular(10.0),
+          // boxShadow: [
+          //   BoxShadow(
+          //     spreadRadius: 2,
+          //     blurRadius: 5,
+          //     offset: Offset(0, 3),
+          //   ),
+          // ],
+        ),
+        child: child,
+      );
+  }
+}
+
+class ContainerContent extends StatelessWidget {
+  final String title;
+  final String description;
+
+  ContainerContent({required this.title, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10), // Rounded corners
+          ),
+          child:Text(
+            title.length > 9
+              ? title.substring(0, 9) + "..." // Truncate text if it exceeds the character limit
+              : title,
+            style: TextStyle(
+              fontSize: 20,
+              shadows: [
+                // Shadow(
+                //   color: Colors.white, // Shadow color
+                //   offset: Offset(1, 1), // Shadow offset
+                //   blurRadius: 2, // Shadow blur radius
+                // ),
+              ],
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        SizedBox(height: 8.0),
+        Container(
+          height:MediaQuery.of(context).size.height*0.11,
+          width:MediaQuery.of(context).size.width*0.3,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10), // Rounded corners
+          ),
+          child:Text(
+            description.length > 35
+              ? description.substring(0, 35) + "..." // Truncate text if it exceeds the character limit
+              : description,
+            style: TextStyle(
+              shadows: [
+                // Shadow(
+                //   color: Colors.white, // Shadow color
+                //   offset: Offset(1, 1), // Shadow offset
+                //   blurRadius: 2, // Shadow blur radius
+                // ),
+              ],
+              fontSize: 16,
+              color: Colors.black,
+            ),
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class MoodEntry {
+  final DateTime date;
+  final String mood;
+
+  MoodEntry(this.date, this.mood);
+}
+
+class MoodPage extends StatefulWidget {
+  @override
+  _MoodPageState createState() => _MoodPageState();
+}
+
+class _MoodPageState extends State<MoodPage> {
+  List<MoodEntry> moodEntries = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch mood data when the page initializes
+    fetchMoodData();
+  }
+
+  Future<void> fetchMoodData() async {
+    try {
+      final DocumentSnapshot docSnapshot = await FirebaseFirestore.instance.collection('audios').doc('rishit.agrawal121@gmail.com').get();
+      final Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
+
+      final moodList = data.entries.where((entry) {
+        // Filter entries to include only those with mood values (e.g., 'Angry', 'Happy', etc.)
+        return ['Angry', 'Happy', 'Neutral'].contains(entry.value.toString());
+      }).map((entry) {
+        final date = DateTime.parse(entry.key);
+        final mood = entry.value.toString();
+        return MoodEntry(date, mood);
+      }).toList();
+
+      setState(() {
+        moodEntries = moodList;
+      });
+    } catch (e) {
+      print('Error fetching mood data: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Mood Tracker'),
+      ),
+      body: Container(
+        child:Column(
+          children:[
+            moodEntries.isNotEmpty
+              ? Column(children:[
+                Container(height:MediaQuery.of(context).size.height*0.025),
+                Text(
+                  "Your Mood Over Time",
+                  style: GoogleFonts.raleway(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(height:MediaQuery.of(context).size.height*0.025),
+                Row(children:[
+                  Container(width:MediaQuery.of(context).size.width*0.05),
+                  MoodGraph(moodEntries)
+                ]),
+              ])
+              : Text('No mood data available.'),
+          ]
+        ),
+      ),
+    );
+  }
+}
+
+class MoodGraph extends StatelessWidget {
+  final List<MoodEntry> moodEntries;
+
+  MoodGraph(this.moodEntries);
+
+  @override
+  Widget build(BuildContext context) {
+    moodEntries.sort((a, b) => a.date.compareTo(b.date));
+    return Container(
+      height:MediaQuery.of(context).size.width*0.7,
+      width:MediaQuery.of(context).size.width*0.95,
+      child:LineChart(
+        LineChartData(
+          gridData: FlGridData(show: false),
+          titlesData: FlTitlesData(
+            topTitles: SideTitles(showTitles: false),
+            leftTitles: SideTitles(
+              showTitles: false,
+              reservedSize: 40,
+              getTitles: (value) {
+                if (value == 1) return 'Angry';
+                if (value == 3) return 'Neutral';
+                if (value == 5) return 'Happy';
+                return ''; // Hide other labels
+              },
+            ),
+            bottomTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 22,
+              getTitles: (value) {
+                final int index = value.toInt();
+                if (index >= 0 && index < moodEntries.length) {
+                  final date = moodEntries[index].date;
+                  return '${date.day}/${date.month}';
+                }
+                return '';
+              },
+              // Calculate the interval to ensure evenly spaced labels
+              interval: (moodEntries.length - 1) / 4,
+            ),
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: const Color(0xff37434d), width: 1),
+          ),
+          minX: 0,
+          maxX: moodEntries.length.toDouble() - 1,
+          minY: 0,
+          maxY: 5, // Customize the y-axis range as needed
+          lineBarsData: [
+            LineChartBarData(
+              spots: moodEntries.asMap().entries.map((entry) {
+                return FlSpot(entry.key.toDouble(), moodValueToDouble(entry.value.mood));
+              }).toList(),
+              colors: [Colors.blue], // Customize the line color
+              dotData: FlDotData(show: true),
+              belowBarData: BarAreaData(show: false),
+            ),
+          ],
+        ),
+      )
+    );
+  }
+
+  double moodValueToDouble(String mood) {
+    switch (mood.toLowerCase()) {
+      case 'happy':
+        return 5.0;
+      case 'neutral':
+        return 3.0;
+      case 'angry':
+        return 1.0;
+      default:
+        return 3.0; // Default to a neutral mood
+    }
   }
 }
 

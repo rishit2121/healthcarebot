@@ -63,6 +63,8 @@ dependencies:
   flutter_stripe: ^9.4.0
   flutter_dotenv: ^5.0.2
   google_mobile_ads: ^1.2.0
+  google_fonts: ^4.0.1
+  fl_chart: ^0.40.0 
 
 dev_dependencies:
   flutter_test:
@@ -90,6 +92,7 @@ flutter:
   assets:
     - assets/data.json
     - assets/.env
+    - assets/Screen Shot 2023-09-29 at 7.48.08 PM.png # Replace with the actual path to your screenshot image
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

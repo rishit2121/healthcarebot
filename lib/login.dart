@@ -187,8 +187,8 @@ class CongratulationsPage extends StatelessWidget {
                         HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:"${myControllerEmail.text}"),
                         Planner(user:"${myControllerEmail.text}"),
-                        PostPage(currentUser:"${myControllerEmail.text}"),
-                        NewsPage(),
+                        MoodPage(),
+                        // PostPage(currentUser:"${myControllerEmail.text}"),
                         // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
                       print(myControllerEmail);
@@ -504,8 +504,8 @@ class _LoginPageState extends State<LoginPage> {
                         HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:'${myControllerEmail.text}'),
                         Planner(user:"${myControllerEmail.text}"),
-                        PostPage(currentUser:"${myControllerEmail.text}"),
-                        NewsPage(),
+                        MoodPage()
+                        // PostPage(currentUser:"${myControllerEmail.text}"),
                         // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
                         Navigator.push(
