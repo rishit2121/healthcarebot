@@ -163,16 +163,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           bottom: Radius.circular(10),
         ),
       ),
-      backgroundColor:Colors.white,
+      backgroundColor: Colors.white,
       elevation: 1,
-    //   flexibleSpace: Container(
-    //   decoration: const BoxDecoration(
-    //     gradient: LinearGradient(
-    //       begin: Alignment.topLeft,
-    //       end: Alignment.bottomRight,
-    //       colors: <Color>[Color.fromARGB(255, 202, 244, 255), Color.fromARGB(255, 209, 230, 255)]),
-    //   ),
-    // ),
+      //   flexibleSpace: Container(
+      //   decoration: const BoxDecoration(
+      //     gradient: LinearGradient(
+      //       begin: Alignment.topLeft,
+      //       end: Alignment.bottomRight,
+      //       colors: <Color>[Color.fromARGB(255, 202, 244, 255), Color.fromARGB(255, 209, 230, 255)]),
+      //   ),
+      // ),
       title: Row(
         children: [
           Icon(Icons.account_circle,
@@ -180,7 +180,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           SizedBox(width: 8.0), // Add some space between the icon and title
           Text(
             title,
-            style: GoogleFonts.raleway(color: Colors.black, fontWeight: FontWeight.bold),
+            style: GoogleFonts.raleway(
+                color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -196,7 +197,7 @@ class ChatScreen extends StatefulWidget with Functions {
   final user;
   @override
   @override
-  _ChatScreenState createState() => _ChatScreenState(user:user);
+  _ChatScreenState createState() => _ChatScreenState(user: user);
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -227,33 +228,34 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
-  Future<void> _sendMessage( user) async {//credits later
-      if (_textEditingController.text.isNotEmpty) {
-        // await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
-        setState(() {
-          String text = _textEditingController.text;
-          Message newMessage = Message(sender: 'You', text: text, list: []);
-          messages.add(newMessage);
-          var scrollPosition = _scrollController.position;
-          if (scrollPosition.viewportDimension < scrollPosition.maxScrollExtent) {
-            _scrollController.animateTo(
-              scrollPosition.maxScrollExtent,
-              duration: new Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-            );
-          }
-          chat_history =
-              chat_history + "\n" + "User: " + newMessage.text + " <END_OF_TURN>";
-          chat_history2 = chat_history2 +
-              [
-                {"role": "user", "content": newMessage.text}
-              ];
-          _textEditingController.clear();
-          // Simulate bot response
-          _scrollToBottom();
-          _simulateBotResponse();
-        });
-      }
+  Future<void> _sendMessage(user) async {
+    //credits later
+    if (_textEditingController.text.isNotEmpty) {
+      // await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+      setState(() {
+        String text = _textEditingController.text;
+        Message newMessage = Message(sender: 'You', text: text, list: []);
+        messages.add(newMessage);
+        var scrollPosition = _scrollController.position;
+        if (scrollPosition.viewportDimension < scrollPosition.maxScrollExtent) {
+          _scrollController.animateTo(
+            scrollPosition.maxScrollExtent,
+            duration: new Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        }
+        chat_history =
+            chat_history + "\n" + "User: " + newMessage.text + " <END_OF_TURN>";
+        chat_history2 = chat_history2 +
+            [
+              {"role": "user", "content": newMessage.text}
+            ];
+        _textEditingController.clear();
+        // Simulate bot response
+        _scrollToBottom();
+        _simulateBotResponse();
+      });
+    }
   }
 
   Future<void> _simulateBotResponse() async {
@@ -289,9 +291,9 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    
     // return FutureBuilder(
     //     future:
     //         FirebaseFirestore.instance.collection('audios').doc('$user').get(),
@@ -302,101 +304,100 @@ class _ChatScreenState extends State<ChatScreen> {
     //       if (snapshot.connectionState == ConnectionState.done) {
     //         final items = snapshot.data;
     //         var data = (items as DocumentSnapshot).data() as Map;
-            return Scaffold(
-                appBar: CustomAppBar(
-                  title: "  Eva",
-                  onProfilePressed: () {
-                    showProfileMenu(context);
+    return Scaffold(
+        appBar: CustomAppBar(
+          title: "  Eva",
+          onProfilePressed: () {
+            showProfileMenu(context);
+          },
+        ),
+        body: Container(
+          decoration: BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
+          child: Column(
+            children: <Widget>[
+              Row(children: <Widget>[
+                Container(width: MediaQuery.of(context).size.width * 0.35),
+                // Text('Credits: ${data['Credits']}'),
+                // TextButton(child:Text("Add more"), onPressed:(){
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
+                //     ),
+                //   );
+                // })
+              ]),
+              Container(height: MediaQuery.of(context).size.height * 0.02),
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  reverse: false, // Show the latest message at the bottom
+                  itemCount: messages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final message = messages[index];
+                    if (message == true) {
+                      return Container(
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          child: Stack(children: [
+                            Container(
+                                width: MediaQuery.of(context).size.width * 0.1,
+                                child: SpinKitThreeBounce(
+                                  color: Colors.black,
+                                  size: 10.0,
+                                )),
+                            Container(
+                                width: MediaQuery.of(context).size.width * 0.1,
+                                child: Icon(Icons.messenger_outline_outlined))
+                          ]));
+                    } else if (message.sender == 'You') {
+                      return _buildMessageBubble(message);
+                    } else if (message.sender == 'Bot') {
+                      return _buildBotMessageBubble(message);
+                    } else {
+                      return _buildProductListMessage(message);
+                    }
                   },
                 ),
-                body: Container(
-                  decoration: BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        children:<Widget>[
-                          Container(width:MediaQuery.of(context).size.width*0.35),
-                          // Text('Credits: ${data['Credits']}'),
-                          // TextButton(child:Text("Add more"), onPressed:(){
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(
-                          //       builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
-                          //     ),
-                          //   );
-                          // })
-                        ]
-                       ),
-                      Container(height:MediaQuery.of(context).size.height*0.02),
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          reverse: false, // Show the latest message at the bottom
-                          itemCount: messages.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final message = messages[index];
-                            if (message == true) {
-                              return Container(
-                                  width: MediaQuery.of(context).size.width * 0.1,
-                                  child: Stack(children: [
-                                    Container(
-                                        width: MediaQuery.of(context).size.width * 0.1,
-                                        child: SpinKitThreeBounce(
-                                          color: Colors.black,
-                                          size: 10.0,
-                                        )),
-                                    Container(
-                                        width: MediaQuery.of(context).size.width * 0.1,
-                                        child: Icon(Icons.messenger_outline_outlined))
-                                  ]));
-                            } else if (message.sender == 'You') {
-                              return _buildMessageBubble(message);
-                            } else if (message.sender == 'Bot') {
-                              return _buildBotMessageBubble(message);
-                            } else {
-                              return _buildProductListMessage(message);
-                            }
-                          },
-                        ),
-                      ),
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height * 0.15,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                                color: Colors.grey), // Customize the top outline color
-                            bottom: BorderSide(
-                                color: Colors.grey),
-                          ),
-                        ),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: TextField(
-                                controller: _textEditingController,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Type your message...',
-                                  contentPadding: EdgeInsets.all(12.0),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.send, color: Colors.black),
-                              onPressed:((){ _sendMessage(user);}), //Add data['Credits'] later
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.15,
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                        color: Colors.grey), // Customize the top outline color
+                    bottom: BorderSide(color: Colors.grey),
                   ),
-                ));
-              // }
-        //   return Center(
-        //     child: CircularProgressIndicator(),
-        //   );
-        // });      
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _textEditingController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Type your message...',
+                          contentPadding: EdgeInsets.all(12.0),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.send, color: Colors.black),
+                      onPressed: (() {
+                        _sendMessage(user);
+                      }), //Add data['Credits'] later
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ));
+    // }
+    //   return Center(
+    //     child: CircularProgressIndicator(),
+    //   );
+    // });
   }
 
   Widget _buildMessageBubble(Message message) {
@@ -417,7 +418,10 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16), topLeft:Radius.circular(16)),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topLeft: Radius.circular(16)),
               gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
@@ -459,8 +463,10 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
               color: Color.fromARGB(255, 215, 215, 215),
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16), topRight:Radius.circular(16)),
-
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topRight: Radius.circular(16)),
             ),
             child: Text(
               message.text,
@@ -784,9 +790,9 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var email = prefs.getString("email");
   final List<Widget> _widgetOptions = [
-    HomePage(user:"$email"),
-    ChatScreen(user:"$email"),
-    TakePictureScreen(camera:firstCamera),
+    HomePage(user: "$email"),
+    ChatScreen(user: "$email"),
+    TakePictureScreen(camera: firstCamera),
     // Planner(user: "$email"),
     JournalPage(),
     // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
@@ -800,78 +806,77 @@ Future<void> main() async {
             debugShowCheckedModeBanner: false,
             home: (email == null || email == "")
                 ? LoginPage()
-                : MyHomePage(widgets: _widgetOptions, selectedIndex:0),
+                : MyHomePage(widgets: _widgetOptions, selectedIndex: 0),
           )));
 }
+
 class SmallRoutineCard extends StatelessWidget {
   final Map routineName;
   final List ExerciseList;
-  Widget build(BuildContext context){
-    return  Column(
-      children:[
-        Row(
-          children: [
-            Container(width:MediaQuery.of(context).size.width*0.02,),
-            SizedBox(
-              width:MediaQuery.of(context).size.width*0.015,
-              height:MediaQuery.of(context).size.height*0.09,
-              child: const DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: Colors.blue
-                ),
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Row(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.02,
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.015,
+            height: MediaQuery.of(context).size.height * 0.09,
+            child: const DecoratedBox(
+              decoration: const BoxDecoration(color: Colors.blue),
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.04,
+          ),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+              DateFormat('d')
+                  .format(DateTime.parse("${routineName['date']} 00:00:00")),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Container(width:MediaQuery.of(context).size.width*0.04,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:[
-                Text(
-                  DateFormat('d').format(DateTime.parse("${routineName['date']} 00:00:00")),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  DateFormat('MMMM').format(DateTime.parse("${routineName['date']} 00:00:00")),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color:Colors.grey,
-                  ),
-                ),
-              ]
+            Text(
+              DateFormat('MMMM')
+                  .format(DateTime.parse("${routineName['date']} 00:00:00")),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
             ),
-            Container(width:MediaQuery.of(context).size.width*0.065),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:[
-                Text(
-                  '${routineName['name']}'.length > 16
-              ? '${routineName['name']}'.substring(0, 16) + "..." // Truncate text if it exceeds the character limit
-              : '${routineName['name']}',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Equipment: ${routineName['equipment']}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color:Colors.grey,
-                  ),
-                ),
-              ]
+          ]),
+          Container(width: MediaQuery.of(context).size.width * 0.065),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+              '${routineName['name']}'.length > 16
+                  ? '${routineName['name']}'.substring(0, 16) +
+                      "..." // Truncate text if it exceeds the character limit
+                  : '${routineName['name']}',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ],
-        ),
-        Container(height:MediaQuery.of(context).size.height*0.035),
-      ]
-    );
+            Text(
+              'Equipment: ${routineName['equipment']}',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+          ]),
+        ],
+      ),
+      Container(height: MediaQuery.of(context).size.height * 0.035),
+    ]);
   }
 
   SmallRoutineCard({required this.routineName, required this.ExerciseList});
 }
+
 class RoutineCard extends StatelessWidget {
   final Map routineName;
   final List ExerciseList;
@@ -986,8 +991,11 @@ class _AddExercisePageState extends State<AddExercisePage> {
           iconTheme: IconThemeData(
             color: Colors.black, //change your color here
           ),
-          backgroundColor:Colors.white, 
-          title: Text('Add Exercises', style:TextStyle(color:Colors.black),),
+          backgroundColor: Colors.white,
+          title: Text(
+            'Add Exercises',
+            style: TextStyle(color: Colors.black),
+          ),
         ),
         body: FutureBuilder<List>(
             future: _dataFuture,
@@ -1588,7 +1596,7 @@ class NewsPage extends StatefulWidget {
   const NewsPage({super.key, required this.totalData});
   final totalData;
   @override
-  _NewsPageState createState() => _NewsPageState(totalData:totalData);
+  _NewsPageState createState() => _NewsPageState(totalData: totalData);
 }
 
 class _NewsPageState extends State<NewsPage> {
@@ -1614,16 +1622,15 @@ class _NewsPageState extends State<NewsPage> {
           title: Text('News Articles', style: TextStyle(color: Colors.black)),
         ),
         body: Container(
-          decoration: BoxDecoration(color: Colors.white), 
-            child:ListView.builder(
-              itemCount: totalData.length,
-              itemBuilder: (context, index) {
-                final article = totalData[index];
-                return NewsArticleCard(article: article);
-              },
-            ),
-          )
-        );
+          decoration: BoxDecoration(color: Colors.white),
+          child: ListView.builder(
+            itemCount: totalData.length,
+            itemBuilder: (context, index) {
+              final article = totalData[index];
+              return NewsArticleCard(article: article);
+            },
+          ),
+        ));
   }
 }
 
@@ -1713,183 +1720,194 @@ class _ProfilePageState extends State<ProfilePage> {
             var data = (items as DocumentSnapshot).data() as Map;
             var questionAnswerList = data['Information'];
             return Scaffold(
-              appBar:AppBar(title:Text('Profile')),
-              body: SingleChildScrollView(
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.025),
-                      CircleAvatar(
-                        backgroundColor: Color(0xFF007BFF),
-                        radius: 60.0,
-                        child: Icon(
-                          Icons.account_circle,
-                          size: 120.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: 16.0),
-                      Text(
-                        '${data['User']}',
-                        style: TextStyle(
-                            fontSize: 24.0, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(
-                        '${user}',
-                        style: TextStyle(fontSize: 16.0),
-                      ),                      
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.025),
-                      Divider(
-                        color: Color.fromARGB(255, 190, 190, 190),
-                        height: 1,
-                        thickness: 1,
-                      ),
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.025),
-                      Text("INFORMATION",
-                          style: TextStyle(
-                              fontSize: 24.0, fontWeight: FontWeight.bold)),
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.025),
-                      for (var index = 0;
-                          index < questionAnswerList.length;
-                          index++)
-                        Card(
-                            elevation: 2,
-                            margin: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    questionAnswerList[index]['question'] ?? '',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    questionAnswerList[index]['answer'] ?? '',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                appBar: AppBar(title: Text('Profile')),
+                body: SingleChildScrollView(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.025),
+                          CircleAvatar(
+                            backgroundColor: Color(0xFF007BFF),
+                            radius: 60.0,
+                            child: Icon(
+                              Icons.account_circle,
+                              size: 120.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 16.0),
+                          Text(
+                            '${data['User']}',
+                            style: TextStyle(
+                                fontSize: 24.0, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 8.0),
+                          Text(
+                            '${user}',
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                          Container(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.025),
+                          Divider(
+                            color: Color.fromARGB(255, 190, 190, 190),
+                            height: 1,
+                            thickness: 1,
+                          ),
+                          Container(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.025),
+                          Text("INFORMATION",
+                              style: TextStyle(
+                                  fontSize: 24.0, fontWeight: FontWeight.bold)),
+                          Container(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.025),
+                          for (var index = 0;
+                              index < questionAnswerList.length;
+                              index++)
+                            Card(
+                                elevation: 2,
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          // Set initial value of the controller
-                                          answerController.text =
-                                              questionAnswerList[index]
-                                                  ['answer'];
+                                      Text(
+                                        questionAnswerList[index]['question'] ??
+                                            '',
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        questionAnswerList[index]['answer'] ??
+                                            '',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              // Set initial value of the controller
+                                              answerController.text =
+                                                  questionAnswerList[index]
+                                                      ['answer'];
 
-                                          // Open a modal bottom sheet for editing the answer
-                                          showModalBottomSheet(
-                                            context: context,
-                                            isScrollControlled: true,
-                                            builder: (BuildContext context) {
-                                              return SingleChildScrollView(
-                                                child: Padding(
-                                                  padding: EdgeInsets.only(
-                                                    bottom:
-                                                        MediaQuery.of(context)
+                                              // Open a modal bottom sheet for editing the answer
+                                              showModalBottomSheet(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return SingleChildScrollView(
+                                                    child: Padding(
+                                                      padding: EdgeInsets.only(
+                                                        bottom: MediaQuery.of(
+                                                                context)
                                                             .viewInsets
                                                             .bottom,
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        'Edit Answer',
-                                                        style: TextStyle(
-                                                            fontSize: 18,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
                                                       ),
-                                                      SizedBox(height: 8),
-                                                      Text(
-                                                        questionAnswerList[
-                                                                    index]
-                                                                ['question'] ??
-                                                            '',
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            'Edit Answer',
+                                                            style: TextStyle(
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          SizedBox(height: 8),
+                                                          Text(
+                                                            questionAnswerList[
+                                                                        index][
+                                                                    'question'] ??
+                                                                '',
+                                                            style: TextStyle(
+                                                                fontSize: 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          SizedBox(height: 16),
+                                                          TextField(
+                                                            controller:
+                                                                answerController,
+                                                            maxLines: 3,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              border:
+                                                                  OutlineInputBorder(),
+                                                              hintText:
+                                                                  'Enter your answer...',
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 16),
+                                                          ElevatedButton(
+                                                            onPressed:
+                                                                () async {
+                                                              // Save the updated answer and close the bottom sheet
+                                                              questionAnswerList[
+                                                                          index]
+                                                                      [
+                                                                      'answer'] =
+                                                                  answerController
+                                                                      .text;
+                                                              await FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      'audios')
+                                                                  .doc(user)
+                                                                  .update({
+                                                                'Information':
+                                                                    questionAnswerList
+                                                              });
+                                                              Navigator.pop(
+                                                                  context);
+                                                              setState(() {});
+                                                            },
+                                                            child: Text('Save'),
+                                                          ),
+                                                        ],
                                                       ),
-                                                      SizedBox(height: 16),
-                                                      TextField(
-                                                        controller:
-                                                            answerController,
-                                                        maxLines: 3,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          border:
-                                                              OutlineInputBorder(),
-                                                          hintText:
-                                                              'Enter your answer...',
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: 16),
-                                                      ElevatedButton(
-                                                        onPressed: () async {
-                                                          // Save the updated answer and close the bottom sheet
-                                                          questionAnswerList[
-                                                                      index]
-                                                                  ['answer'] =
-                                                              answerController
-                                                                  .text;
-                                                          await FirebaseFirestore
-                                                              .instance
-                                                              .collection(
-                                                                  'audios')
-                                                              .doc(user)
-                                                              .update({
-                                                            'Information':
-                                                                questionAnswerList
-                                                          });
-                                                          Navigator.pop(
-                                                              context);
-                                                          setState(() {});
-                                                        },
-                                                        child: Text('Save'),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
+                                                    ),
+                                                  );
+                                                },
                                               );
                                             },
-                                          );
-                                        },
-                                        child: Icon(
-                                          Icons.edit,
-                                          color: Colors
-                                              .blue, // Customize the icon color
-                                        ),
+                                            child: Icon(
+                                              Icons.edit,
+                                              color: Colors
+                                                  .blue, // Customize the icon color
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            )),
-                    ],
+                                )),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ));
+                ));
           }
           return Center(
             child: CircularProgressIndicator(),
@@ -1897,8 +1915,6 @@ class _ProfilePageState extends State<ProfilePage> {
         });
   }
 }
-
-
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({
@@ -1908,11 +1924,13 @@ class MyHomePage extends StatefulWidget {
   });
   final widgets;
   var selectedIndex;
-  _MyHomePageState createState() => _MyHomePageState(widgets: widgets, selectedIndex:selectedIndex);
+  _MyHomePageState createState() =>
+      _MyHomePageState(widgets: widgets, selectedIndex: selectedIndex);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  _MyHomePageState({required this.widgets, required this.selectedIndex}) : super();
+  _MyHomePageState({required this.widgets, required this.selectedIndex})
+      : super();
   final widgets;
   var selectedIndex;
 
@@ -1927,9 +1945,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: widgets.elementAt(selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         backgroundColor: Colors.white,
-        selectedLabelStyle:
-            TextStyle(color: Color(0xFF007BFF)),
+        selectedLabelStyle: TextStyle(color: Color(0xFF007BFF)),
         unselectedLabelStyle: TextStyle(color: Colors.black),
         selectedItemColor: Color(0xFF007BFF),
         unselectedItemColor: Colors.black,
@@ -2202,8 +2222,8 @@ class PostList extends StatelessWidget {
     // Update likesCount in the corresponding post documen
   }
 
-  void _showPostDetailsAndComments(
-      BuildContext context, String postId, String text, String userId, String currentUser) {
+  void _showPostDetailsAndComments(BuildContext context, String postId,
+      String text, String userId, String currentUser) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -2250,7 +2270,7 @@ class PostList extends StatelessWidget {
                       SizedBox(height: 16),
                       Text('Comments:',
                           style: TextStyle(fontWeight: FontWeight.bold)),
-                      CommentList(postId: postId, user:currentUser),
+                      CommentList(postId: postId, user: currentUser),
                       SizedBox(height: 16),
                     ],
                   ),
@@ -2286,7 +2306,8 @@ class PostList extends StatelessWidget {
                   await FirebaseFirestore.instance.collection('comments').add({
                     'postId': postId,
                     'userId': currentUser,
-                    'userName': await UserName(name), // Replace with actual user ID
+                    'userName':
+                        await UserName(name), // Replace with actual user ID
                     'text': commentText,
                     'timestamp': FieldValue.serverTimestamp(),
                   });
@@ -2365,12 +2386,14 @@ class PostList extends StatelessWidget {
                                         builder: (context, snapshot) {
                                           if (snapshot.connectionState ==
                                               ConnectionState.waiting) {
-                                            return Icon(Icons.favorite_border, color: Colors.blue.shade400,);
+                                            return Icon(
+                                              Icons.favorite_border,
+                                              color: Colors.blue.shade400,
+                                            );
                                           }
                                           bool? userLiked = snapshot.data;
                                           return IconButton(
-                                            icon: Icon(
-                                              (userLiked ?? false)
+                                            icon: Icon((userLiked ?? false)
                                                 ? Icons.favorite
                                                 : Icons.favorite_border),
                                             onPressed: () async {
@@ -2467,11 +2490,10 @@ class PostList extends StatelessWidget {
                                         bool? userLiked = snapshot.data;
                                         return IconButton(
                                           icon: Icon(
-                                            color: Colors.blue.shade400,
-                                            (userLiked ?? false)
-                                              ? Icons.favorite
-                                              : Icons.favorite_border
-                                          ),
+                                              color: Colors.blue.shade400,
+                                              (userLiked ?? false)
+                                                  ? Icons.favorite
+                                                  : Icons.favorite_border),
                                           onPressed: () async {
                                             if (userLiked == true) {
                                               // Unlike the post
@@ -2581,13 +2603,13 @@ class CommentList extends StatelessWidget {
                 padding: EdgeInsets.all(8.0),
                 child: ListTile(
                   trailing: comment['userId'] == user
-                    ? IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          deleteComment(comment.id);
-                        },
-                      )
-                    : null,
+                      ? IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            deleteComment(comment.id);
+                          },
+                        )
+                      : null,
                   title: Text(comment['text']),
                   subtitle: Text('User: ${comment['userName']}'),
                 ),
@@ -2598,13 +2620,15 @@ class CommentList extends StatelessWidget {
     );
   }
 }
-class SubscriptionPage extends StatefulWidget{
+
+class SubscriptionPage extends StatefulWidget {
   var currentCredits;
   var user;
   SubscriptionPage({required this.currentCredits, required this.user});
   @override
   _SubscriptionPageState createState() => _SubscriptionPageState();
 }
+
 class _SubscriptionPageState extends State<SubscriptionPage> {
   var paymentIntent;
   Future<void> makePayment(var amount, var creditsToAdd) async {
@@ -2614,7 +2638,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       //STEP 2: Initialize Payment Sheet
       await stripe.Stripe.instance
           .initPaymentSheet(
-            
               paymentSheetParameters: stripe.SetupPaymentSheetParameters(
                   paymentIntentClientSecret: paymentIntent[
                       'client_secret'], //Gotten from payment intent
@@ -2623,56 +2646,57 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           .then((value) {});
       //STEP 3: Display Payment sheet
       await displayPaymentSheet(creditsToAdd);
-
     } catch (err) {
       throw Exception(err);
     }
   }
-  createPaymentIntent(String amount, String currency) async {
-      try {
-        //Request body
-        Map<String, dynamic> body = {
-          'amount': "$amount",
-          'currency': currency,
-        };
 
-        //Make post request to Stripe
-        var response = await http.post(
-          Uri.parse('https://api.stripe.com/v1/payment_intents'),
-          headers: {
-            'Authorization': 'Bearer ${dotenv.env['STRIPE_SECRET']}',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: body,
-        );
-        return json.decode(response.body);
-      } catch (err) {
-        throw Exception(err.toString());
-      }
+  createPaymentIntent(String amount, String currency) async {
+    try {
+      //Request body
+      Map<String, dynamic> body = {
+        'amount': "$amount",
+        'currency': currency,
+      };
+
+      //Make post request to Stripe
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        headers: {
+          'Authorization': 'Bearer ${dotenv.env['STRIPE_SECRET']}',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body,
+      );
+      return json.decode(response.body);
+    } catch (err) {
+      throw Exception(err.toString());
     }
+  }
 
   displayPaymentSheet(var creditsToAdd) async {
-      try {
-        await stripe.Stripe.instance.presentPaymentSheet().then((value) async {
-          //Clear paymentIntent variable after successful payment
-          paymentIntent = null;
-          await FirebaseFirestore.instance.collection('audios').doc('${widget.user}').update({'Credits': widget.currentCredits+creditsToAdd});
-          Navigator.pop(context);
-          setState((){});
-        })
-        .onError((error, stackTrace) {
-          throw Exception(error);
-        });
-      } 
-      on stripe.StripeException catch (e) {
-      print('Error is:---> $e'); 
-      } 
-      catch (e) {
-        print('$e');
-      }
+    try {
+      await stripe.Stripe.instance.presentPaymentSheet().then((value) async {
+        //Clear paymentIntent variable after successful payment
+        paymentIntent = null;
+        await FirebaseFirestore.instance
+            .collection('audios')
+            .doc('${widget.user}')
+            .update({'Credits': widget.currentCredits + creditsToAdd});
+        Navigator.pop(context);
+        setState(() {});
+      }).onError((error, stackTrace) {
+        throw Exception(error);
+      });
+    } on stripe.StripeException catch (e) {
+      print('Error is:---> $e');
+    } catch (e) {
+      print('$e');
     }
+  }
+
   var _amount;
-  Widget build (BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Purchase Page'),
@@ -2683,8 +2707,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           children: <Widget>[
             SizedBox(height: 20.0),
             Padding(
-              padding:EdgeInsets.all(15),
-              child:Text(
+              padding: EdgeInsets.all(15),
+              child: Text(
                 'Enter the amount of credits you would like to purchase.',
                 style: TextStyle(fontSize: 20.0),
               ),
@@ -2693,8 +2717,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             AmountTextField(
               onChanged: (amount) {
                 // Use the entered amount in your logic
-                setState((){
-                  _amount=amount;
+                setState(() {
+                  _amount = amount;
                 });
               },
             ),
@@ -2703,7 +2727,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 // Implement payment logic here
                 // You can navigate to a payment screen or handle payment processing.
                 // For simplicity, we'll just display a message for now.
-                makePayment((_amount * 8).round(),_amount);
+                makePayment((_amount * 8).round(), _amount);
                 // fetchOffers,
               },
               child: Text('Pay Now'),
@@ -2715,6 +2739,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 }
+
 class PostForm extends StatefulWidget {
   final String currentUser; // Declare the parameter
 
@@ -2775,10 +2800,6 @@ class _PostFormState extends State<PostForm> {
   }
 }
 
-
-
-
-
 class AmountTextField extends StatefulWidget {
   final ValueChanged<int> onChanged;
 
@@ -2831,6 +2852,7 @@ class _AmountTextFieldState extends State<AmountTextField> {
     );
   }
 }
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.user});
   final user;
@@ -2844,11 +2866,14 @@ class _HomePageState extends State<HomePage> {
   _HomePageState({required this.user}) : super();
   var value =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-          // .toString()
-          // .replaceAll(' 00:00:00.000', '');
-  String value2 = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).toString().replaceAll(' 00:00:00.000', '');
-  late var combinedList=[];
-  late var newData={};
+  // .toString()
+  // .replaceAll(' 00:00:00.000', '');
+  String value2 =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          .toString()
+          .replaceAll(' 00:00:00.000', '');
+  late var combinedList = [];
+  late var newData = {};
   late List workoutRoutines;
   final ValueNotifier<String> selectedFeeling = ValueNotifier<String>('');
   CollectionReference login = FirebaseFirestore.instance.collection('audios');
@@ -2858,470 +2883,523 @@ class _HomePageState extends State<HomePage> {
 
   Future<List> futureData() async {
     // Simulate fetching data from a source (e.g., Firestore)
-    return [await login.doc(user).get(), await fetchExercises(), await fetchNews()];
+    return [
+      await login.doc(user).get(),
+      await fetchExercises(),
+      await fetchNews()
+    ];
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future: futureData(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text("Something went wrong");
-          }
-          if (snapshot.connectionState == ConnectionState.done) {
-            final List? items = snapshot.data;
-            var exerciseItems = items![1];
-            data = (items![0] as DocumentSnapshot).data() as Map;
-            if (data['planner'] == null) {
-              data['planner'] = {};
-            }
-            var article=snapshot.data![2];
-            final DateTime articleDateTime = DateTime.parse(article![0]['datePublished']);
-            List NewsData(int index){
-              final desc=article[index]['description'];
-              final name = article[index]['name'];
-              final url= article[index]['url'];
-              final String formattedDate =
-                '${articleDateTime.year}-${articleDateTime.month.toString().padLeft(2, '0')}-${articleDateTime.day.toString().padLeft(2, '0')}';
-              final String imageUrl = article![index]['image'] != null &&
-                      article[index]['image']['thumbnail'] != null
-                  ? article[index]['image']['thumbnail']['contentUrl']
-                  : (article[index]['contentUrl'] != null
-                      ? article[0]['contentUrl']
-                      : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
-              return([name, desc, formattedDate, imageUrl, url]);
-            }
-            var thresholdDateString = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-            newData=data['planner'];
-            (newData).forEach((date, listOfDicts) {
-              DateTime dt1 = DateTime.parse("$date 00:00:00");
-              for(var i = 0; i < listOfDicts.length; i++){
-                  listOfDicts[i]['date']=date;
+        body: FutureBuilder(
+            future: futureData(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text("Something went wrong");
               }
-              if (dt1.compareTo(thresholdDateString)>=0) {
-                combinedList.addAll(listOfDicts);
-              }
-            
-            combinedList.sort((a, b) {
-              DateTime dt1 = DateTime.parse("${a["date"]} 00:00:00");
-              DateTime dt2 = DateTime.parse("${b["date"]} 00:00:00");
-              return dt1.compareTo(dt2);
-            });
-            });
-            
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  // Welcome Message
-                  Container(height:MediaQuery.of(context).size.height*0.05),
-                  Row(
-                    children:[
-                      _buildTitle('Welcome back,'),
-                      Text(
-                        '${data['User']}',
-                        style: GoogleFonts.raleway(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Spacer(),
-                      _buildProfile(),
-                    ]
-                  ),
-                  if (data[value2] == null) 
-                    Divider(thickness:1.0, color:Colors.black),
-                  if (data[value2] == null) 
-                    Container(height:MediaQuery.of(context).size.height*0.02),
-                  if (data[value2] == null) 
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
+              if (snapshot.connectionState == ConnectionState.done) {
+                final List? items = snapshot.data;
+                var exerciseItems = items![1];
+                data = (items![0] as DocumentSnapshot).data() as Map;
+                if (data['planner'] == null) {
+                  data['planner'] = {};
+                }
+                var article = snapshot.data![2];
+                final DateTime articleDateTime =
+                    DateTime.parse(article![0]['datePublished']);
+                List NewsData(int index) {
+                  final desc = article[index]['description'];
+                  final name = article[index]['name'];
+                  final url = article[index]['url'];
+                  final String formattedDate =
+                      '${articleDateTime.year}-${articleDateTime.month.toString().padLeft(2, '0')}-${articleDateTime.day.toString().padLeft(2, '0')}';
+                  final String imageUrl = article![index]['image'] != null &&
+                          article[index]['image']['thumbnail'] != null
+                      ? article[index]['image']['thumbnail']['contentUrl']
+                      : (article[index]['contentUrl'] != null
+                          ? article[0]['contentUrl']
+                          : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
+                  return ([name, desc, formattedDate, imageUrl, url]);
+                }
+
+                var thresholdDateString = DateTime(DateTime.now().year,
+                    DateTime.now().month, DateTime.now().day);
+                newData = data['planner'];
+                (newData).forEach((date, listOfDicts) {
+                  DateTime dt1 = DateTime.parse("$date 00:00:00");
+                  for (var i = 0; i < listOfDicts.length; i++) {
+                    listOfDicts[i]['date'] = date;
+                  }
+                  if (dt1.compareTo(thresholdDateString) >= 0) {
+                    combinedList.addAll(listOfDicts);
+                  }
+
+                  combinedList.sort((a, b) {
+                    DateTime dt1 = DateTime.parse("${a["date"]} 00:00:00");
+                    DateTime dt2 = DateTime.parse("${b["date"]} 00:00:00");
+                    return dt1.compareTo(dt2);
+                  });
+                });
+
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      // Welcome Message
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.05),
+                      Row(children: [
+                        _buildTitle('Welcome back,'),
                         Text(
-                          'How are you feeling today?',
-                          style: TextStyle(fontSize: 18),
+                          '${data['User']}',
+                          style: GoogleFonts.raleway(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                          SizedBox(height: 20),
+                        Spacer(),
+                        _buildProfile(),
+                      ]),
+                      if (data[value2] == null)
+                        Divider(thickness: 1.0, color: Colors.black),
+                      if (data[value2] == null)
+                        Container(
+                            height: MediaQuery.of(context).size.height * 0.02),
+                      if (data[value2] == null)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'How are you feeling today?',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                buildFeelingEmoji('😡', 'Angry'),
+                                buildFeelingEmoji('😞', 'Sad'),
+                                buildFeelingEmoji('😐', 'Neutral'),
+                                buildFeelingEmoji('😄', 'Happy'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      Divider(thickness: 2.0),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.05),
+                      Row(children: [
+                        Container(
+                            height: MediaQuery.of(context).size.height * 0.1,
+                            width: MediaQuery.of(context).size.width * 0.05),
+                        Container(
+                          child: Image.asset(
+                              'assets/Screen Shot 2023-09-29 at 7.48.08 PM.png'), // Replace with the actual path to your screenshot image
+                        ),
+                        Container(
+                            width: MediaQuery.of(context).size.width * 0.15),
+                        Column(children: [
+                          Text('Not feeling well?\nHave a talk.'),
+                          _buildTalkButton(),
+                        ])
+                      ]),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.05),
+                      // _buildSectionTitle('Have a talk'),
+
+                      // Divider
+                      Divider(thickness: 2.0),
+
+                      // Today's Exercises
+                      _buildSectionTitle("Upcoming Exercises"),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      if (combinedList.length == 0)
+                        Container(
+                            height: MediaQuery.of(context).size.height * 0.02),
+                      if (combinedList.length != 0)
+                        Container(
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            child: SingleChildScrollView(
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: combinedList.length,
+                                    itemBuilder: (context, index) {
+                                      var routine = combinedList[index];
+                                      return Stack(children: [
+                                        SmallRoutineCard(
+                                            routineName: routine,
+                                            ExerciseList: exerciseItems)
+                                      ]);
+                                    }))),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      // You can add your exercise list here
+
+                      // Divider
+                      Divider(thickness: 2.0),
+                      _buildSectionTitle("Latest News"),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      // Random Quote
+                      Column(
+                        children: <Widget>[
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
-                              buildFeelingEmoji('😡', 'Angry'),
-                              buildFeelingEmoji('😞', 'Sad'),
-                              buildFeelingEmoji('😐', 'Neutral'),
-                              buildFeelingEmoji('😄', 'Happy'),                              
+                              GestureDetector(
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      return SingleChildScrollView(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Text(
+                                                '${NewsData(0)[0]}',
+                                                style: TextStyle(
+                                                  fontSize: 24.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Image.network(
+                                                '${NewsData(0)[3]}', // Replace with your news image URL
+                                                fit: BoxFit.cover,
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Text(
+                                                '${NewsData(0)[1]}',
+                                                style:
+                                                    TextStyle(fontSize: 16.0),
+                                              ),
+                                              SizedBox(height: 16.0),
+                                              OutlinedButton(
+                                                onPressed: () {
+                                                  launchUrl(
+                                                      Uri.parse(NewsData(0)[4]),
+                                                      mode: LaunchMode
+                                                          .externalApplication);
+                                                },
+                                                style: OutlinedButton.styleFrom(
+                                                  primary: Colors
+                                                      .transparent, // Transparent background
+                                                  side: BorderSide(
+                                                      color: Color(
+                                                          0xFF007BFF)), // Add an outline
+                                                ),
+                                                child: Text(
+                                                  'Read More',
+                                                  style: TextStyle(
+                                                    color: Color(
+                                                        0xFF007BFF), // Text color
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: ShadedContainer(
+                                  color: NewsData(0)[3],
+                                  child: ContainerContent(
+                                    title: '${NewsData(0)[0]}',
+                                    description: '${NewsData(0)[1]}',
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                  height: MediaQuery.of(context).size.height *
+                                      0.01),
+                              GestureDetector(
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      return SingleChildScrollView(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Text(
+                                                '${NewsData(1)[0]}',
+                                                style: TextStyle(
+                                                  fontSize: 24.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Image.network(
+                                                '${NewsData(1)[3]}', // Replace with your news image URL
+                                                fit: BoxFit.cover,
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Text(
+                                                '${NewsData(1)[1]}',
+                                                style:
+                                                    TextStyle(fontSize: 16.0),
+                                              ),
+                                              SizedBox(height: 16.0),
+                                              OutlinedButton(
+                                                onPressed: () {
+                                                  launchUrl(
+                                                      Uri.parse(NewsData(1)[4]),
+                                                      mode: LaunchMode
+                                                          .externalApplication);
+                                                },
+                                                style: OutlinedButton.styleFrom(
+                                                  primary: Colors
+                                                      .transparent, // Transparent background
+                                                  side: BorderSide(
+                                                      color: Color(
+                                                          0xFF007BFF)), // Add an outline
+                                                ),
+                                                child: Text(
+                                                  'Read More',
+                                                  style: TextStyle(
+                                                    color: Color(
+                                                        0xFF007BFF), // Text color
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: ShadedContainer(
+                                  color: NewsData(1)[3],
+                                  child: ContainerContent(
+                                    title: '${NewsData(1)[0]}',
+                                    description: '${NewsData(1)[1]}',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.01),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              GestureDetector(
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      return SingleChildScrollView(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Text(
+                                                '${NewsData(2)[0]}',
+                                                style: TextStyle(
+                                                  fontSize: 24.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Image.network(
+                                                '${NewsData(2)[3]}', // Replace with your news image URL
+                                                fit: BoxFit.cover,
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Text(
+                                                '${NewsData(2)[1]}',
+                                                style:
+                                                    TextStyle(fontSize: 16.0),
+                                              ),
+                                              SizedBox(height: 16.0),
+                                              OutlinedButton(
+                                                onPressed: () {
+                                                  launchUrl(
+                                                      Uri.parse(NewsData(2)[4]),
+                                                      mode: LaunchMode
+                                                          .externalApplication);
+                                                },
+                                                style: OutlinedButton.styleFrom(
+                                                  primary: Colors
+                                                      .transparent, // Transparent background
+                                                  side: BorderSide(
+                                                      color: Color(
+                                                          0xFF007BFF)), // Add an outline
+                                                ),
+                                                child: Text(
+                                                  'Read More',
+                                                  style: TextStyle(
+                                                    color: Color(
+                                                        0xFF007BFF), // Text color
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: ShadedContainer(
+                                  color: NewsData(2)[3],
+                                  child: ContainerContent(
+                                    title: '${NewsData(2)[0]}',
+                                    description: '${NewsData(2)[1]}',
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                  height: MediaQuery.of(context).size.height *
+                                      0.01),
+                              GestureDetector(
+                                onTap: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      return SingleChildScrollView(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Text(
+                                                '${NewsData(3)[0]}',
+                                                style: TextStyle(
+                                                  fontSize: 24.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Image.network(
+                                                '${NewsData(3)[3]}', // Replace with your news image URL
+                                                fit: BoxFit.cover,
+                                              ),
+                                              SizedBox(height: 12.0),
+                                              Text(
+                                                '${NewsData(3)[1]}',
+                                                style:
+                                                    TextStyle(fontSize: 16.0),
+                                              ),
+                                              SizedBox(height: 16.0),
+                                              OutlinedButton(
+                                                onPressed: () {
+                                                  launchUrl(
+                                                      Uri.parse(NewsData(3)[4]),
+                                                      mode: LaunchMode
+                                                          .externalApplication);
+                                                },
+                                                style: OutlinedButton.styleFrom(
+                                                  primary: Colors
+                                                      .transparent, // Transparent background
+                                                  side: BorderSide(
+                                                      color: Color(
+                                                          0xFF007BFF)), // Add an outline
+                                                ),
+                                                child: Text(
+                                                  'Read More',
+                                                  style: TextStyle(
+                                                    color: Color(
+                                                        0xFF007BFF), // Text color
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: ShadedContainer(
+                                  color: NewsData(3)[3],
+                                  child: ContainerContent(
+                                    title: '${NewsData(3)[0]}',
+                                    description: '${NewsData(3)[1]}',
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ],
                       ),
-                  Divider(thickness:2.0),
-                  Container(height:MediaQuery.of(context).size.height*0.05),
-                  Row(children:[
-                    Container(height:MediaQuery.of(context).size.height*0.1, width:MediaQuery.of(context).size.width*0.05),
-                    Container(
-                      child: Image.asset('assets/Screen Shot 2023-09-29 at 7.48.08 PM.png'),  // Replace with the actual path to your screenshot image
-                    ),
-                    Container(width:MediaQuery.of(context).size.width*0.15),
-                    Column(children:[
-                      Text('Not feeling well?\nHave a talk.'),
-                      _buildTalkButton(),
-                    ])
-                  ]),
-                  Container(height:MediaQuery.of(context).size.height*0.05),
-                  // _buildSectionTitle('Have a talk'),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      Row(children: [
+                        Container(
+                            width: MediaQuery.of(context).size.width * 0.05),
+                        ElevatedButton(
+                            child: Text("View All"),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      NewsPage(totalData: article),
+                                ),
+                              );
+                            }),
+                        Container(
+                            width: MediaQuery.of(context).size.width * 0.2),
+                      ]),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      // You can add your exercise list here
 
-                  // Divider
-                  Divider(thickness:2.0),
+                      // Divider
+                      Divider(thickness: 2.0),
+                      _buildSectionTitle('Quote Of The Day'),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.025),
+                      _buildRandomQuote(),
 
-                  // Today's Exercises
-                  _buildSectionTitle("Upcoming Exercises"),
-                  Container(height:MediaQuery.of(context).size.height*0.01),
-                  if(combinedList.length==0)
-                    Container(height:MediaQuery.of(context).size.height*0.02),
-                  if(combinedList.length!=0)
-                    Container(
-                      height:MediaQuery.of(context).size.height*0.3,
-                      child: SingleChildScrollView(child:ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: combinedList.length,
-                        itemBuilder: (context, index) {
-                          var routine = combinedList[index];
-                          return Stack(children: [
-                            SmallRoutineCard(
-                                routineName: routine,
-                                ExerciseList: exerciseItems)
-                          ]
-                          );
-                        }
-                      )
-                      )
-                    ),
-                  Container(height:MediaQuery.of(context).size.height*0.01),
-                  // You can add your exercise list here
-
-                  // Divider
-                  Divider(thickness:2.0),
-                  _buildSectionTitle("Latest News"),
-                  Container(height:MediaQuery.of(context).size.height*0.01),
-                  // Random Quote
-                  Column(
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          GestureDetector(
-                            onTap:(){
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext context) {
-                                  return SingleChildScrollView(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: [
-                                          Text(
-                                            '${NewsData(0)[0]}',
-                                            style: TextStyle(
-                                              fontSize: 24.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Image.network(
-                                            '${NewsData(0)[3]}', // Replace with your news image URL
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Text(
-                                            '${NewsData(0)[1]}',
-                                            style: TextStyle(fontSize: 16.0),
-                                          ),
-                                          SizedBox(height: 16.0),
-                                          OutlinedButton(
-                                            onPressed: () {
-                                              launchUrl(Uri.parse(NewsData(0)[4]),
-                                                  mode: LaunchMode.externalApplication);
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              primary: Colors.transparent, // Transparent background
-                                              side:
-                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
-                                            ),
-                                            child: Text(
-                                              'Read More',
-                                              style: TextStyle(
-                                                color: Color(0xFF007BFF), // Text color
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child:ShadedContainer(
-                              color: NewsData(0)[3],
-                              child: ContainerContent(
-                                title: '${NewsData(0)[0]}',
-                                description: '${NewsData(0)[1]}',
-                              ),
-                            ),
-                          ),
-                          Container(height:MediaQuery.of(context).size.height*0.01),
-                          
-                          GestureDetector(
-                            onTap:(){
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext context) {
-                                  return SingleChildScrollView(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: [
-                                          Text(
-                                            '${NewsData(1)[0]}',
-                                            style: TextStyle(
-                                              fontSize: 24.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Image.network(
-                                            '${NewsData(1)[3]}', // Replace with your news image URL
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Text(
-                                            '${NewsData(1)[1]}',
-                                            style: TextStyle(fontSize: 16.0),
-                                          ),
-                                          SizedBox(height: 16.0),
-                                          OutlinedButton(
-                                            onPressed: () {
-                                              launchUrl(Uri.parse(NewsData(1)[4]),
-                                                  mode: LaunchMode.externalApplication);
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              primary: Colors.transparent, // Transparent background
-                                              side:
-                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
-                                            ),
-                                            child: Text(
-                                              'Read More',
-                                              style: TextStyle(
-                                                color: Color(0xFF007BFF), // Text color
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child:ShadedContainer(
-                              color: NewsData(1)[3],
-                              child: ContainerContent(
-                                title: '${NewsData(1)[0]}',
-                                description: '${NewsData(1)[1]}',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(height:MediaQuery.of(context).size.height*0.01),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          GestureDetector(
-                            onTap:(){
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext context) {
-                                  return SingleChildScrollView(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: [
-                                          Text(
-                                            '${NewsData(2)[0]}',
-                                            style: TextStyle(
-                                              fontSize: 24.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Image.network(
-                                            '${NewsData(2)[3]}', // Replace with your news image URL
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Text(
-                                            '${NewsData(2)[1]}',
-                                            style: TextStyle(fontSize: 16.0),
-                                          ),
-                                          SizedBox(height: 16.0),
-                                          OutlinedButton(
-                                            onPressed: () {
-                                              launchUrl(Uri.parse(NewsData(2)[4]),
-                                                  mode: LaunchMode.externalApplication);
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              primary: Colors.transparent, // Transparent background
-                                              side:
-                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
-                                            ),
-                                            child: Text(
-                                              'Read More',
-                                              style: TextStyle(
-                                                color: Color(0xFF007BFF), // Text color
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child:ShadedContainer(
-                              color: NewsData(2)[3],
-                              child: ContainerContent(
-                                title: '${NewsData(2)[0]}',
-                                description: '${NewsData(2)[1]}',
-                              ),
-                            ),
-                          ),
-                          Container(height:MediaQuery.of(context).size.height*0.01),
-                          GestureDetector(
-                            onTap:(){
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext context) {
-                                  return SingleChildScrollView(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: [
-                                          Text(
-                                            '${NewsData(3)[0]}',
-                                            style: TextStyle(
-                                              fontSize: 24.0,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Image.network(
-                                            '${NewsData(3)[3]}', // Replace with your news image URL
-                                            fit: BoxFit.cover,
-                                          ),
-                                          SizedBox(height: 12.0),
-                                          Text(
-                                            '${NewsData(3)[1]}',
-                                            style: TextStyle(fontSize: 16.0),
-                                          ),
-                                          SizedBox(height: 16.0),
-                                          OutlinedButton(
-                                            onPressed: () {
-                                              launchUrl(Uri.parse(NewsData(3)[4]),
-                                                  mode: LaunchMode.externalApplication);
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              primary: Colors.transparent, // Transparent background
-                                              side:
-                                                  BorderSide(color: Color(0xFF007BFF)), // Add an outline
-                                            ),
-                                            child: Text(
-                                              'Read More',
-                                              style: TextStyle(
-                                                color: Color(0xFF007BFF), // Text color
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child:ShadedContainer(
-                              color: NewsData(3)[3],
-                              child: ContainerContent(
-                                title: '${NewsData(3)[0]}',
-                                description: '${NewsData(3)[1]}',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Divider
+                      Divider(thickness: 2.0),
                     ],
                   ),
-                  Container(height:MediaQuery.of(context).size.height*0.01),
-                  Row(
-                    children:[
-                      Container(width:MediaQuery.of(context).size.width*0.05),
-                      ElevatedButton(
-                        child:Text("View All"), 
-                        onPressed:(){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => NewsPage(totalData:article),
-                              ),
-                            );
-                        }
-                      ),
-                      Container(width:MediaQuery.of(context).size.width*0.2),
-                    ]
-                  ),
-                  Container(height:MediaQuery.of(context).size.height*0.01),
-                  // You can add your exercise list here
-
-                  // Divider
-                  Divider(thickness:2.0),
-                  _buildSectionTitle('Quote Of The Day'),
-                  Container(height:MediaQuery.of(context).size.height*0.025),
-                  _buildRandomQuote(),
-
-                  // Divider
-                  Divider(thickness:2.0),
-                ],
-              ),
-            );
-          }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      )
-    );
+                );
+              }
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }));
   }
+
   Widget buildFeelingEmoji(String emoji, String feeling) {
     return GestureDetector(
       onTap: () async {
-        setState((){
+        setState(() {
           selectedFeeling.value = feeling;
         });
-        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'$value2': selectedFeeling.value});
+        await FirebaseFirestore.instance
+            .collection('audios')
+            .doc('$user')
+            .update({'$value2': selectedFeeling.value});
       },
       child: Container(
         margin: EdgeInsets.all(10),
@@ -3337,6 +3415,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   Widget _buildSectionTitle(String text) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -3349,25 +3428,23 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  Widget _buildProfile(){
+
+  Widget _buildProfile() {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.person_rounded, color:Colors.blue),
+      icon: Icon(Icons.person_rounded, color: Colors.blue),
       onSelected: (value) async {
         // Handle item selection here
         if (value == 'Logout') {
-          SharedPreferences pref =
-              await SharedPreferences.getInstance();
+          SharedPreferences pref = await SharedPreferences.getInstance();
           pref.setString("email", "");
           FirebaseAuth.instance.signOut();
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => LoginPage()));        
+              context, MaterialPageRoute(builder: (context) => LoginPage()));
         } else if (value == 'About') {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProfilePage(user:user),
+              builder: (context) => ProfilePage(user: user),
             ),
           );
         }
@@ -3387,14 +3464,15 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+
   Widget _buildTitle(String text) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0,16.0,5.0,16.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 5.0, 16.0),
       child: Text(
         text,
         style: GoogleFonts.raleway(
           fontSize: 24, // Adjust the font size as needed
-           // Adjust the font weight as needed
+          // Adjust the font weight as needed
           // You can also set other text styles here
         ),
       ),
@@ -3422,13 +3500,13 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MyHomePage(widgets:[
-                HomePage(user:"$user"),
-                ChatScreen(user:"$user"),
+              builder: (context) => MyHomePage(widgets: [
+                HomePage(user: "$user"),
+                ChatScreen(user: "$user"),
                 Planner(user: "$user"),
                 PostPage(currentUser: "$user"),
                 // ProfilePage(user:"$email"),
-              ], selectedIndex:1),
+              ], selectedIndex: 1),
             ),
           );
         },
@@ -3451,6 +3529,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
 class ShadedContainer extends StatelessWidget {
   final color;
   final Widget child;
@@ -3460,29 +3539,30 @@ class ShadedContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width:MediaQuery.of(context).size.width*0.45,
-        height:MediaQuery.of(context).size.height*0.2,
-        padding: EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(
-              Colors.white.withOpacity(0.45), // Adjust the opacity value as needed
-              BlendMode.srcOver,
-            ),
-            image: NetworkImage("$color"),
-            fit: BoxFit.cover,
+      width: MediaQuery.of(context).size.width * 0.45,
+      height: MediaQuery.of(context).size.height * 0.2,
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          colorFilter: ColorFilter.mode(
+            Colors.white
+                .withOpacity(0.45), // Adjust the opacity value as needed
+            BlendMode.srcOver,
           ),
-          borderRadius: BorderRadius.circular(10.0),
-          // boxShadow: [
-          //   BoxShadow(
-          //     spreadRadius: 2,
-          //     blurRadius: 5,
-          //     offset: Offset(0, 3),
-          //   ),
-          // ],
+          image: NetworkImage("$color"),
+          fit: BoxFit.cover,
         ),
-        child: child,
-      );
+        borderRadius: BorderRadius.circular(10.0),
+        // boxShadow: [
+        //   BoxShadow(
+        //     spreadRadius: 2,
+        //     blurRadius: 5,
+        //     offset: Offset(0, 3),
+        //   ),
+        // ],
+      ),
+      child: child,
+    );
   }
 }
 
@@ -3501,10 +3581,11 @@ class ContainerContent extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10), // Rounded corners
           ),
-          child:Text(
+          child: Text(
             title.length > 9
-              ? title.substring(0, 9) + "..." // Truncate text if it exceeds the character limit
-              : title,
+                ? title.substring(0, 9) +
+                    "..." // Truncate text if it exceeds the character limit
+                : title,
             style: TextStyle(
               fontSize: 20,
               shadows: [
@@ -3521,15 +3602,16 @@ class ContainerContent extends StatelessWidget {
         ),
         SizedBox(height: 8.0),
         Container(
-          height:MediaQuery.of(context).size.height*0.11,
-          width:MediaQuery.of(context).size.width*0.3,
+          height: MediaQuery.of(context).size.height * 0.11,
+          width: MediaQuery.of(context).size.width * 0.3,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10), // Rounded corners
           ),
-          child:Text(
+          child: Text(
             description.length > 35
-              ? description.substring(0, 35) + "..." // Truncate text if it exceeds the character limit
-              : description,
+                ? description.substring(0, 35) +
+                    "..." // Truncate text if it exceeds the character limit
+                : description,
             style: TextStyle(
               shadows: [
                 // Shadow(
@@ -3552,120 +3634,120 @@ class JournalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:Column(
-          children: [
-            Container(height:MediaQuery.of(context).size.height*0.07),
-            Align(
-              alignment: Alignment.topLeft,
-              child:Padding(
-                padding: const EdgeInsets.fromLTRB(16.0,16.0,5.0,0.0),
-                child: Text(
-                  DateFormat.MMMMd().format(DateTime.now()),
-                  style: GoogleFonts.raleway(
-                    fontSize: 33, // Adjust the font size as needed
-                    // Adjust the font weight as needed
-                    // You can also set other text styles here
-                  ),
+      body: Column(
+        children: [
+          Container(height: MediaQuery.of(context).size.height * 0.07),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 5.0, 0.0),
+              child: Text(
+                DateFormat.MMMMd().format(DateTime.now()),
+                style: GoogleFonts.raleway(
+                  fontSize: 33, // Adjust the font size as needed
+                  // Adjust the font weight as needed
+                  // You can also set other text styles here
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.topLeft,
-              child:Padding(
-                padding: const EdgeInsets.fromLTRB(16.0,0.0,0.0,0.0),
-                child: Text(
-                  DateFormat.y().format(DateTime.now()),
-                  style: GoogleFonts.raleway(
-                    fontSize: 33, // Adjust the font size as needed
-                    // Adjust the font weight as needed
-                    // You can also set other text styles here
-                  ),
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 0.0, 0.0),
+              child: Text(
+                DateFormat.y().format(DateTime.now()),
+                style: GoogleFonts.raleway(
+                  fontSize: 33, // Adjust the font size as needed
+                  // Adjust the font weight as needed
+                  // You can also set other text styles here
                 ),
               ),
             ),
-            Container(height:MediaQuery.of(context).size.height*0.05),
-            Container(
-              height:MediaQuery.of(context).size.height*0.15,
-              width:MediaQuery.of(context).size.width*0.9,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.blue, // Border color
-                  width: 2.0, // Border width
-                ),
-                borderRadius: BorderRadius.circular(20), // Curved edges
+          ),
+          Container(height: MediaQuery.of(context).size.height * 0.05),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.15,
+            width: MediaQuery.of(context).size.width * 0.9,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.blue, // Border color
+                width: 2.0, // Border width
               ),
+              borderRadius: BorderRadius.circular(20), // Curved edges
             ),
-            Container(height:MediaQuery.of(context).size.height*0.05),
-            Align(
-              alignment: Alignment.topLeft,
-              child:Padding(
-                padding: const EdgeInsets.fromLTRB(16.0,16.0,5.0,0.0),
-                child: Row(
-                  children:[
-                    Text(
-                      "Latest Entries",
-                      style: GoogleFonts.raleway(
-                        fontSize: 25, // Adjust the font size as needed
-                        // Adjust the font weight as needed
-                        // You can also set other text styles here
-                      ),
+          ),
+          Container(height: MediaQuery.of(context).size.height * 0.05),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 5.0, 0.0),
+                child: Row(children: [
+                  Text(
+                    "Latest Entries",
+                    style: GoogleFonts.raleway(
+                      fontSize: 25, // Adjust the font size as needed
+                      // Adjust the font weight as needed
+                      // You can also set other text styles here
                     ),
-                    Container(width:MediaQuery.of(context).size.width*0.25),
-                    Text(
-                      "View All",
-                      style: GoogleFonts.raleway(
-                          fontSize: 15, // Adjust the font size as needed
-                          // Adjust the font weight as needed
-                          // You can also set other text styles here
-                      ),
-                    )
-                  ]
-                )
-              ),
-            ),
-            Container(
-              height:MediaQuery.of(context).size.height*0.275,
-              width:MediaQuery.of(context).size.width*0.9,
-              child:ListView.builder(
-                itemCount: 5, // Number of items
-                itemBuilder: (context, index) {
-                  return Container(
-                    child: Text('Item $index'),
-                  );
-                },
-              ),
-            ),
-            Container(
-              width:MediaQuery.of(context).size.width*0.9,
-              child:ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddEntryPage(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(16.0), // Adjust padding as needed.
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0), // Adjust radius as needed.
                   ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.add,), // Replace with your desired icon.
-                    SizedBox(height: 8.0),
-                    Text(
-                      'Create Entry',
-                      style: TextStyle(fontSize: 14.0),
+                  Container(width: MediaQuery.of(context).size.width * 0.25),
+                  Text(
+                    "View All",
+                    style: GoogleFonts.raleway(
+                      fontSize: 15, // Adjust the font size as needed
+                      // Adjust the font weight as needed
+                      // You can also set other text styles here
                     ),
-                  ],
+                  )
+                ])),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.275,
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: ListView.builder(
+              itemCount: 5, // Number of items
+              itemBuilder: (context, index) {
+                return Container(
+                  child: Text('Item $index'),
+                );
+              },
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEntryPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(16.0), // Adjust padding as needed.
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(20.0), // Adjust radius as needed.
                 ),
               ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.add,
+                  ), // Replace with your desired icon.
+                  SizedBox(height: 8.0),
+                  Text(
+                    'Create Entry',
+                    style: TextStyle(fontSize: 14.0),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -3684,152 +3766,129 @@ class _AddEntryPageState extends State<AddEntryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child:Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(height:MediaQuery.of(context).size.height*0.02),
-              Row(children:[
-                GestureDetector(
-                  onTap:(){
-                    Navigator.of(context).pop();
-                  },
-                  child:Container(
-                    child:Center(child:Text("Go Back", style:TextStyle(color:Colors.white))),
-                    height:MediaQuery.of(context).size.height*0.04,
-                    width:MediaQuery.of(context).size.width*0.18,
-                    decoration: BoxDecoration(
-                      color:Colors.blue,
-                      borderRadius: BorderRadius.circular(10), // Curved edges
-                    ),
+        body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Row(children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  child: Center(
+                      child: Text("Go Back",
+                          style: TextStyle(color: Colors.white))),
+                  height: MediaQuery.of(context).size.height * 0.04,
+                  width: MediaQuery.of(context).size.width * 0.18,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(10), // Curved edges
                   ),
                 ),
-                Container(width:MediaQuery.of(context).size.width*0.14),
-                Text(
-                  "Write An Entry",
-                  style: GoogleFonts.raleway(
-                      fontSize: 15, 
-                      // Adjust the font size as needed
-                      // Adjust the font weight as needed
-                      // You can also set other text styles here
+              ),
+              Container(width: MediaQuery.of(context).size.width * 0.14),
+              Text(
+                "Write An Entry",
+                style: GoogleFonts.raleway(
+                  fontSize: 15,
+                  // Adjust the font size as needed
+                  // Adjust the font weight as needed
+                  // You can also set other text styles here
+                ),
+              ),
+              Container(width: MediaQuery.of(context).size.width * 0.14),
+              GestureDetector(
+                child: Container(
+                  child: Center(
+                      child: Text("Publish",
+                          style: TextStyle(color: Colors.white))),
+                  height: MediaQuery.of(context).size.height * 0.04,
+                  width: MediaQuery.of(context).size.width * 0.17,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(10), // Curved edges
                   ),
                 ),
-                Container(width:MediaQuery.of(context).size.width*0.14),
-                GestureDetector(
-                  child:Container(
-                    child:Center(child:Text("Publish", style:TextStyle(color:Colors.white))),
-                    height:MediaQuery.of(context).size.height*0.04,
-                    width:MediaQuery.of(context).size.width*0.17,
-                    decoration: BoxDecoration(
-                      color:Colors.blue,
-                      borderRadius: BorderRadius.circular(10), // Curved edges
-                    ),
-                  ),
-                ),
-              ]),
-              Container(height:MediaQuery.of(context).size.height*0.02),
-              Text("Title"),
-              TextField(
+              ),
+            ]),
+            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Text("Title"),
+            TextField(
+              onChanged: (value) {
+                setState(() {
+                  title = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Name Your Entry',
+              ),
+            ),
+            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Text("Description"),
+            Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height *
+                  0.52, // Set the width to expand across the screen
+              child: TextField(
                 onChanged: (value) {
                   setState(() {
-                    title = value;
+                    description = value;
                   });
                 },
+                maxLines: null, // Set maxLines to null for multiple lines
                 decoration: InputDecoration(
-                  hintText: 'Name Your Entry',
-                ),
-              ),
-              Container(height:MediaQuery.of(context).size.height*0.02),
-              Text("Description"),
-              Container(
-                width: double.infinity,
-                height:MediaQuery.of(context).size.height*0.52, // Set the width to expand across the screen 
-                child: TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      description = value;
-                    });
-                  },
-                  maxLines: null, // Set maxLines to null for multiple lines
-                  decoration: InputDecoration(
-                    hintText: 'Write about your day...',
-                    border: InputBorder.none, // Remove the default border
-                    focusedBorder: UnderlineInputBorder( // Add an underline decoration
-                      borderSide: BorderSide(
-                        color: Colors.blue, // Define the underline color
-                        width: 2.0, // Define the underline width
-                      ),
+                  hintText: 'Write about your day...',
+                  border: InputBorder.none, // Remove the default border
+                  focusedBorder: UnderlineInputBorder(
+                    // Add an underline decoration
+                    borderSide: BorderSide(
+                      color: Colors.blue, // Define the underline color
+                      width: 2.0, // Define the underline width
                     ),
                   ),
                 ),
               ),
-              Container(height: MediaQuery.of(context).size.height*0.1,),
-              Divider(
-                thickness: 1.0, 
-                color:Colors.black
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap:(){
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => TakePictureScreen(),
-                          //   ),
-                          // );
-                        },
-                        child:Container(
-                          width: MediaQuery.of(context).size.width*0.4, // Adjust width as needed
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(20.0), // Curved edges
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.camera,
-                                color: Colors.white, // Make the icon white
-                              ),
-                              SizedBox(height: 8.0), // Adjust spacing as needed
-                              Text(
-                                'Add Image',
-                                style: TextStyle(
-                                  color: Colors.white, // Text color
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16.0), // Adjust spacing between buttons
-                    ],
-                  ),
-                  Container(width: MediaQuery.of(context).size.width*0.1,),
-                  Column(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width*0.4, // Adjust width as needed
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height * 0.1,
+            ),
+            Divider(thickness: 1.0, color: Colors.black),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => TakePictureScreen(),
+                        //   ),
+                        // );
+                      },
+                      child: Container(
+                        width: MediaQuery.of(context).size.width *
+                            0.4, // Adjust width as needed
                         padding: EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
                           color: Colors.blue,
-                          borderRadius: BorderRadius.circular(20.0), // Curved edges
+                          borderRadius:
+                              BorderRadius.circular(20.0), // Curved edges
                         ),
                         child: Column(
                           children: [
                             Icon(
-                              Icons.mic,
+                              Icons.camera,
                               color: Colors.white, // Make the icon white
                             ),
                             SizedBox(height: 8.0), // Adjust spacing as needed
                             Text(
-                              'Add Audio',
+                              'Add Image',
                               style: TextStyle(
                                 color: Colors.white, // Text color
                               ),
@@ -3837,16 +3896,49 @@ class _AddEntryPageState extends State<AddEntryPage> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 16.0), // Adjust spacing between buttons
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+                    ),
+                    SizedBox(height: 16.0), // Adjust spacing between buttons
+                  ],
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.1,
+                ),
+                Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width *
+                          0.4, // Adjust width as needed
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius:
+                            BorderRadius.circular(20.0), // Curved edges
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.mic,
+                            color: Colors.white, // Make the icon white
+                          ),
+                          SizedBox(height: 8.0), // Adjust spacing as needed
+                          Text(
+                            'Add Audio',
+                            style: TextStyle(
+                              color: Colors.white, // Text color
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16.0), // Adjust spacing between buttons
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
-      )
-    );
+      ),
+    ));
   }
 }
 
@@ -3863,7 +3955,6 @@ class JournalEntry {
     this.imageFilePath = '',
   });
 }
-
 
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
@@ -3885,13 +3976,13 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
     _controller = CameraController(widget.camera, ResolutionPreset.medium);
     _initializeControllerFuture = _controller.initialize();
   }
-  
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
+
   Future<void> _captureImage() async {
     try {
       final image = await _controller.takePicture();
@@ -3921,14 +4012,14 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
       return Stack(
         children: [
           Container(
-            height:MediaQuery.of(context).size.height,
-            width:MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
             child: Image.file(_capturedImage), // Display the captured image
           ),
           Positioned(
-            bottom:20,
-            left:MediaQuery.of(context).size.width*0.35,
-            child:Row(
+            bottom: 20,
+            left: MediaQuery.of(context).size.width * 0.35,
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
@@ -3945,8 +4036,7 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
           )
         ],
       );
-    }
-    else{
+    } else {
       return FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
@@ -3954,17 +4044,17 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
             return Stack(
               children: [
                 Container(
-                  width:MediaQuery.of(context).size.width,
-                  height:MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
                   child: AspectRatio(
                     aspectRatio: _controller.value.aspectRatio,
                     child: CameraPreview(_controller),
                   ),
                 ),
                 Positioned(
-                  bottom:20,
-                  left:MediaQuery.of(context).size.width*0.5,
-                  child:FloatingActionButton(
+                  bottom: 20,
+                  left: MediaQuery.of(context).size.width * 0.5,
+                  child: FloatingActionButton(
                     // Provide an onPressed callback.
                     onPressed: _captureImage,
                     child: const Icon(Icons.camera_alt),
