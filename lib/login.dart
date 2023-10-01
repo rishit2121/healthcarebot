@@ -187,7 +187,7 @@ class CongratulationsPage extends StatelessWidget {
                         HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:"${myControllerEmail.text}"),
                         Planner(user:"${myControllerEmail.text}"),
-                        MoodPage(),
+                        JournalPage(),
                         // PostPage(currentUser:"${myControllerEmail.text}"),
                         // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
@@ -504,7 +504,7 @@ class _LoginPageState extends State<LoginPage> {
                         HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:'${myControllerEmail.text}'),
                         Planner(user:"${myControllerEmail.text}"),
-                        MoodPage()
+                        JournalPage()
                         // PostPage(currentUser:"${myControllerEmail.text}"),
                         // ProfilePage(user:"${myControllerEmail.text}"),
                       ];

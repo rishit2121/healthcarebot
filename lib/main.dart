@@ -784,7 +784,7 @@ Future<void> main() async {
     HomePage(user:"$email"),
     ChatScreen(user:"$email"),
     Planner(user: "$email"),
-    MoodPage(),
+    JournalPage(),
     // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
   ];
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
@@ -3544,158 +3544,313 @@ class ContainerContent extends StatelessWidget {
   }
 }
 
-class MoodEntry {
-  final DateTime date;
-  final String mood;
-
-  MoodEntry(this.date, this.mood);
+class JournalPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body:Column(
+          children: [
+            Container(height:MediaQuery.of(context).size.height*0.07),
+            Align(
+              alignment: Alignment.topLeft,
+              child:Padding(
+                padding: const EdgeInsets.fromLTRB(16.0,16.0,5.0,0.0),
+                child: Text(
+                  DateFormat.MMMMd().format(DateTime.now()),
+                  style: GoogleFonts.raleway(
+                    fontSize: 33, // Adjust the font size as needed
+                    // Adjust the font weight as needed
+                    // You can also set other text styles here
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topLeft,
+              child:Padding(
+                padding: const EdgeInsets.fromLTRB(16.0,0.0,0.0,0.0),
+                child: Text(
+                  DateFormat.y().format(DateTime.now()),
+                  style: GoogleFonts.raleway(
+                    fontSize: 33, // Adjust the font size as needed
+                    // Adjust the font weight as needed
+                    // You can also set other text styles here
+                  ),
+                ),
+              ),
+            ),
+            Container(height:MediaQuery.of(context).size.height*0.05),
+            Container(
+              height:MediaQuery.of(context).size.height*0.15,
+              width:MediaQuery.of(context).size.width*0.9,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.blue, // Border color
+                  width: 2.0, // Border width
+                ),
+                borderRadius: BorderRadius.circular(20), // Curved edges
+              ),
+            ),
+            Container(height:MediaQuery.of(context).size.height*0.05),
+            Align(
+              alignment: Alignment.topLeft,
+              child:Padding(
+                padding: const EdgeInsets.fromLTRB(16.0,16.0,5.0,0.0),
+                child: Row(
+                  children:[
+                    Text(
+                      "Latest Entries",
+                      style: GoogleFonts.raleway(
+                        fontSize: 25, // Adjust the font size as needed
+                        // Adjust the font weight as needed
+                        // You can also set other text styles here
+                      ),
+                    ),
+                    Container(width:MediaQuery.of(context).size.width*0.25),
+                    Text(
+                      "View All",
+                      style: GoogleFonts.raleway(
+                          fontSize: 15, // Adjust the font size as needed
+                          // Adjust the font weight as needed
+                          // You can also set other text styles here
+                      ),
+                    )
+                  ]
+                )
+              ),
+            ),
+            Container(
+              height:MediaQuery.of(context).size.height*0.275,
+              width:MediaQuery.of(context).size.width*0.9,
+              child:ListView.builder(
+                itemCount: 5, // Number of items
+                itemBuilder: (context, index) {
+                  return Container(
+                    child: Text('Item $index'),
+                  );
+                },
+              ),
+            ),
+            Container(
+              width:MediaQuery.of(context).size.width*0.9,
+              child:ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddEntryPage(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.all(16.0), // Adjust padding as needed.
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0), // Adjust radius as needed.
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.add,), // Replace with your desired icon.
+                    SizedBox(height: 8.0),
+                    Text(
+                      'Create Entry',
+                      style: TextStyle(fontSize: 14.0),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+    );
+  }
 }
 
-class MoodPage extends StatefulWidget {
+class AddEntryPage extends StatefulWidget {
   @override
-  _MoodPageState createState() => _MoodPageState();
+  _AddEntryPageState createState() => _AddEntryPageState();
 }
 
-class _MoodPageState extends State<MoodPage> {
-  List<MoodEntry> moodEntries = [];
-
-  @override
-  void initState() {
-    super.initState();
-    // Fetch mood data when the page initializes
-    fetchMoodData();
-  }
-
-  Future<void> fetchMoodData() async {
-    try {
-      final DocumentSnapshot docSnapshot = await FirebaseFirestore.instance.collection('audios').doc('rishit.agrawal121@gmail.com').get();
-      final Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
-
-      final moodList = data.entries.where((entry) {
-        // Filter entries to include only those with mood values (e.g., 'Angry', 'Happy', etc.)
-        return ['Angry', 'Happy', 'Neutral'].contains(entry.value.toString());
-      }).map((entry) {
-        final date = DateTime.parse(entry.key);
-        final mood = entry.value.toString();
-        return MoodEntry(date, mood);
-      }).toList();
-
-      setState(() {
-        moodEntries = moodList;
-      });
-    } catch (e) {
-      print('Error fetching mood data: $e');
-    }
-  }
+class _AddEntryPageState extends State<AddEntryPage> {
+  String title = '';
+  String description = '';
+  String audioFilePath = '';
+  String imageFilePath = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Mood Tracker'),
-      ),
-      body: Container(
-        child:Column(
-          children:[
-            moodEntries.isNotEmpty
-              ? Column(children:[
-                Container(height:MediaQuery.of(context).size.height*0.025),
-                Text(
-                  "Your Mood Over Time",
-                  style: GoogleFonts.raleway(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child:Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(height:MediaQuery.of(context).size.height*0.02),
+              Row(children:[
+                GestureDetector(
+                  onTap:(){
+                    Navigator.of(context).pop();
+                  },
+                  child:Container(
+                    child:Center(child:Text("Go Back")),
+                    height:MediaQuery.of(context).size.height*0.04,
+                    width:MediaQuery.of(context).size.width*0.18,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.blue, // Border color
+                        width: 2.0, // Border width
+                      ),
+                      borderRadius: BorderRadius.circular(10), // Curved edges
+                    ),
                   ),
                 ),
-                Container(height:MediaQuery.of(context).size.height*0.025),
-                Row(children:[
-                  Container(width:MediaQuery.of(context).size.width*0.05),
-                  MoodGraph(moodEntries)
-                ]),
-              ])
-              : Text('No mood data available.'),
-          ]
-        ),
-      ),
-    );
-  }
-}
-
-class MoodGraph extends StatelessWidget {
-  final List<MoodEntry> moodEntries;
-
-  MoodGraph(this.moodEntries);
-
-  @override
-  Widget build(BuildContext context) {
-    moodEntries.sort((a, b) => a.date.compareTo(b.date));
-    return Container(
-      height:MediaQuery.of(context).size.width*0.7,
-      width:MediaQuery.of(context).size.width*0.95,
-      child:LineChart(
-        LineChartData(
-          gridData: FlGridData(show: false),
-          titlesData: FlTitlesData(
-            topTitles: SideTitles(showTitles: false),
-            leftTitles: SideTitles(
-              showTitles: false,
-              reservedSize: 40,
-              getTitles: (value) {
-                if (value == 1) return 'Angry';
-                if (value == 3) return 'Neutral';
-                if (value == 5) return 'Happy';
-                return ''; // Hide other labels
-              },
-            ),
-            bottomTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 22,
-              getTitles: (value) {
-                final int index = value.toInt();
-                if (index >= 0 && index < moodEntries.length) {
-                  final date = moodEntries[index].date;
-                  return '${date.day}/${date.month}';
-                }
-                return '';
-              },
-              // Calculate the interval to ensure evenly spaced labels
-              interval: (moodEntries.length - 1) / 4,
-            ),
+                Container(width:MediaQuery.of(context).size.width*0.14),
+                Text(
+                  "Write An Entry",
+                  style: GoogleFonts.raleway(
+                      fontSize: 15, // Adjust the font size as needed
+                      // Adjust the font weight as needed
+                      // You can also set other text styles here
+                  ),
+                ),
+                Container(width:MediaQuery.of(context).size.width*0.14),
+                GestureDetector(
+                  child:Container(
+                    child:Center(child:Text("Publish")),
+                    height:MediaQuery.of(context).size.height*0.04,
+                    width:MediaQuery.of(context).size.width*0.17,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.blue, // Border color
+                        width: 2.0, // Border width
+                      ),
+                      borderRadius: BorderRadius.circular(10), // Curved edges
+                    ),
+                  ),
+                ),
+              ]),
+              Container(height:MediaQuery.of(context).size.height*0.02),
+              Text("Title"),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    title = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Name Your Entry',
+                ),
+              ),
+              Container(height:MediaQuery.of(context).size.height*0.02),
+              Text("Description"),
+              Container(
+                width: double.infinity,
+                height:MediaQuery.of(context).size.height*0.52, // Set the width to expand across the screen 
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      description = value;
+                    });
+                  },
+                  maxLines: null, // Set maxLines to null for multiple lines
+                  decoration: InputDecoration(
+                    hintText: 'Write about your day...',
+                    border: InputBorder.none, // Remove the default border
+                    focusedBorder: UnderlineInputBorder( // Add an underline decoration
+                      borderSide: BorderSide(
+                        color: Colors.blue, // Define the underline color
+                        width: 2.0, // Define the underline width
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(height: MediaQuery.of(context).size.height*0.1,),
+              Divider(
+                thickness: 1.0, 
+                color:Colors.black
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.4, // Adjust width as needed
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(20.0), // Curved edges
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.camera,
+                              color: Colors.white, // Make the icon white
+                            ),
+                            SizedBox(height: 8.0), // Adjust spacing as needed
+                            Text(
+                              'Add Image',
+                              style: TextStyle(
+                                color: Colors.white, // Text color
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.0), // Adjust spacing between buttons
+                    ],
+                  ),
+                  Container(width: MediaQuery.of(context).size.width*0.1,),
+                  Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.4, // Adjust width as needed
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(20.0), // Curved edges
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.mic,
+                              color: Colors.white, // Make the icon white
+                            ),
+                            SizedBox(height: 8.0), // Adjust spacing as needed
+                            Text(
+                              'Add Audio',
+                              style: TextStyle(
+                                color: Colors.white, // Text color
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.0), // Adjust spacing between buttons
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-          borderData: FlBorderData(
-            show: true,
-            border: Border.all(color: const Color(0xff37434d), width: 1),
-          ),
-          minX: 0,
-          maxX: moodEntries.length.toDouble() - 1,
-          minY: 0,
-          maxY: 5, // Customize the y-axis range as needed
-          lineBarsData: [
-            LineChartBarData(
-              spots: moodEntries.asMap().entries.map((entry) {
-                return FlSpot(entry.key.toDouble(), moodValueToDouble(entry.value.mood));
-              }).toList(),
-              colors: [Colors.blue], // Customize the line color
-              dotData: FlDotData(show: true),
-              belowBarData: BarAreaData(show: false),
-            ),
-          ],
         ),
       )
     );
   }
-
-  double moodValueToDouble(String mood) {
-    switch (mood.toLowerCase()) {
-      case 'happy':
-        return 5.0;
-      case 'neutral':
-        return 3.0;
-      case 'angry':
-        return 1.0;
-      default:
-        return 3.0; // Default to a neutral mood
-    }
-  }
 }
 
+class JournalEntry {
+  final String title;
+  final String description;
+  final String audioFilePath;
+  final String imageFilePath;
+
+  JournalEntry({
+    required this.title,
+    required this.description,
+    this.audioFilePath = '',
+    this.imageFilePath = '',
+  });
+}
