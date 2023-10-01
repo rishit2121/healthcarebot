@@ -19,7 +19,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'ad_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:camera/camera.dart';
+import 'dart:io';
 
 Future<List> fetchExercises() async {
   final url = Uri.parse(
@@ -773,6 +774,8 @@ class Message {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  final firstCamera = cameras.first;
   await MobileAds.instance.initialize();
   stripe.Stripe.publishableKey =
       "pk_test_51NmiBSGseqFBdXVsWiAI51HJYB3Z34pDouqmxbo9jIHvkIK1VYNEYaUVojJGJmOqA7LrXAF7OPje6LlE8GFdko4Y00Y1VYrnvu";
@@ -783,7 +786,8 @@ Future<void> main() async {
   final List<Widget> _widgetOptions = [
     HomePage(user:"$email"),
     ChatScreen(user:"$email"),
-    Planner(user: "$email"),
+    TakePictureScreen(camera:firstCamera),
+    // Planner(user: "$email"),
     JournalPage(),
     // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
   ];
@@ -3693,14 +3697,11 @@ class _AddEntryPageState extends State<AddEntryPage> {
                     Navigator.of(context).pop();
                   },
                   child:Container(
-                    child:Center(child:Text("Go Back")),
+                    child:Center(child:Text("Go Back", style:TextStyle(color:Colors.white))),
                     height:MediaQuery.of(context).size.height*0.04,
                     width:MediaQuery.of(context).size.width*0.18,
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.blue, // Border color
-                        width: 2.0, // Border width
-                      ),
+                      color:Colors.blue,
                       borderRadius: BorderRadius.circular(10), // Curved edges
                     ),
                   ),
@@ -3709,7 +3710,8 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 Text(
                   "Write An Entry",
                   style: GoogleFonts.raleway(
-                      fontSize: 15, // Adjust the font size as needed
+                      fontSize: 15, 
+                      // Adjust the font size as needed
                       // Adjust the font weight as needed
                       // You can also set other text styles here
                   ),
@@ -3717,14 +3719,11 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 Container(width:MediaQuery.of(context).size.width*0.14),
                 GestureDetector(
                   child:Container(
-                    child:Center(child:Text("Publish")),
+                    child:Center(child:Text("Publish", style:TextStyle(color:Colors.white))),
                     height:MediaQuery.of(context).size.height*0.04,
                     width:MediaQuery.of(context).size.width*0.17,
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.blue, // Border color
-                        width: 2.0, // Border width
-                      ),
+                      color:Colors.blue,
                       borderRadius: BorderRadius.circular(10), // Curved edges
                     ),
                   ),
@@ -3776,27 +3775,37 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 children: [
                   Column(
                     children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width*0.4, // Adjust width as needed
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(20.0), // Curved edges
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.camera,
-                              color: Colors.white, // Make the icon white
-                            ),
-                            SizedBox(height: 8.0), // Adjust spacing as needed
-                            Text(
-                              'Add Image',
-                              style: TextStyle(
-                                color: Colors.white, // Text color
+                      GestureDetector(
+                        onTap:(){
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => TakePictureScreen(),
+                          //   ),
+                          // );
+                        },
+                        child:Container(
+                          width: MediaQuery.of(context).size.width*0.4, // Adjust width as needed
+                          padding: EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(20.0), // Curved edges
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.camera,
+                                color: Colors.white, // Make the icon white
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 8.0), // Adjust spacing as needed
+                              Text(
+                                'Add Image',
+                                style: TextStyle(
+                                  color: Colors.white, // Text color
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 16.0), // Adjust spacing between buttons
@@ -3853,4 +3862,123 @@ class JournalEntry {
     this.audioFilePath = '',
     this.imageFilePath = '',
   });
+}
+
+
+class TakePictureScreen extends StatefulWidget {
+  final CameraDescription camera;
+
+  TakePictureScreen({required this.camera});
+
+  @override
+  _TakePictureScreenState createState() => _TakePictureScreenState();
+}
+
+class _TakePictureScreenState extends State<TakePictureScreen> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+  late File _capturedImage;
+  bool _showCapturedImage = false;
+  @override
+  void initState() {
+    super.initState();
+    _controller = CameraController(widget.camera, ResolutionPreset.medium);
+    _initializeControllerFuture = _controller.initialize();
+  }
+  
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  Future<void> _captureImage() async {
+    try {
+      final image = await _controller.takePicture();
+      setState(() {
+        _capturedImage = File(image.path);
+        _showCapturedImage = true;
+      });
+    } catch (e) {
+      print('Error taking picture: $e');
+    }
+  }
+
+  void _proceedWithImage() {
+    // Add your logic for proceeding with the captured image here.
+    // This can include saving the image or navigating to a new screen.
+  }
+
+  void _cancelImageCapture() {
+    setState(() {
+      _showCapturedImage = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showCapturedImage) {
+      return Stack(
+        children: [
+          Container(
+            height:MediaQuery.of(context).size.height,
+            width:MediaQuery.of(context).size.width,
+            child: Image.file(_capturedImage), // Display the captured image
+          ),
+          Positioned(
+            bottom:20,
+            left:MediaQuery.of(context).size.width*0.35,
+            child:Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _proceedWithImage,
+                  child: Text('Proceed'),
+                ),
+                SizedBox(width: 16.0),
+                ElevatedButton(
+                  onPressed: _cancelImageCapture,
+                  child: Text('Cancel'),
+                ),
+              ],
+            ),
+          )
+        ],
+      );
+    }
+    else{
+      return FutureBuilder<void>(
+        future: _initializeControllerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return Stack(
+              children: [
+                Container(
+                  width:MediaQuery.of(context).size.width,
+                  height:MediaQuery.of(context).size.height,
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: CameraPreview(_controller),
+                  ),
+                ),
+                Positioned(
+                  bottom:20,
+                  left:MediaQuery.of(context).size.width*0.5,
+                  child:FloatingActionButton(
+                    // Provide an onPressed callback.
+                    onPressed: _captureImage,
+                    child: const Icon(Icons.camera_alt),
+                  ),
+                )
+              ],
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      );
+    }
+  }
 }

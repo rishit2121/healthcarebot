@@ -65,6 +65,7 @@ dependencies:
   google_mobile_ads: ^1.2.0
   google_fonts: ^4.0.1
   fl_chart: ^0.40.0 
+  camera: ^0.10.0+4
 
 dev_dependencies:
   flutter_test:
