@@ -28,20 +28,15 @@ class _ChatDialogState extends State<ChatDialog> {
   final data;
   List messages = [
     Message(
-        sender: 'Bot',
-        text:
-            'Hi, my name is Jack and I am your personal fitness assistant. How can I help yout today?',
+        sender: 'Eva',
+        text: 'What are you looking to work on today?',
         list: []),
   ];
   TextEditingController dateInputController = TextEditingController();
   var chat_history =
-      '\nJack: Hello, my name is Jack, and I am your fitness assistant. How may I help you today? <END_OF_TURN>';
+      '\nEva: What are you looking to work on today? <END_OF_TURN>';
   var chat_history2 = [
-    {
-      "role": "assistant",
-      "content":
-          "Hello, my name is Jack, and I am your fitness assistant. How may I help you today?"
-    },
+    {"role": "assistant", "content": "What are you looking to work on today?"},
   ];
   TextEditingController _textEditingController = TextEditingController();
   int currentDoctorIndex = 0;
@@ -91,7 +86,7 @@ class _ChatDialogState extends State<ChatDialog> {
     sentence = sentence.replaceAll('\n', '');
     Message botMessage = Message(sender: 'Bot', text: sentence, list: []);
     chat_history =
-        chat_history + "\n" + "Jack: " + botMessage.text + " <END_OF_TURN>";
+        chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
     chat_history2 = chat_history2 +
         [
           {"role": "assistant", "content": botMessage.text}

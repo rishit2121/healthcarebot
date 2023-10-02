@@ -176,7 +176,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           Icon(Icons.account_circle,
-              color: Color(0xFF007BFF), size: 30), // Profile Icon
+              color: Color(0xFF0F4FA6), size: 30), // Profile Icon
           SizedBox(width: 8.0), // Add some space between the icon and title
           Text(
             title,
@@ -1949,9 +1949,9 @@ class _MyHomePageState extends State<MyHomePage> {
         showSelectedLabels: false,
         showUnselectedLabels: false,
         backgroundColor: Colors.white,
-        selectedLabelStyle: TextStyle(color: Color(0xFF007BFF)),
+        selectedLabelStyle: TextStyle(color: Color(0xFF0F4FA6)),
         unselectedLabelStyle: TextStyle(color: Colors.black),
-        selectedItemColor: Color(0xFF007BFF),
+        selectedItemColor: Color(0xFF0F4FA6),
         unselectedItemColor: Colors.black,
         items: [
           BottomNavigationBarItem(
@@ -2967,51 +2967,66 @@ class _HomePageState extends State<HomePage> {
                       if (data[value2] == null)
                         Container(
                             height: MediaQuery.of(context).size.height * 0.02),
-                      if (data[value2] == null)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'How are you feeling today?',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                buildFeelingEmoji('😡', 'Angry'),
-                                buildFeelingEmoji('😞', 'Sad'),
-                                buildFeelingEmoji('😐', 'Neutral'),
-                                buildFeelingEmoji('😄', 'Happy'),
-                              ],
-                            ),
-                          ],
-                        ),
-                      Divider(thickness: 2.0),
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.05),
-                      Row(children: [
-                        Container(
-                            height: MediaQuery.of(context).size.height * 0.1,
-                            width: MediaQuery.of(context).size.width * 0.05),
-                        Container(
-                          child: Image.asset(
-                              'assets/Screen Shot 2023-09-29 at 7.48.08 PM.png'), // Replace with the actual path to your screenshot image
-                        ),
-                        Container(
-                            width: MediaQuery.of(context).size.width * 0.15),
-                        Column(children: [
-                          Text('Not feeling well?\nHave a talk.'),
-                          _buildTalkButton(),
-                        ])
-                      ]),
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.05),
-                      // _buildSectionTitle('Have a talk'),
 
-                      // Divider
-                      Divider(thickness: 2.0),
-
+                      if (data[value2] == null) Divider(thickness: 2.0),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                              width: 370,
+                              height: 155.06,
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    left: 0,
+                                    top: 0,
+                                    child: Container(
+                                      width: 370,
+                                      height: 155.06,
+                                      decoration: ShapeDecoration(
+                                        color: Color(0xFF0F4FA6),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(13),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 22,
+                                    top: 40,
+                                    child: SizedBox(
+                                      width: 135,
+                                      height: 40,
+                                      child: Text(
+                                        'Not Feeling It?\nHave a Talk.',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontFamily: 'Raleway',
+                                          fontWeight: FontWeight.w700,
+                                          height: 0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 22.14,
+                                    top: 80.89,
+                                    child: _buildTalkButton(),
+                                  ),
+                                  Positioned(
+                                    left: 180,
+                                    top: 6.94,
+                                    child: Container(
+                                        width: 158.54,
+                                        height: 141.18,
+                                        child: Image.asset(
+                                            'assets/images/homepagehealth.png')),
+                                  ),
+                                ],
+                              ))),
                       // Today's Exercises
                       _buildSectionTitle("Upcoming Exercises"),
                       Container(
@@ -3040,7 +3055,7 @@ class _HomePageState extends State<HomePage> {
                       // You can add your exercise list here
 
                       // Divider
-                      Divider(thickness: 2.0),
+
                       _buildSectionTitle("Latest News"),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
@@ -3431,7 +3446,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildProfile() {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.person_rounded, color: Colors.blue),
+      icon: Icon(Icons.person_rounded, color: Color(0xFF0F4FA6)),
       onSelected: (value) async {
         // Handle item selection here
         if (value == 'Logout') {
@@ -3493,9 +3508,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTalkButton() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ElevatedButton(
+    return Row(children: [
+      Text(
+        'Talk to Eva',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontFamily: 'Raleway',
+          height: 0,
+        ),
+      ),
+      IconButton(
+        icon: const Icon(Icons.arrow_circle_right_outlined),
+        color: Colors.white,
         onPressed: () {
           Navigator.push(
             context,
@@ -3510,9 +3535,8 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         },
-        child: Text('Start'),
-      ),
-    );
+      )
+    ]);
   }
 
   Widget _buildRandomQuote() {
