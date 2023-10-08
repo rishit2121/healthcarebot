@@ -2974,16 +2974,16 @@ class _HomePageState extends State<HomePage> {
                       Align(
                           alignment: Alignment.center,
                           child: Container(
-                              width: 370,
-                              height: 155.06,
+                              width: MediaQuery.of(context).size.width*0.95,
+                              height: MediaQuery.of(context).size.height*0.2,
                               child: Stack(
                                 children: [
                                   Positioned(
                                     left: 0,
                                     top: 0,
                                     child: Container(
-                                      width: 370,
-                                      height: 155.06,
+                                      width: MediaQuery.of(context).size.width*0.95,
+                                      height: MediaQuery.of(context).size.height*0.2,
                                       decoration: ShapeDecoration(
                                         color: Color(0xFF0F4FA6),
                                         shape: RoundedRectangleBorder(
@@ -2994,11 +2994,11 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Positioned(
-                                    left: 22,
-                                    top: 40,
+                                    left: MediaQuery.of(context).size.width*0.06,
+                                    top: MediaQuery.of(context).size.height*0.055,
                                     child: SizedBox(
-                                      width: 135,
-                                      height: 40,
+                                      width: MediaQuery.of(context).size.width*0.4,
+                                      height: MediaQuery.of(context).size.height*0.1,
                                       child: Text(
                                         'Not Feeling It?\nHave a Talk.',
                                         style: TextStyle(
@@ -3012,16 +3012,16 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Positioned(
-                                    left: 22.14,
-                                    top: 80.89,
+                                    left: MediaQuery.of(context).size.width*0.06,
+                                    top: MediaQuery.of(context).size.height*0.115,
                                     child: _buildTalkButton(),
                                   ),
                                   Positioned(
-                                    left: 180,
-                                    top: 6.94,
+                                    left: MediaQuery.of(context).size.width*0.52,
+                                    top: MediaQuery.of(context).size.height*0.001,
                                     child: Container(
-                                        width: 158.54,
-                                        height: 141.18,
+                                        width: MediaQuery.of(context).size.width*0.4,
+                                        height: MediaQuery.of(context).size.height*0.22,
                                         child: Image.asset(
                                             'assets/images/homepagehealth.png')),
                                   ),
@@ -3055,322 +3055,13 @@ class _HomePageState extends State<HomePage> {
                       // You can add your exercise list here
 
                       // Divider
-
-                      _buildSectionTitle("Latest News"),
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.01),
-                      // Random Quote
-                      Column(
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (BuildContext context) {
-                                      return SingleChildScrollView(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Text(
-                                                '${NewsData(0)[0]}',
-                                                style: TextStyle(
-                                                  fontSize: 24.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Image.network(
-                                                '${NewsData(0)[3]}', // Replace with your news image URL
-                                                fit: BoxFit.cover,
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Text(
-                                                '${NewsData(0)[1]}',
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                              ),
-                                              SizedBox(height: 16.0),
-                                              OutlinedButton(
-                                                onPressed: () {
-                                                  launchUrl(
-                                                      Uri.parse(NewsData(0)[4]),
-                                                      mode: LaunchMode
-                                                          .externalApplication);
-                                                },
-                                                style: OutlinedButton.styleFrom(
-                                                  primary: Colors
-                                                      .transparent, // Transparent background
-                                                  side: BorderSide(
-                                                      color: Color(
-                                                          0xFF007BFF)), // Add an outline
-                                                ),
-                                                child: Text(
-                                                  'Read More',
-                                                  style: TextStyle(
-                                                    color: Color(
-                                                        0xFF007BFF), // Text color
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                child: ShadedContainer(
-                                  color: NewsData(0)[3],
-                                  child: ContainerContent(
-                                    title: '${NewsData(0)[0]}',
-                                    description: '${NewsData(0)[1]}',
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.01),
-                              GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (BuildContext context) {
-                                      return SingleChildScrollView(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Text(
-                                                '${NewsData(1)[0]}',
-                                                style: TextStyle(
-                                                  fontSize: 24.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Image.network(
-                                                '${NewsData(1)[3]}', // Replace with your news image URL
-                                                fit: BoxFit.cover,
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Text(
-                                                '${NewsData(1)[1]}',
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                              ),
-                                              SizedBox(height: 16.0),
-                                              OutlinedButton(
-                                                onPressed: () {
-                                                  launchUrl(
-                                                      Uri.parse(NewsData(1)[4]),
-                                                      mode: LaunchMode
-                                                          .externalApplication);
-                                                },
-                                                style: OutlinedButton.styleFrom(
-                                                  primary: Colors
-                                                      .transparent, // Transparent background
-                                                  side: BorderSide(
-                                                      color: Color(
-                                                          0xFF007BFF)), // Add an outline
-                                                ),
-                                                child: Text(
-                                                  'Read More',
-                                                  style: TextStyle(
-                                                    color: Color(
-                                                        0xFF007BFF), // Text color
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                child: ShadedContainer(
-                                  color: NewsData(1)[3],
-                                  child: ContainerContent(
-                                    title: '${NewsData(1)[0]}',
-                                    description: '${NewsData(1)[1]}',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                              height:
-                                  MediaQuery.of(context).size.height * 0.01),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (BuildContext context) {
-                                      return SingleChildScrollView(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Text(
-                                                '${NewsData(2)[0]}',
-                                                style: TextStyle(
-                                                  fontSize: 24.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Image.network(
-                                                '${NewsData(2)[3]}', // Replace with your news image URL
-                                                fit: BoxFit.cover,
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Text(
-                                                '${NewsData(2)[1]}',
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                              ),
-                                              SizedBox(height: 16.0),
-                                              OutlinedButton(
-                                                onPressed: () {
-                                                  launchUrl(
-                                                      Uri.parse(NewsData(2)[4]),
-                                                      mode: LaunchMode
-                                                          .externalApplication);
-                                                },
-                                                style: OutlinedButton.styleFrom(
-                                                  primary: Colors
-                                                      .transparent, // Transparent background
-                                                  side: BorderSide(
-                                                      color: Color(
-                                                          0xFF007BFF)), // Add an outline
-                                                ),
-                                                child: Text(
-                                                  'Read More',
-                                                  style: TextStyle(
-                                                    color: Color(
-                                                        0xFF007BFF), // Text color
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                child: ShadedContainer(
-                                  color: NewsData(2)[3],
-                                  child: ContainerContent(
-                                    title: '${NewsData(2)[0]}',
-                                    description: '${NewsData(2)[1]}',
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.01),
-                              GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (BuildContext context) {
-                                      return SingleChildScrollView(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Text(
-                                                '${NewsData(3)[0]}',
-                                                style: TextStyle(
-                                                  fontSize: 24.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Image.network(
-                                                '${NewsData(3)[3]}', // Replace with your news image URL
-                                                fit: BoxFit.cover,
-                                              ),
-                                              SizedBox(height: 12.0),
-                                              Text(
-                                                '${NewsData(3)[1]}',
-                                                style:
-                                                    TextStyle(fontSize: 16.0),
-                                              ),
-                                              SizedBox(height: 16.0),
-                                              OutlinedButton(
-                                                onPressed: () {
-                                                  launchUrl(
-                                                      Uri.parse(NewsData(3)[4]),
-                                                      mode: LaunchMode
-                                                          .externalApplication);
-                                                },
-                                                style: OutlinedButton.styleFrom(
-                                                  primary: Colors
-                                                      .transparent, // Transparent background
-                                                  side: BorderSide(
-                                                      color: Color(
-                                                          0xFF007BFF)), // Add an outline
-                                                ),
-                                                child: Text(
-                                                  'Read More',
-                                                  style: TextStyle(
-                                                    color: Color(
-                                                        0xFF007BFF), // Text color
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                child: ShadedContainer(
-                                  color: NewsData(3)[3],
-                                  child: ContainerContent(
-                                    title: '${NewsData(3)[0]}',
-                                    description: '${NewsData(3)[1]}',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.01),
-                      Row(children: [
-                        Container(
-                            width: MediaQuery.of(context).size.width * 0.05),
-                        ElevatedButton(
+                      Row(
+                        children:[
+                          _buildSectionTitle("Latest News"),
+                          Container(width:MediaQuery.of(context).size.width*0.25),
+                          GestureDetector(
                             child: Text("View All"),
-                            onPressed: () {
+                            onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -3379,9 +3070,49 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             }),
-                        Container(
-                            width: MediaQuery.of(context).size.width * 0.2),
-                      ]),
+                        ]
+                      ),
+
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      Container(
+                        height:MediaQuery.of(context).size.height * 0.4, 
+                        width:MediaQuery.of(context).size.width,
+                        child:ListView(
+                          scrollDirection: Axis.horizontal, // Horizontal scrolling
+                          children: <Widget>[
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(title:NewsData(0)[0],image:NewsData(0)[3], description: NewsData(0)[1], url:NewsData(0)[4]),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(title:NewsData(1)[0],image:NewsData(1)[3], description: NewsData(1)[1], url:NewsData(1)[4]),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(title:NewsData(2)[0],image:NewsData(2)[3], description: NewsData(2)[1], url:NewsData(2)[4]),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(title:NewsData(3)[0],image:NewsData(3)[3], description: NewsData(3)[1], url:NewsData(3)[4]),
+                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            // Add more items as needed
+                          ],
+                        ),
+                      ),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.01),
+                      // Row(children: [
+                      //   Container(
+                      //       width: MediaQuery.of(context).size.width * 0.05),
+                      //   ElevatedButton(
+                      //       child: Text("View All"),
+                      //       onPressed: () {
+                      //         Navigator.push(
+                      //           context,
+                      //           MaterialPageRoute(
+                      //             builder: (context) =>
+                      //                 NewsPage(totalData: article),
+                      //           ),
+                      //         );
+                      //       }),
+                      //   Container(
+                      //       width: MediaQuery.of(context).size.width * 0.2),
+                      // ]),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
                       // You can add your exercise list here
@@ -3432,13 +3163,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildSectionTitle(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(
-        text,
-        style: GoogleFonts.raleway(
-          fontSize: 26,
-          fontWeight: FontWeight.bold,
+    return Container(
+      width:MediaQuery.of(context).size.width*0.55,
+      child:Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          text,
+          style: GoogleFonts.raleway(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -3553,6 +3287,147 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+class NewsItemWidget extends StatelessWidget {
+  final String image;
+  final String title;
+  final String description;
+  final String url;
+  NewsItemWidget({
+    required this.image,
+    required this.title,
+    required this.description,
+    required this.url,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.3,
+      width: MediaQuery.of(context).size.width * 0.5,
+      decoration: BoxDecoration(
+        color: Color(0xFF0F4FA6),
+        border: Border.all(
+          color: Colors.black, // Border color
+          width: 2.0, // Border width
+        ),
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.06,
+            padding: EdgeInsets.only(left: 16.0),
+            child: Text(
+              title.length > 15
+                  ? title.substring(0, 15) + "..."
+                  : title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.16, // Adjusted height
+            width: MediaQuery.of(context).size.height * 0.16,
+            padding: EdgeInsets.only(left: 16.0),
+            child: Image.network(
+              "$image",
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.05,
+            padding: EdgeInsets.only(left: 16.0),
+            child: Text(
+              description.length > 60
+                  ? description.substring(0, 60) + "..."
+                  : description,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          GestureDetector(
+            onTap:(){
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (BuildContext context) {
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            '${title}',
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 12.0),
+                          Image.network(
+                            '${image}', // Replace with your news image URL
+                            fit: BoxFit.cover,
+                          ),
+                          SizedBox(height: 12.0),
+                          Text(
+                            '${description}',
+                            style:
+                                TextStyle(fontSize: 16.0),
+                          ),
+                          SizedBox(height: 16.0),
+                          OutlinedButton(
+                            onPressed: () {
+                              launchUrl(
+                                  Uri.parse(url),
+                                  mode: LaunchMode
+                                      .externalApplication);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              primary: Colors
+                                  .transparent, // Transparent background
+                              side: BorderSide(
+                                  color: Color(
+                                      0xFF007BFF)), // Add an outline
+                            ),
+                            child: Text(
+                              'Read More',
+                              style: TextStyle(
+                                color: Color(
+                                    0xFF007BFF), // Text color
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            child:Container(
+              alignment: Alignment.center,
+              height: MediaQuery.of(context).size.height * 0.063,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Text("Learn More"),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
 
 class ShadedContainer extends StatelessWidget {
   final color;
