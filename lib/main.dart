@@ -818,13 +818,13 @@ class SmallRoutineCard extends StatelessWidget {
       Row(
         children: [
           Container(
-            width: MediaQuery.of(context).size.width * 0.02,
+            width: MediaQuery.of(context).size.width * 0.04,
           ),
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.015,
             height: MediaQuery.of(context).size.height * 0.09,
             child: const DecoratedBox(
-              decoration: const BoxDecoration(color: Colors.blue),
+              decoration: const BoxDecoration(color: Color(0xFF0F4FA6)),
             ),
           ),
           Container(
@@ -835,7 +835,7 @@ class SmallRoutineCard extends StatelessWidget {
               DateFormat('d')
                   .format(DateTime.parse("${routineName['date']} 00:00:00")),
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -843,7 +843,7 @@ class SmallRoutineCard extends StatelessWidget {
               DateFormat('MMMM')
                   .format(DateTime.parse("${routineName['date']} 00:00:00")),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: Colors.grey,
               ),
             ),
@@ -3041,6 +3041,8 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ],
                               ))),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.02),
                       // Today's Exercises
                       _buildSectionTitle("Upcoming Exercises"),
                       Container(
