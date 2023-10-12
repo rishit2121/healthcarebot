@@ -793,7 +793,7 @@ Future<void> main() async {
   final List<Widget> _widgetOptions = [
     HomePage(user: "$email"),
     ChatScreen(user: "$email"),
-    TakePictureScreen(camera: firstCamera),
+    Planner(user: "$email"),
     // Planner(user: "$email"),
     JournalPage(),
     // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
@@ -819,13 +819,13 @@ class SmallRoutineCard extends StatelessWidget {
       Row(
         children: [
           Container(
-            width: MediaQuery.of(context).size.width * 0.02,
+            width: MediaQuery.of(context).size.width * 0.04,
           ),
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.015,
             height: MediaQuery.of(context).size.height * 0.09,
             child: const DecoratedBox(
-              decoration: const BoxDecoration(color: Colors.blue),
+              decoration: const BoxDecoration(color: Color(0xFF0F4FA6)),
             ),
           ),
           Container(
@@ -836,7 +836,7 @@ class SmallRoutineCard extends StatelessWidget {
               DateFormat('d')
                   .format(DateTime.parse("${routineName['date']} 00:00:00")),
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -844,7 +844,7 @@ class SmallRoutineCard extends StatelessWidget {
               DateFormat('MMMM')
                   .format(DateTime.parse("${routineName['date']} 00:00:00")),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: Colors.grey,
               ),
             ),
@@ -2967,24 +2967,25 @@ class _HomePageState extends State<HomePage> {
                         Divider(thickness: 1.0, color: Colors.black),
                       if (data[value2] == null)
                         Container(
-                            height: MediaQuery.of(context).size.height * 0.02),
-
-                      if (data[value2] == null) Divider(thickness: 2.0),
+                            height: MediaQuery.of(context).size.height * 0.01),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
                       Align(
                           alignment: Alignment.center,
                           child: Container(
-                              width: MediaQuery.of(context).size.width*0.95,
-                              height: MediaQuery.of(context).size.height*0.2,
+                              width: MediaQuery.of(context).size.width * 0.95,
+                              height: MediaQuery.of(context).size.height * 0.2,
                               child: Stack(
                                 children: [
                                   Positioned(
                                     left: 0,
                                     top: 0,
                                     child: Container(
-                                      width: MediaQuery.of(context).size.width*0.95,
-                                      height: MediaQuery.of(context).size.height*0.2,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.95,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.2,
                                       decoration: ShapeDecoration(
                                         color: Color(0xFF0F4FA6),
                                         shape: RoundedRectangleBorder(
@@ -2995,11 +2996,16 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Positioned(
-                                    left: MediaQuery.of(context).size.width*0.06,
-                                    top: MediaQuery.of(context).size.height*0.055,
+                                    left: MediaQuery.of(context).size.width *
+                                        0.06,
+                                    top: MediaQuery.of(context).size.height *
+                                        0.055,
                                     child: SizedBox(
-                                      width: MediaQuery.of(context).size.width*0.4,
-                                      height: MediaQuery.of(context).size.height*0.1,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.4,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.1,
                                       child: Text(
                                         'Not Feeling It?\nHave a Talk.',
                                         style: TextStyle(
@@ -3013,21 +3019,31 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                   Positioned(
-                                    left: MediaQuery.of(context).size.width*0.06,
-                                    top: MediaQuery.of(context).size.height*0.115,
+                                    left: MediaQuery.of(context).size.width *
+                                        0.06,
+                                    top: MediaQuery.of(context).size.height *
+                                        0.115,
                                     child: _buildTalkButton(),
                                   ),
                                   Positioned(
-                                    left: MediaQuery.of(context).size.width*0.52,
-                                    top: MediaQuery.of(context).size.height*0.001,
+                                    left: MediaQuery.of(context).size.width *
+                                        0.52,
+                                    top: MediaQuery.of(context).size.height *
+                                        0.001,
                                     child: Container(
-                                        width: MediaQuery.of(context).size.width*0.4,
-                                        height: MediaQuery.of(context).size.height*0.22,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.4,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.2,
                                         child: Image.asset(
                                             'assets/images/homepagehealth.png')),
                                   ),
                                 ],
                               ))),
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.02),
                       // Today's Exercises
                       _buildSectionTitle("Upcoming Exercises"),
                       Container(
@@ -3056,11 +3072,11 @@ class _HomePageState extends State<HomePage> {
                       // You can add your exercise list here
 
                       // Divider
-                      Row(
-                        children:[
-                          _buildSectionTitle("Latest News"),
-                          Container(width:MediaQuery.of(context).size.width*0.25),
-                          GestureDetector(
+                      Row(children: [
+                        _buildSectionTitle("Latest News"),
+                        Container(
+                            width: MediaQuery.of(context).size.width * 0.25),
+                        GestureDetector(
                             child: Text("View All"),
                             onTap: () {
                               Navigator.push(
@@ -3071,26 +3087,52 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                             }),
-                        ]
-                      ),
+                      ]),
 
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
                       Container(
-                        height:MediaQuery.of(context).size.height * 0.4, 
-                        width:MediaQuery.of(context).size.width,
-                        child:ListView(
-                          scrollDirection: Axis.horizontal, // Horizontal scrolling
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        width: MediaQuery.of(context).size.width,
+                        child: ListView(
+                          scrollDirection:
+                              Axis.horizontal, // Horizontal scrolling
                           children: <Widget>[
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(title:NewsData(0)[0],image:NewsData(0)[3], description: NewsData(0)[1], url:NewsData(0)[4]),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(title:NewsData(1)[0],image:NewsData(1)[3], description: NewsData(1)[1], url:NewsData(1)[4]),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(title:NewsData(2)[0],image:NewsData(2)[3], description: NewsData(2)[1], url:NewsData(2)[4]),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(title:NewsData(3)[0],image:NewsData(3)[3], description: NewsData(3)[1], url:NewsData(3)[4]),
-                            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(
+                                title: NewsData(0)[0],
+                                image: NewsData(0)[3],
+                                description: NewsData(0)[1],
+                                url: NewsData(0)[4]),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(
+                                title: NewsData(1)[0],
+                                image: NewsData(1)[3],
+                                description: NewsData(1)[1],
+                                url: NewsData(1)[4]),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(
+                                title: NewsData(2)[0],
+                                image: NewsData(2)[3],
+                                description: NewsData(2)[1],
+                                url: NewsData(2)[4]),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.03),
+                            NewsItemWidget(
+                                title: NewsData(3)[0],
+                                image: NewsData(3)[3],
+                                description: NewsData(3)[1],
+                                url: NewsData(3)[4]),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width * 0.03),
                             // Add more items as needed
                           ],
                         ),
@@ -3118,8 +3160,6 @@ class _HomePageState extends State<HomePage> {
                           height: MediaQuery.of(context).size.height * 0.01),
                       // You can add your exercise list here
 
-                      // Divider
-                      Divider(thickness: 2.0),
                       _buildSectionTitle('Quote Of The Day'),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.025),
@@ -3165,8 +3205,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSectionTitle(String text) {
     return Container(
-      width:MediaQuery.of(context).size.width*0.55,
-      child:Padding(
+      width: MediaQuery.of(context).size.width * 0.55,
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
           text,
@@ -3313,122 +3353,114 @@ class NewsItemWidget extends StatelessWidget {
           width: 2.0, // Border width
         ),
       ),
-      child: Column(
-        children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.06,
-            padding: EdgeInsets.only(left: 16.0),
-            child: Text(
-              title.length > 15
-                  ? title.substring(0, 15) + "..."
-                  : title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+      child: Center(
+        child: Column(
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            Container(
+              height: MediaQuery.of(context).size.height * 0.06,
+              child: Text(
+                title.length > 15 ? title.substring(0, 15) + "..." : title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.16, // Adjusted height
-            width: MediaQuery.of(context).size.height * 0.16,
-            padding: EdgeInsets.only(left: 16.0),
-            child: Image.network(
-              "$image",
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          Container(
-            height: MediaQuery.of(context).size.height * 0.05,
-            padding: EdgeInsets.only(left: 16.0),
-            child: Text(
-              description.length > 60
-                  ? description.substring(0, 60) + "..."
-                  : description,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
+            Container(
+              height:
+                  MediaQuery.of(context).size.height * 0.16, // Adjusted height
+              width: MediaQuery.of(context).size.height * 0.16,
+              child: Image.network(
+                "$image",
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-          GestureDetector(
-            onTap:(){
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (BuildContext context) {
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            '${title}',
-                            style: TextStyle(
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 12.0),
-                          Image.network(
-                            '${image}', // Replace with your news image URL
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(height: 12.0),
-                          Text(
-                            '${description}',
-                            style:
-                                TextStyle(fontSize: 16.0),
-                          ),
-                          SizedBox(height: 16.0),
-                          OutlinedButton(
-                            onPressed: () {
-                              launchUrl(
-                                  Uri.parse(url),
-                                  mode: LaunchMode
-                                      .externalApplication);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              primary: Colors
-                                  .transparent, // Transparent background
-                              side: BorderSide(
-                                  color: Color(
-                                      0xFF007BFF)), // Add an outline
-                            ),
-                            child: Text(
-                              'Read More',
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            Container(
+              height: MediaQuery.of(context).size.height * 0.05,
+              padding: EdgeInsets.only(left: 16.0),
+              child: Text(
+                description.length > 60
+                    ? description.substring(0, 60) + "..."
+                    : description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              '${title}',
                               style: TextStyle(
-                                color: Color(
-                                    0xFF007BFF), // Text color
+                                fontSize: 24.0,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 12.0),
+                            Image.network(
+                              '${image}', // Replace with your news image URL
+                              fit: BoxFit.cover,
+                            ),
+                            SizedBox(height: 12.0),
+                            Text(
+                              '${description}',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            SizedBox(height: 16.0),
+                            OutlinedButton(
+                              onPressed: () {
+                                launchUrl(Uri.parse(url),
+                                    mode: LaunchMode.externalApplication);
+                              },
+                              style: OutlinedButton.styleFrom(
+                                primary: Colors
+                                    .transparent, // Transparent background
+                                side: BorderSide(
+                                    color: Color(0xFF007BFF)), // Add an outline
+                              ),
+                              child: Text(
+                                'Read More',
+                                style: TextStyle(
+                                  color: Color(0xFF007BFF), // Text color
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
-            child:Container(
-              alignment: Alignment.center,
-              height: MediaQuery.of(context).size.height * 0.063,
-              decoration: BoxDecoration(color: Colors.white),
-              child: Text("Learn More"),
-            ),
-          )
-        ],
+                    );
+                  },
+                );
+              },
+              child: Container(
+                alignment: Alignment.center,
+                height: MediaQuery.of(context).size.height * 0.063,
+                decoration: BoxDecoration(color: Colors.white),
+                child: Text("Learn More"),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 }
-
 
 class ShadedContainer extends StatelessWidget {
   final color;
