@@ -21,6 +21,7 @@ import 'ad_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
+import 'package:calendar_timeline/calendar_timeline.dart';
 
 Future<List> fetchExercises() async {
   final url = Uri.parse(
@@ -3661,6 +3662,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
   String description = '';
   String audioFilePath = '';
   String imageFilePath = '';
+  int selectedContainerIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -3671,7 +3673,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Container(height: MediaQuery.of(context).size.height * 0.04),
             Row(children: [
               GestureDetector(
                 onTap: () {
@@ -3679,12 +3681,10 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 },
                 child: Container(
                   child: Center(
-                      child: Text("Go Back",
-                          style: TextStyle(color: Colors.white))),
+                      child: Icon(color:Color(0xFF0F4FA6), Icons.arrow_back_rounded)),
                   height: MediaQuery.of(context).size.height * 0.04,
                   width: MediaQuery.of(context).size.width * 0.18,
                   decoration: BoxDecoration(
-                    color: Colors.blue,
                     borderRadius: BorderRadius.circular(10), // Curved edges
                   ),
                 ),
@@ -3703,18 +3703,68 @@ class _AddEntryPageState extends State<AddEntryPage> {
               GestureDetector(
                 child: Container(
                   child: Center(
-                      child: Text("Publish",
-                          style: TextStyle(color: Colors.white))),
+                      child: Text("Finish",
+                          style: TextStyle(color: Color(0xFF0F4FA6)))),
                   height: MediaQuery.of(context).size.height * 0.04,
                   width: MediaQuery.of(context).size.width * 0.17,
                   decoration: BoxDecoration(
-                    color: Colors.blue,
                     borderRadius: BorderRadius.circular(10), // Curved edges
                   ),
                 ),
               ),
             ]),
-            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Container(height: MediaQuery.of(context).size.height * 0.04),
+            Text("Select a Date:"),
+            Container(height:MediaQuery.of(context).size.height*0.02),
+            CalendarTimeline(
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2015, 1, 1),
+              lastDate: DateTime(2025, 12, 31),
+              onDateSelected: (date) => print(date),
+              leftMargin: 20,
+              monthColor: Colors.blueGrey,
+              dayColor: Colors.teal[200],
+              activeDayColor: Colors.white,
+              activeBackgroundDayColor: Color(0xFF0F4FA6),
+              dotsColor: Colors.white,
+              locale: 'en_ISO',
+            ),
+            Container(height:MediaQuery.of(context).size.height*0.03),
+            Text("Type"),
+            Container(height:MediaQuery.of(context).size.height*0.01),
+            Container(
+              width:MediaQuery.of(context).size.width,
+              height:MediaQuery.of(context).size.height*0.1,
+              child:ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 2, // Number of containers
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedContainerIndex = index;
+                      });
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width*0.4, 
+                      height: MediaQuery.of(context).size.height*0.07, // Adjust the width as needed
+                      margin: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: selectedContainerIndex == index ? Color(0xFF0F4FA6) : Colors.black,
+                          width: selectedContainerIndex == index ? 2.5 : 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: index == 0 ? Text("Journal Entry", style:TextStyle(color:Colors.black)) : Text("To-do", style:TextStyle(color:Colors.black)),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
             Text("Title"),
             TextField(
               onChanged: (value) {
@@ -3723,15 +3773,17 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 });
               },
               decoration: InputDecoration(
+                border: InputBorder.none,
                 hintText: 'Name Your Entry',
               ),
             ),
             Container(height: MediaQuery.of(context).size.height * 0.02),
             Text("Description"),
+            Container(height:MediaQuery.of(context).size.height*0.01),
             Container(
               width: double.infinity,
               height: MediaQuery.of(context).size.height *
-                  0.52, // Set the width to expand across the screen
+                  0.32, // Set the width to expand across the screen
               child: TextField(
                 onChanged: (value) {
                   setState(() {
@@ -3740,99 +3792,10 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 },
                 maxLines: null, // Set maxLines to null for multiple lines
                 decoration: InputDecoration(
+                  border: OutlineInputBorder(),
                   hintText: 'Write about your day...',
-                  border: InputBorder.none, // Remove the default border
-                  focusedBorder: UnderlineInputBorder(
-                    // Add an underline decoration
-                    borderSide: BorderSide(
-                      color: Colors.blue, // Define the underline color
-                      width: 2.0, // Define the underline width
-                    ),
-                  ),
                 ),
               ),
-            ),
-            Container(
-              height: MediaQuery.of(context).size.height * 0.1,
-            ),
-            Divider(thickness: 1.0, color: Colors.black),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => TakePictureScreen(),
-                        //   ),
-                        // );
-                      },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.4, // Adjust width as needed
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius:
-                              BorderRadius.circular(20.0), // Curved edges
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.camera,
-                              color: Colors.white, // Make the icon white
-                            ),
-                            SizedBox(height: 8.0), // Adjust spacing as needed
-                            Text(
-                              'Add Image',
-                              style: TextStyle(
-                                color: Colors.white, // Text color
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16.0), // Adjust spacing between buttons
-                  ],
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.1,
-                ),
-                Column(
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width *
-                          0.4, // Adjust width as needed
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius:
-                            BorderRadius.circular(20.0), // Curved edges
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.mic,
-                            color: Colors.white, // Make the icon white
-                          ),
-                          SizedBox(height: 8.0), // Adjust spacing as needed
-                          Text(
-                            'Add Audio',
-                            style: TextStyle(
-                              color: Colors.white, // Text color
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16.0), // Adjust spacing between buttons
-                  ],
-                ),
-              ],
             ),
           ],
         ),

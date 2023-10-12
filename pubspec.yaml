@@ -66,6 +66,7 @@ dependencies:
   google_fonts: ^4.0.1
   fl_chart: ^0.40.0 
   camera: ^0.10.0+4
+  calendar_timeline: ^1.1.2
 
 dev_dependencies:
   flutter_test:
