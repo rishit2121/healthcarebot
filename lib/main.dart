@@ -3718,7 +3718,7 @@ class JournalPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AddEntryPage(journalList:journalList),
+                            builder: (context) => AddEntryPage(journalList:journalList, user:user),
                           ),
                         );
                       },
@@ -3757,15 +3757,17 @@ class JournalPage extends StatelessWidget {
 
 
 class AddEntryPage extends StatefulWidget {
-  const AddEntryPage({super.key, required this.journalList});
+  const AddEntryPage({super.key, required this.journalList, required this.user});
   final journalList;
+  final user;
   @override
-  _AddEntryPageState createState() => _AddEntryPageState(journalList:journalList);
+  _AddEntryPageState createState() => _AddEntryPageState(journalList:journalList, user:user);
 }
 
 class _AddEntryPageState extends State<AddEntryPage> {
-  _AddEntryPageState({required this.journalList}) : super();
+  _AddEntryPageState({required this.journalList, required this.user}) : super();
   var journalList;
+  var user;
   String title = 'Journal Entry';
   String description = 'No description provided';
   String audioFilePath = '';
@@ -3814,7 +3816,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
               GestureDetector(
                 onTap:() async {
                   journalList.add({'date':'$dateControl', 'title':title, 'description':description, 'type':type});
-                  await FirebaseFirestore.instance.collection('audios').doc('rishit.agrawal121@gmail.com').update({'journal': journalList});
+                  await FirebaseFirestore.instance.collection('audios').doc('$user').update({'journal': journalList});
                   Navigator.pop(context);
                   setState((){});
                 },
