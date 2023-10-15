@@ -187,7 +187,7 @@ class CongratulationsPage extends StatelessWidget {
                         HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:"${myControllerEmail.text}"),
                         Planner(user:"${myControllerEmail.text}"),
-                        JournalPage(),
+                        JournalPage(user:"${myControllerEmail.text}"),
                         // PostPage(currentUser:"${myControllerEmail.text}"),
                         // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
@@ -504,7 +504,7 @@ class _LoginPageState extends State<LoginPage> {
                         HomePage(user:"${myControllerEmail.text}"),
                         ChatScreen(user:'${myControllerEmail.text}'),
                         Planner(user:"${myControllerEmail.text}"),
-                        JournalPage()
+                        JournalPage(user:"${myControllerEmail.text}")
                         // PostPage(currentUser:"${myControllerEmail.text}"),
                         // ProfilePage(user:"${myControllerEmail.text}"),
                       ];
@@ -575,7 +575,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (user?.emailVerified==true) {
                             print('yay');
                             login.doc("${myControllerEmail.text}").set(
-                              {'User':myController.text, 'Credits':5, 'planner':{}},
+                              {'User':myController.text, 'Credits':5, 'planner':{}, 'journal':[]},
                               SetOptions(merge:true),
                             );
                             SharedPreferences pref =await SharedPreferences.getInstance();
