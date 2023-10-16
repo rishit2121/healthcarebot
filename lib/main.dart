@@ -795,7 +795,7 @@ Future<void> main() async {
     ChatScreen(user: "$email"),
     Planner(user: "$email"),
     // Planner(user: "$email"),
-    JournalPage(user:"$email"),
+    JournalPage(user: "$email"),
     // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
   ];
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
@@ -3582,186 +3582,181 @@ class JournalPage extends StatelessWidget {
             var data = (items as DocumentSnapshot).data() as Map;
             var journalList = data['journal'];
             return Scaffold(
-              body: Column(
-                children: [
-                  Container(height: MediaQuery.of(context).size.height * 0.07),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 5.0, 0.0),
-                      child: Text(
-                        DateFormat.MMMMd().format(DateTime.now()),
-                        style: GoogleFonts.raleway(
-                          fontSize: 33, // Adjust the font size as needed
-                          // Adjust the font weight as needed
-                          // You can also set other text styles here
-                        ),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 0.0, 0.0, 0.0),
-                      child: Text(
-                        DateFormat.y().format(DateTime.now()),
-                        style: GoogleFonts.raleway(
-                          fontSize: 33, // Adjust the font size as needed
-                          // Adjust the font weight as needed
-                          // You can also set other text styles here
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(height: MediaQuery.of(context).size.height * 0.05),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 5.0, 0.0),
-                        child: Row(children: [
-                          Text(
-                            "Entries",
-                            style: GoogleFonts.raleway(
-                              fontSize: 25, // Adjust the font size as needed
-                              // Adjust the font weight as needed
-                              // You can also set other text styles here
-                            ),
+                body: Column(
+                  children: [
+                    Container(
+                        height: MediaQuery.of(context).size.height * 0.05),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(16.0, 16.0, 5.0, 0.0),
+                        child: Text(
+                          "Your Journals",
+                          style: GoogleFonts.raleway(
+                            fontSize: 24,
+                            fontWeight: FontWeight
+                                .bold, // Adjust the font size as needed
+                            // Adjust the font weight as needed
+                            // You can also set other text styles here
                           ),
-                          Container(width: MediaQuery.of(context).size.width * 0.25),
-                          // Text(
-                          //   "View All",
-                          //   style: GoogleFonts.raleway(
-                          //     fontSize: 15, // Adjust the font size as needed
-                          //     // Adjust the font weight as needed
-                          //     // You can also set other text styles here
-                          //   ),
-                          // )
-                        ])),
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.475,
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: ListView.builder(
-                      itemCount: journalList.length, // Number of items
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap:(){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ViewEntryPage(journalList:journalList[index]),
-                              ),
-                            );
-                          },
-                          child:Column(
-                          children:[
-                            Container(
-                              decoration:BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.black,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              width:MediaQuery.of(context).size.width*0.85,
-                              height:MediaQuery.of(context).size.height*0.1,
-                              child:Row(children:[
-                                Container(
-                                  height:MediaQuery.of(context).size.height*0.1,
-                                  width:MediaQuery.of(context).size.height*0.1,
-                                  decoration:BoxDecoration(color:Color(0xFF0F4FA6), borderRadius:BorderRadius.circular(10)),
-                                  child:Center(
-                                    child:Column(
-                                      children:[
-                                        Container(height:MediaQuery.of(context).size.height*0.016),
-                                        Text('May', style:TextStyle(color:Colors.white, fontSize:18.0)),
-                                        Text('05', style:TextStyle(fontWeight:FontWeight.bold, color:Colors.white, fontSize:18.0))
-                                      ]
-                                    )
-                                  )
-                                ),
-                                Container(width:MediaQuery.of(context).size.width*0.04),
-                                Container(
-                                  child:Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children:[
-                                      Container(height:MediaQuery.of(context).size.height*0.01),
-                                      Container(child:Text("${journalList[index]['title']}", style:TextStyle(fontWeight:FontWeight.bold, fontSize:18.0))),
-                                      Container(height:MediaQuery.of(context).size.height*0.01),
-                                      Container(
-                                        child:Text(
-                                          "${journalList[index]['description']}",
-                                          style: GoogleFonts.raleway(
-                                            fontSize: 15,
-                                            // Adjust the font size as needed
-                                            // Adjust the font weight as needed
-                                            // You can also set other text styles here
-                                          ),
-                                        )
-                                      )
-                                    ]
+                        ),
+                      ),
+                    ),
+                    Container(
+                        height: MediaQuery.of(context).size.height * 0.04),
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.475,
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      child: ListView.builder(
+                        itemCount: journalList.length, // Number of items
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ViewEntryPage(
+                                        journalList: journalList[index]),
                                   ),
-                                )
-                              ])
-                            ),
-                            Container(height:MediaQuery.of(context).size.height*0.02),
-                          ]
-                        )
-                        );
-                      },
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AddEntryPage(journalList:journalList, user:user),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.all(16.0), // Adjust padding as needed.
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(20.0), // Adjust radius as needed.
-                        ),
+                                );
+                              },
+                              child: Column(children: [
+                                Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    width: MediaQuery.of(context).size.width *
+                                        0.85,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.1,
+                                    child: Row(children: [
+                                      Container(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.1,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.1,
+                                          decoration: BoxDecoration(
+                                              color: Color(0xFF0F4FA6),
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Center(
+                                              child: Column(children: [
+                                            Container(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.016),
+                                            Text('May',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18.0)),
+                                            Text('05',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                    fontSize: 18.0))
+                                          ]))),
+                                      Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04),
+                                      Container(
+                                        child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.01),
+                                              Container(
+                                                  child: Text(
+                                                      '${journalList[index]['title']}'
+                                                                  .length >
+                                                              30
+                                                          ? '${journalList[index]['title']}'
+                                                                  .substring(
+                                                                      0, 30) +
+                                                              "..." // Truncate text if it exceeds the character limit
+                                                          : '${journalList[index]['title']}',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18.0))),
+                                              Container(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.01),
+                                              Container(
+                                                  child: Text(
+                                                '${journalList[index]['description']}'
+                                                            .length >
+                                                        30
+                                                    ? '${journalList[index]['description']}'
+                                                            .substring(0, 30) +
+                                                        "..." // Truncate text if it exceeds the character limit
+                                                    : '${journalList[index]['description']}',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.raleway(
+                                                  fontSize: 15,
+                                                  // Adjust the font size as needed
+                                                  // Adjust the font weight as needed
+                                                  // You can also set other text styles here
+                                                ),
+                                              )),
+                                            ]),
+                                      )
+                                    ])),
+                                Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02),
+                              ]));
+                        },
                       ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.add,
-                          ), // Replace with your desired icon.
-                          SizedBox(height: 8.0),
-                          Text(
-                            'Create Entry',
-                            style: TextStyle(fontSize: 14.0),
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
+                  ],
+                ),
+                floatingActionButton: FloatingActionButton(
+                  backgroundColor: Color(0xFF007BFF),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddEntryPage(journalList: journalList, user: user),
+                      ),
+                    );
+                  },
+                  child: Icon(Icons.add),
+                ));
           }
           return Center(
             child: CircularProgressIndicator(),
           );
-        }
-    );
+        });
   }
 }
 
-
 class AddEntryPage extends StatefulWidget {
-  const AddEntryPage({super.key, required this.journalList, required this.user});
+  const AddEntryPage(
+      {super.key, required this.journalList, required this.user});
   final journalList;
   final user;
   @override
-  _AddEntryPageState createState() => _AddEntryPageState(journalList:journalList, user:user);
+  _AddEntryPageState createState() =>
+      _AddEntryPageState(journalList: journalList, user: user);
 }
 
 class _AddEntryPageState extends State<AddEntryPage> {
@@ -3773,9 +3768,9 @@ class _AddEntryPageState extends State<AddEntryPage> {
   String audioFilePath = '';
   String imageFilePath = '';
   int selectedContainerIndex = 0;
-  var dateControl=DateTime.now();
-  String type='Journal Entry';
-  var listToAdd=[];
+  var dateControl = DateTime.now();
+  String type = 'Journal Entry';
+  var listToAdd = [];
 
   @override
   Widget build(BuildContext context) {
@@ -3794,7 +3789,8 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 },
                 child: Container(
                   child: Center(
-                      child: Icon(color:Color(0xFF0F4FA6), Icons.arrow_back_rounded)),
+                      child: Icon(
+                          color: Color(0xFF0F4FA6), Icons.arrow_back_rounded)),
                   height: MediaQuery.of(context).size.height * 0.04,
                   width: MediaQuery.of(context).size.width * 0.18,
                   decoration: BoxDecoration(
@@ -3814,11 +3810,19 @@ class _AddEntryPageState extends State<AddEntryPage> {
               ),
               Container(width: MediaQuery.of(context).size.width * 0.14),
               GestureDetector(
-                onTap:() async {
-                  journalList.add({'date':'$dateControl', 'title':title, 'description':description, 'type':type});
-                  await FirebaseFirestore.instance.collection('audios').doc('$user').update({'journal': journalList});
+                onTap: () async {
+                  journalList.add({
+                    'date': '$dateControl',
+                    'title': title,
+                    'description': description,
+                    'type': type
+                  });
+                  await FirebaseFirestore.instance
+                      .collection('audios')
+                      .doc('$user')
+                      .update({'journal': journalList});
                   Navigator.pop(context);
-                  setState((){});
+                  setState(() {});
                 },
                 child: Container(
                   child: Center(
@@ -3834,12 +3838,12 @@ class _AddEntryPageState extends State<AddEntryPage> {
             ]),
             Container(height: MediaQuery.of(context).size.height * 0.04),
             Text("Select a Date:"),
-            Container(height:MediaQuery.of(context).size.height*0.02),
+            Container(height: MediaQuery.of(context).size.height * 0.02),
             CalendarTimeline(
               initialDate: dateControl,
               firstDate: DateTime(2015, 1, 1),
               lastDate: DateTime(2025, 12, 31),
-              onDateSelected: (date) => dateControl=date,
+              onDateSelected: (date) => dateControl = date,
               leftMargin: 20,
               monthColor: Colors.blueGrey,
               dayColor: Colors.teal[200],
@@ -3848,13 +3852,13 @@ class _AddEntryPageState extends State<AddEntryPage> {
               dotsColor: Colors.white,
               locale: 'en_ISO',
             ),
-            Container(height:MediaQuery.of(context).size.height*0.03),
+            Container(height: MediaQuery.of(context).size.height * 0.03),
             Text("Type"),
-            Container(height:MediaQuery.of(context).size.height*0.01),
+            Container(height: MediaQuery.of(context).size.height * 0.01),
             Container(
-              width:MediaQuery.of(context).size.width,
-              height:MediaQuery.of(context).size.height*0.1,
-              child:ListView.builder(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.1,
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 2, // Number of containers
                 itemBuilder: (context, index) {
@@ -3862,27 +3866,34 @@ class _AddEntryPageState extends State<AddEntryPage> {
                     onTap: () {
                       setState(() {
                         selectedContainerIndex = index;
-                        if(index==0){
-                          type='Journal Entry';
-                        }else{
-                          type="To-do";
+                        if (index == 0) {
+                          type = 'Journal Entry';
+                        } else {
+                          type = "To-do";
                         }
                       });
                     },
                     child: Container(
-                      width: MediaQuery.of(context).size.width*0.4, 
-                      height: MediaQuery.of(context).size.height*0.07, // Adjust the width as needed
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: MediaQuery.of(context).size.height *
+                          0.07, // Adjust the width as needed
                       margin: EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(
-                          color: selectedContainerIndex == index ? Color(0xFF0F4FA6) : Colors.black,
+                          color: selectedContainerIndex == index
+                              ? Color(0xFF0F4FA6)
+                              : Colors.black,
                           width: selectedContainerIndex == index ? 2.5 : 1.5,
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
-                        child: index == 0 ? Text("Journal Entry", style:TextStyle(color:Colors.black)) : Text("To-do", style:TextStyle(color:Colors.black)),
+                        child: index == 0
+                            ? Text("Journal Entry",
+                                style: TextStyle(color: Colors.black))
+                            : Text("To-do",
+                                style: TextStyle(color: Colors.black)),
                       ),
                     ),
                   );
@@ -3903,7 +3914,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
             ),
             Container(height: MediaQuery.of(context).size.height * 0.02),
             Text("Description"),
-            Container(height:MediaQuery.of(context).size.height*0.01),
+            Container(height: MediaQuery.of(context).size.height * 0.01),
             Container(
               width: double.infinity,
               height: MediaQuery.of(context).size.height *
@@ -4059,18 +4070,12 @@ class _TakePictureScreenState extends State<TakePictureScreen> {
   }
 }
 
-
-
-
-
-
-
-
 class ViewEntryPage extends StatefulWidget {
   const ViewEntryPage({super.key, required this.journalList});
   final journalList;
   @override
-  _ViewEntryPageState createState() => _ViewEntryPageState(journalList:journalList);
+  _ViewEntryPageState createState() =>
+      _ViewEntryPageState(journalList: journalList);
 }
 
 class _ViewEntryPageState extends State<ViewEntryPage> {
@@ -4081,58 +4086,51 @@ class _ViewEntryPageState extends State<ViewEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(height: MediaQuery.of(context).size.height * 0.04),
-                Row(
-                  children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      child: Center(
-                          child: Icon(color:Color(0xFF0F4FA6), Icons.arrow_back_rounded)),
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      width: MediaQuery.of(context).size.width * 0.18,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10), // Curved edges
-                      ),
-                    ),
-                  ),
-                  Container(width: MediaQuery.of(context).size.width * 0.14),
-                  Text(
-                    "${journalList['title']}",
-                    style: GoogleFonts.raleway(
-                      fontWeight:FontWeight.bold,
-                      fontSize: 20,
-                      // Adjust the font size as needed
-                      // Adjust the font weight as needed
-                      // You can also set other text styles here
-                    ),
-                  ),
-                  Container(width: MediaQuery.of(context).size.width * 0.14),
-                  ]
-                ),
-                Container(height: MediaQuery.of(context).size.height * 0.04),
-                Text("${journalList['type']}"),
-                Container(height:MediaQuery.of(context).size.height*0.02),
-                Text("Description", style:TextStyle(fontWeight:FontWeight.bold)),
-                Container(height:MediaQuery.of(context).size.height*0.02),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.32, // Set the width to expand across the screen
-                  child: Text(
-                    "${journalList['description']}"
-                  ),
-                ),
-              ]
+            child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(height: MediaQuery.of(context).size.height * 0.04),
+        Row(children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              child: Center(
+                  child:
+                      Icon(color: Color(0xFF0F4FA6), Icons.arrow_back_rounded)),
+              height: MediaQuery.of(context).size.height * 0.04,
+              width: MediaQuery.of(context).size.width * 0.18,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10), // Curved edges
+              ),
+            ),
           ),
-        )
-      )
-    );
+          Container(width: MediaQuery.of(context).size.width * 0.14),
+          Text(
+            "${journalList['title']}",
+            style: GoogleFonts.raleway(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              // Adjust the font size as needed
+              // Adjust the font weight as needed
+              // You can also set other text styles here
+            ),
+          ),
+          Container(width: MediaQuery.of(context).size.width * 0.14),
+        ]),
+        Container(height: MediaQuery.of(context).size.height * 0.04),
+        Text("${journalList['type']}"),
+        Container(height: MediaQuery.of(context).size.height * 0.02),
+        Text("Description", style: TextStyle(fontWeight: FontWeight.bold)),
+        Container(height: MediaQuery.of(context).size.height * 0.02),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height *
+              0.32, // Set the width to expand across the screen
+          child: Text("${journalList['description']}"),
+        ),
+      ]),
+    )));
   }
 }
