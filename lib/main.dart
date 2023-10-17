@@ -3655,11 +3655,11 @@ class JournalPage extends StatelessWidget {
                                                         .size
                                                         .height *
                                                     0.016),
-                                            Text('May',
+                                            Text("${DateFormat('MMM').format(DateTime.parse(journalList[index]['date']))}",
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 18.0)),
-                                            Text('05',
+                                            Text('${DateFormat('dd').format(DateTime.parse(journalList[index]['date']))}',
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.white,
@@ -3683,11 +3683,11 @@ class JournalPage extends StatelessWidget {
                                               Container(
                                                   child: Text(
                                                       '${journalList[index]['title']}'
-                                                                  .length >
-                                                              30
+                                                                  .length >20
+                                                            
                                                           ? '${journalList[index]['title']}'
                                                                   .substring(
-                                                                      0, 30) +
+                                                                      0, 20) +
                                                               "..." // Truncate text if it exceeds the character limit
                                                           : '${journalList[index]['title']}',
                                                       style: TextStyle(
@@ -4100,15 +4100,18 @@ class _ViewEntryPageState extends State<ViewEntryPage> {
                   child:
                       Icon(color: Color(0xFF0F4FA6), Icons.arrow_back_rounded)),
               height: MediaQuery.of(context).size.height * 0.04,
-              width: MediaQuery.of(context).size.width * 0.18,
+              width: MediaQuery.of(context).size.width * 0.12,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10), // Curved edges
               ),
             ),
           ),
-          Container(width: MediaQuery.of(context).size.width * 0.14),
+          Container(width: MediaQuery.of(context).size.width * 0.03),
           Text(
-            "${journalList['title']}",
+            "${journalList['title']}".length > 14
+                  ? "${journalList['title']}".substring(0, 14) +
+                      "..." // Truncate text if it exceeds the character limit
+                  : "${journalList['title']}",
             style: GoogleFonts.raleway(
               fontWeight: FontWeight.bold,
               fontSize: 20,
@@ -4117,7 +4120,16 @@ class _ViewEntryPageState extends State<ViewEntryPage> {
               // You can also set other text styles here
             ),
           ),
-          Container(width: MediaQuery.of(context).size.width * 0.14),
+          Container(width: MediaQuery.of(context).size.width * 0.065),
+          Text(
+            "${DateFormat('MM/dd/yyyy').format(DateTime.parse(journalList['date']))}",
+            style: GoogleFonts.raleway(
+              fontSize: 15,
+              // Adjust the font size as needed
+              // Adjust the font weight as needed
+              // You can also set other text styles here
+            ),
+          )
         ]),
         Container(height: MediaQuery.of(context).size.height * 0.04),
         Text("${journalList['type']}"),
