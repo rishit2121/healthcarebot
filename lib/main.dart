@@ -1976,7 +1976,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.view_stream,
+              Icons.book,
             ),
             label: 'Posts',
             backgroundColor: Colors.white,
@@ -3049,8 +3049,23 @@ class _HomePageState extends State<HomePage> {
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
                       if (combinedList.length == 0)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 0.05,
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            decoration:BoxDecoration(color:const Color.fromARGB(255, 203, 203, 203), borderRadius:BorderRadius.circular(12.0),),
+                            alignment:Alignment.center,
+                            child:Text(
+                              "No exercises at the moment",
+                              style: GoogleFonts.raleway(
+                                fontSize: 16,
+                              ),
+                            ),
+                          )
+                        ),
                         Container(
-                            height: MediaQuery.of(context).size.height * 0.02),
+                            height: MediaQuery.of(context).size.height * 0.0025),
                       if (combinedList.length != 0)
                         Container(
                             height: MediaQuery.of(context).size.height * 0.3,
@@ -3304,7 +3319,7 @@ class _HomePageState extends State<HomePage> {
                 HomePage(user: "$user"),
                 ChatScreen(user: "$user"),
                 Planner(user: "$user"),
-                PostPage(currentUser: "$user"),
+                JournalPage(user: "$user"),
                 // ProfilePage(user:"$email"),
               ], selectedIndex: 1),
             ),
@@ -3561,12 +3576,21 @@ class ContainerContent extends StatelessWidget {
     );
   }
 }
+class JournalPage extends StatefulWidget {
+  const JournalPage(
+      {super.key, required this.user});
+  final user;
+  @override
+  _JournalPageState createState() =>
+      _JournalPageState(user: user);
+}
 
-class JournalPage extends StatelessWidget {
+class _JournalPageState extends State<JournalPage> {
   var user;
-  JournalPage({
+  _JournalPageState({
     required this.user,
   });
+  var currentDate=DateTime.now();
   @override
   Widget build(BuildContext context) {
     print("USER $user");
@@ -3585,7 +3609,25 @@ class JournalPage extends StatelessWidget {
                 body: Column(
                   children: [
                     Container(
-                        height: MediaQuery.of(context).size.height * 0.05),
+                        height: MediaQuery.of(context).size.height * 0.07),
+                    Container(
+                      width:MediaQuery.of(context).size.width*0.95,
+                      child:
+                      CalendarTimeline(
+                        initialDate: currentDate,
+                        firstDate: DateTime(2015, 1, 1),
+                        onDateSelected: (date)=>setState((){currentDate=date;}),
+                        lastDate: DateTime(2025, 12, 31),
+                        leftMargin: 20,
+                        monthColor: Colors.blueGrey,
+                        dayColor: Colors.teal[200],
+                        activeDayColor: Colors.white,
+                        activeBackgroundDayColor: Color(0xFF0F4FA6),
+                        dotsColor: Colors.white,
+                      ),
+                    ),
+                    Container(
+                        height: MediaQuery.of(context).size.height * 0.04),
                     Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
@@ -3606,125 +3648,134 @@ class JournalPage extends StatelessWidget {
                     Container(
                         height: MediaQuery.of(context).size.height * 0.04),
                     Container(
-                      height: MediaQuery.of(context).size.height * 0.475,
+                      height: MediaQuery.of(context).size.height * 0.555,
                       width: MediaQuery.of(context).size.width * 0.9,
                       child: ListView.builder(
                         itemCount: journalList.length, // Number of items
                         itemBuilder: (context, index) {
-                          return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ViewEntryPage(
-                                        journalList: journalList[index]),
-                                  ),
-                                );
-                              },
-                              child: Column(children: [
-                                Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.black,
-                                        width: 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
+                          print(journalList);
+                          print(currentDate);
+                          print(journalList[index]['date']);
+                          if(DateFormat('yyyy-MM-dd').format(DateFormat('yyyy-MM-dd').parse(journalList[index]['date']))==DateFormat('yyyy-MM-dd').format(currentDate)){
+                            return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ViewEntryPage(
+                                          journalList: journalList[index]),
                                     ),
-                                    width: MediaQuery.of(context).size.width *
-                                        0.85,
-                                    height: MediaQuery.of(context).size.height *
-                                        0.1,
-                                    child: Row(children: [
-                                      Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.1,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.1,
-                                          decoration: BoxDecoration(
-                                              color: Color(0xFF0F4FA6),
-                                              borderRadius:
-                                                  BorderRadius.circular(10)),
-                                          child: Center(
-                                              child: Column(children: [
-                                            Container(
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.016),
-                                            Text("${DateFormat('MMM').format(DateTime.parse(journalList[index]['date']))}",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 18.0)),
-                                            Text('${DateFormat('dd').format(DateTime.parse(journalList[index]['date']))}',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                    fontSize: 18.0))
-                                          ]))),
-                                      Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.04),
-                                      Container(
-                                        child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
+                                  );
+                                },
+                                child: Column(children: [
+                                  Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      width: MediaQuery.of(context).size.width *
+                                          0.85,
+                                      height: MediaQuery.of(context).size.height *
+                                          0.1,
+                                      child: Row(children: [
+                                        Container(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.1,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.1,
+                                            decoration: BoxDecoration(
+                                                color: Color(0xFF0F4FA6),
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            child: Center(
+                                                child: Column(children: [
                                               Container(
                                                   height: MediaQuery.of(context)
                                                           .size
                                                           .height *
-                                                      0.01),
-                                              Container(
-                                                  child: Text(
-                                                      '${journalList[index]['title']}'
-                                                                  .length >20
-                                                            
-                                                          ? '${journalList[index]['title']}'
-                                                                  .substring(
-                                                                      0, 20) +
-                                                              "..." // Truncate text if it exceeds the character limit
-                                                          : '${journalList[index]['title']}',
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 18.0))),
-                                              Container(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      0.01),
-                                              Container(
-                                                  child: Text(
-                                                '${journalList[index]['description']}'
-                                                            .length >
-                                                        30
-                                                    ? '${journalList[index]['description']}'
-                                                            .substring(0, 30) +
-                                                        "..." // Truncate text if it exceeds the character limit
-                                                    : '${journalList[index]['description']}',
-                                                overflow: TextOverflow.ellipsis,
-                                                style: GoogleFonts.raleway(
-                                                  fontSize: 15,
-                                                  // Adjust the font size as needed
-                                                  // Adjust the font weight as needed
-                                                  // You can also set other text styles here
-                                                ),
-                                              )),
-                                            ]),
-                                      )
-                                    ])),
-                                Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.02),
-                              ]));
-                        },
-                      ),
+                                                      0.016),
+                                              Text("${DateFormat('MMM').format(DateTime.parse(journalList[index]['date']))}",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 18.0)),
+                                              Text('${DateFormat('dd').format(DateTime.parse(journalList[index]['date']))}',
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                      fontSize: 18.0))
+                                            ]))),
+                                        Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.04),
+                                        Container(
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                    height: MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.01),
+                                                Container(
+                                                    child: Text(
+                                                        '${journalList[index]['title']}'
+                                                                    .length >20
+                                                              
+                                                            ? '${journalList[index]['title']}'
+                                                                    .substring(
+                                                                        0, 20) +
+                                                                "..." // Truncate text if it exceeds the character limit
+                                                            : '${journalList[index]['title']}',
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 18.0))),
+                                                Container(
+                                                    height: MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.01),
+                                                Container(
+                                                    child: Text(
+                                                  '${journalList[index]['description']}'
+                                                              .length >
+                                                          30
+                                                      ? '${journalList[index]['description']}'
+                                                              .substring(0, 30) +
+                                                          "..." // Truncate text if it exceeds the character limit
+                                                      : '${journalList[index]['description']}',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: GoogleFonts.raleway(
+                                                    fontSize: 15,
+                                                    // Adjust the font size as needed
+                                                    // Adjust the font weight as needed
+                                                    // You can also set other text styles here
+                                                  ),
+                                                )),
+                                              ]),
+                                        )
+                                      ])),
+                                  Container(
+                                      height: MediaQuery.of(context).size.height *
+                                          0.02),
+                                ]
+                              )
+                            );
+                          }else {
+                            return SizedBox.shrink(); // Return an empty widget if the condition is not met
+                          }
+                          },
+                        ),
                     ),
                   ],
                 ),
@@ -3812,7 +3863,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
               GestureDetector(
                 onTap: () async {
                   journalList.add({
-                    'date': '$dateControl',
+                    'date': '${DateFormat('yyyy-MM-dd').parse(DateFormat('yyyy-MM-dd').format(dateControl))}',
                     'title': title,
                     'description': description,
                     'type': type
