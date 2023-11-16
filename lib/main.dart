@@ -49,7 +49,7 @@ Future<List> fetchExercises() async {
 Future<List> fetchNews() async {
   final headers = {
     'X-BingApis-SDK': 'true',
-    'X-RapidAPI-Key': '24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3',
+    'X-RapidAPI-Key': '8727b59c21msh0412cfa27434a6dp1c6852jsn0c85f3ebb92b',
     'X-RapidAPI-Host': 'bing-news-search1.p.rapidapi.com',
   };
 
@@ -229,10 +229,12 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
-  Future<void> _sendMessage(user) async {
+  Future<void> _sendMessage(user,credits) async {
     //credits later
     if (_textEditingController.text.isNotEmpty) {
-      // await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+      if(credits>0){
+        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+      }
       setState(() {
         String text = _textEditingController.text;
         Message newMessage = Message(sender: 'You', text: text, list: []);
@@ -254,7 +256,9 @@ class _ChatScreenState extends State<ChatScreen> {
         _textEditingController.clear();
         // Simulate bot response
         _scrollToBottom();
-        _simulateBotResponse();
+        if(credits>0){
+          _simulateBotResponse();
+        }
       });
     }
   }
@@ -295,16 +299,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // return FutureBuilder(
-    //     future:
-    //         FirebaseFirestore.instance.collection('audios').doc('$user').get(),
-    //     builder: (context, snapshot) {
-    //       if (snapshot.hasError) {
-    //         return Text("Something went wrong");
-    //       }
-    //       if (snapshot.connectionState == ConnectionState.done) {
-    //         final items = snapshot.data;
-    //         var data = (items as DocumentSnapshot).data() as Map;
+    return FutureBuilder(
+        future:
+            FirebaseFirestore.instance.collection('audios').doc('$user').get(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text("Something went wrong");
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            final items = snapshot.data;
+            var data = (items as DocumentSnapshot).data() as Map;
     return Scaffold(
         appBar: CustomAppBar(
           title: "  Eva",
@@ -318,15 +322,15 @@ class _ChatScreenState extends State<ChatScreen> {
             children: <Widget>[
               Row(children: <Widget>[
                 Container(width: MediaQuery.of(context).size.width * 0.35),
-                // Text('Credits: ${data['Credits']}'),
-                // TextButton(child:Text("Add more"), onPressed:(){
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
-                //     ),
-                //   );
-                // })
+                Text('Credits: ${data['Credits']}'),
+                TextButton(child:Text("Add more"), onPressed:(){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
+                    ),
+                  );
+                })
               ]),
               Container(height: MediaQuery.of(context).size.height * 0.02),
               Expanded(
@@ -385,7 +389,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     IconButton(
                       icon: Icon(Icons.send, color: Colors.black),
                       onPressed: (() {
-                        _sendMessage(user);
+                        _sendMessage(user,data['Credits']);
                       }), //Add data['Credits'] later
                     ),
                   ],
@@ -394,11 +398,11 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ));
-    // }
-    //   return Center(
-    //     child: CircularProgressIndicator(),
-    //   );
-    // });
+    }
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    });
   }
 
   Widget _buildMessageBubble(Message message) {
@@ -1068,15 +1072,15 @@ class _AddExercisePageState extends State<AddExercisePage> {
                         ),
                       ),
                     ),
-                    // if (_bannerAd != null)
-                    //   Align(
-                    //     alignment: Alignment.topCenter,
-                    //     child: Container(
-                    //       width: _bannerAd!.size.width.toDouble(),
-                    //       height: _bannerAd!.size.height.toDouble(),
-                    //       child: AdWidget(ad: _bannerAd!),
-                    //     ),
-                    //   ),
+                    if (_bannerAd != null)
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: Container(
+                          width: _bannerAd!.size.width.toDouble(),
+                          height: _bannerAd!.size.height.toDouble(),
+                          child: AdWidget(ad: _bannerAd!),
+                        ),
+                      ),
                     Stack(children: [
                       Container(
                         height: MediaQuery.of(context).size.height * 0.75,
@@ -3749,9 +3753,9 @@ class _JournalPageState extends State<JournalPage> {
                                                     child: Text(
                                                   '${journalList[index]['description']}'
                                                               .length >
-                                                          30
+                                                          25
                                                       ? '${journalList[index]['description']}'
-                                                              .substring(0, 30) +
+                                                              .substring(0, 25) +
                                                           "..." // Truncate text if it exceeds the character limit
                                                       : '${journalList[index]['description']}',
                                                   overflow: TextOverflow.ellipsis,
@@ -3788,7 +3792,7 @@ class _JournalPageState extends State<JournalPage> {
                         builder: (context) =>
                             AddEntryPage(journalList: journalList, user: user),
                       ),
-                    );
+                    ).then((value) { setState(() {});});
                   },
                   child: Icon(Icons.add),
                 ));

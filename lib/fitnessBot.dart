@@ -84,7 +84,7 @@ class _ChatDialogState extends State<ChatDialog> {
     var sentence = response[0];
     sentence = sentence.replaceAll('<END_OF_TURN>', '');
     sentence = sentence.replaceAll('\n', '');
-    Message botMessage = Message(sender: 'Bot', text: sentence, list: []);
+    Message botMessage = Message(sender: 'Eva', text: sentence, list: []);
     chat_history =
         chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
     chat_history2 = chat_history2 +
@@ -144,7 +144,7 @@ class _ChatDialogState extends State<ChatDialog> {
                           ]));
                     } else if (message.sender == 'You') {
                       return _buildMessageBubble(message);
-                    } else if (message.sender == 'Bot') {
+                    } else if (message.sender == 'Eva') {
                       return _buildBotMessageBubble(message);
                     } else if (message.sender == 'Trainer') {
                       print(messages);
