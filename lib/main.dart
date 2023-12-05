@@ -22,6 +22,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 import 'package:calendar_timeline/calendar_timeline.dart';
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 
 Future<List> fetchExercises() async {
   final url = Uri.parse(
@@ -48,22 +49,36 @@ Future<List> fetchExercises() async {
 
 Future<List> fetchNews() async {
   final headers = {
-    'X-BingApis-SDK': 'true',
-    'X-RapidAPI-Key': '8727b59c21msh0412cfa27434a6dp1c6852jsn0c85f3ebb92b',
-    'X-RapidAPI-Host': 'bing-news-search1.p.rapidapi.com',
+    "content-type": "application/json",
+    "X-RapidAPI-Key": "24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3",
+    "X-RapidAPI-Host": "newsnow.p.rapidapi.com"
+  };
+  Map<String, dynamic> payload = {
+    "query": "Health",
+    "page": 1,
+    "time_bounded": true,
+    "from_date": "01/02/2021",
+    "to_date": "05/06/2021",
+    "location": "",
+    "category": "",
+    "source": "",
   };
 
-  var response = await http.get(
+
+  var response = await http.post(
     Uri.parse(
-        'https://bing-news-search1.p.rapidapi.com/news/search?q=Health&count=80&setLang=EN&textFormat=Raw&safeSearch=Off&originalImg=true&freshness=Month'),
+        'https://newsnow.p.rapidapi.com/newsv2'),
     headers: headers,
+    body: json.encode(payload),
   );
 
   if (response.statusCode == 200) {
     // Request succeeded, parse the response
     var data = json.decode(response.body);
     // Handle the data
-    return (data["value"]);
+
+
+    return (data["news"]);
   } else {
     // Request failed
     print('Request failed with status: ${response.statusCode}');
@@ -152,9 +167,10 @@ void showProfileMenu(BuildContext context) {
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final Column row;
   final Function() onProfilePressed;
 
-  CustomAppBar({required this.title, required this.onProfilePressed});
+  CustomAppBar({required this.title,required this.row, required this.onProfilePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +181,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       backgroundColor: Colors.white,
-      elevation: 1,
+      elevation: 0,
       //   flexibleSpace: Container(
       //   decoration: const BoxDecoration(
       //     gradient: LinearGradient(
@@ -184,6 +200,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             style: GoogleFonts.raleway(
                 color: Colors.black, fontWeight: FontWeight.bold),
           ),
+          Container(width:MediaQuery.of(context).size.width*0.3),
+          row,
         ],
       ),
     );
@@ -312,6 +330,26 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
         appBar: CustomAppBar(
           title: "  Eva",
+          row:Column(children: <Widget>[
+            Container(height:MediaQuery.of(context).size.height*0.01),
+            Text('Credits: ${data['Credits']}', style:TextStyle(fontSize:12.0)),
+            TextButton(
+              child:Text("Add more"), 
+              style:TextButton.styleFrom(
+                minimumSize: Size.zero,
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed:(){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
+                  ),
+                );
+              }
+            )
+          ]),
           onProfilePressed: () {
             showProfileMenu(context);
           },
@@ -320,19 +358,7 @@ class _ChatScreenState extends State<ChatScreen> {
           decoration: BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
           child: Column(
             children: <Widget>[
-              Row(children: <Widget>[
-                Container(width: MediaQuery.of(context).size.width * 0.35),
-                Text('Credits: ${data['Credits']}'),
-                TextButton(child:Text("Add more"), onPressed:(){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
-                    ),
-                  );
-                })
-              ]),
-              Container(height: MediaQuery.of(context).size.height * 0.02),
+              Container(height: MediaQuery.of(context).size.height * 0.005),
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
@@ -804,9 +830,9 @@ Future<void> main() async {
   ];
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((value) => runApp(MaterialApp(
-            // theme:ThemeData(
-            //   fontFamily: GoogleFonts.raleway().fontFamily,
-            // ),
+            theme:ThemeData(
+              useMaterial3: false,
+            ),
             title: 'Readerly',
             debugShowCheckedModeBanner: false,
             home: (email == null || email == "")
@@ -1168,14 +1194,14 @@ class _AddExercisePageState extends State<AddExercisePage> {
                         ),
                       ),
                       Positioned(
-                        bottom: 16.0,
-                        right: 16.0,
+                        bottom: 64.0,
+                        right: 12.0,
                         child: FloatingActionButton(
                           onPressed: () {
                             // Save selected exercises and navigate back to the previous page
                             Navigator.pop(context, selectedExercises);
                           },
-                          child: Icon(Icons.check),
+                          child: Icon(Icons.check, color:Colors.white),
                         ),
                       ),
                     ])
@@ -1471,7 +1497,7 @@ class _PlannerState extends State<Planner> {
                         ),
                         Container(
                           height: MediaQuery.of(context).size.height * 0.38,
-                          padding: EdgeInsets.all(16),
+                          width: MediaQuery.of(context).size.width * 0.9,
                           child: SfDateRangePicker(
                             initialSelectedDate:
                                 DateTime(now.year, now.month, now.day),
@@ -1646,20 +1672,17 @@ class NewsArticleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateTime articleDateTime = DateTime.parse(article['datePublished']);
-    final String formattedDate =
-        '${articleDateTime.year}-${articleDateTime.month.toString().padLeft(2, '0')}-${articleDateTime.day.toString().padLeft(2, '0')}';
-    final String imageUrl = article['image'] != null &&
-            article['image']['thumbnail'] != null
-        ? article['image']['thumbnail']['contentUrl']
-        : (article['contentUrl'] != null
-            ? article['contentUrl']
+    final String formattedDate = article['date'];
+    final String imageUrl = article['image'] != null
+        ? article['image']
+        : (article['image'] != null
+            ? article['image']
             : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
     return Card(
       margin: EdgeInsets.all(10),
       child: ExpansionTile(
         title: Text(
-          article['name'], // Title displayed in bold
+          article['title'], // Title displayed in bold
           style: TextStyle(
             fontWeight: FontWeight.bold, // Make the title bold
           ),
@@ -1672,7 +1695,7 @@ class NewsArticleCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(article['description']), // Display the entire description
+                Text(article['body']), // Display the entire description
                 OutlinedButton(
                   onPressed: () {
                     launchUrl(Uri.parse(article['url']),
@@ -2911,20 +2934,18 @@ class _HomePageState extends State<HomePage> {
                 if (data['planner'] == null) {
                   data['planner'] = {};
                 }
+                print(data);
                 var article = snapshot.data![2];
-                final DateTime articleDateTime =
-                    DateTime.parse(article![0]['datePublished']);
                 List NewsData(int index) {
-                  final desc = article[index]['description'];
-                  final name = article[index]['name'];
+                  final desc = article[index]['body'];
+                  final name = article[index]['title'];
                   final url = article[index]['url'];
-                  final String formattedDate =
-                      '${articleDateTime.year}-${articleDateTime.month.toString().padLeft(2, '0')}-${articleDateTime.day.toString().padLeft(2, '0')}';
+                  final String formattedDate = article[index]['date'];
                   final String imageUrl = article![index]['image'] != null &&
-                          article[index]['image']['thumbnail'] != null
-                      ? article[index]['image']['thumbnail']['contentUrl']
-                      : (article[index]['contentUrl'] != null
-                          ? article[0]['contentUrl']
+                          article[index]['image']!= null
+                      ? article[index]['image']
+                      : (article[index]['image'] != null
+                          ? article[0]['image']
                           : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
                   return ([name, desc, formattedDate, imageUrl, url]);
                 }
