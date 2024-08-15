@@ -1,1 +1,0 @@
-var myGPTAPI='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';
