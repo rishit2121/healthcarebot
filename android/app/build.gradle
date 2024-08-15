@@ -27,7 +27,7 @@ apply plugin: 'com.google.gms.google-services'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -45,22 +45,32 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.health_care_app"
+        applicationId "com.geneva.health_care_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode flutterVersionCode.toInteger()
+        targetSdkVersion 34
+        versionCode 14
         versionName flutterVersionName
+    }
+     signingConfigs {
+        release {
+            storeFile file('/Users/rishit/Documents/healthcarebot/your_keystore_name.jks') // Path to your keystore file
+            storePassword 'Eighty2*' // Store password
+            keyAlias 'your_key_alias' // Key alias
+            keyPassword 'Eighty2*' // Key password (use same as store password if not different)
+        }
+        // You can define additional signing configs for debug, etc. if needed
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            // Add your signing config for the release build
+            signingConfig signingConfigs.release // This line will be updated below
         }
     }
+
+    // Define your signing configurations
 }
 
 flutter {
@@ -68,5 +78,7 @@ flutter {
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-ads-lite:23.2.0'
+    implementation 'com.google.android.gms:play-services-ads:23.2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

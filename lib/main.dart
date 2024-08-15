@@ -2,10 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'resources/chat.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'resources/prompts.dart';
+import 'package:path/path.dart' as path;
+import 'package:video_player/video_player.dart';
+import 'package:camera/camera.dart';
+import 'dart:math';
+import 'package:flutter_signature_pad/flutter_signature_pad.dart';
+import 'package:flutter_drawing_board/flutter_drawing_board.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:timer_count_down/timer_count_down.dart';
+import 'package:timer_count_down/timer_count_down.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:record/record.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'login.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -22,14 +37,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 import 'package:calendar_timeline/calendar_timeline.dart';
-import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:flutter_emoji_feedback/flutter_emoji_feedback.dart';
 
 Future<List> fetchExercises() async {
   final url = Uri.parse(
       'https://exercisedb.p.rapidapi.com/exercises'); //BEST_MATCH also
 
   final headers = {
-    'X-RapidAPI-Key': 'b271ecb65fmshd32cd3e3e0dd409p1aaa88jsnf9c93122133f',
+    'X-RapidAPI-Key': '24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3',
     'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com',
   };
 
@@ -47,44 +62,6 @@ Future<List> fetchExercises() async {
   }
 }
 
-Future<List> fetchNews() async {
-  final headers = {
-    "content-type": "application/json",
-    "X-RapidAPI-Key": "24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3",
-    "X-RapidAPI-Host": "newsnow.p.rapidapi.com"
-  };
-  Map<String, dynamic> payload = {
-    "query": "Health",
-    "page": 1,
-    "time_bounded": true,
-    "from_date": "01/02/2021",
-    "to_date": "05/06/2021",
-    "location": "",
-    "category": "",
-    "source": "",
-  };
-
-
-  var response = await http.post(
-    Uri.parse(
-        'https://newsnow.p.rapidapi.com/newsv2'),
-    headers: headers,
-    body: json.encode(payload),
-  );
-
-  if (response.statusCode == 200) {
-    // Request succeeded, parse the response
-    var data = json.decode(response.body);
-    // Handle the data
-
-
-    return (data["news"]);
-  } else {
-    // Request failed
-    print('Request failed with status: ${response.statusCode}');
-    return ([]);
-  }
-}
 
 class StarRating extends StatelessWidget {
   final double rating;
@@ -174,14 +151,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(10),
-        ),
-      ),
-      backgroundColor: Colors.white,
-      elevation: 0,
+    return Container(
+      decoration:BoxDecoration(color:Colors.white),
       //   flexibleSpace: Container(
       //   decoration: const BoxDecoration(
       //     gradient: LinearGradient(
@@ -190,19 +161,27 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       //       colors: <Color>[Color.fromARGB(255, 202, 244, 255), Color.fromARGB(255, 209, 230, 255)]),
       //   ),
       // ),
-      title: Row(
+      child: 
+      Column(
+        children:[
+        Container(height:MediaQuery.of(context).size.height*0.04),
+        Row(
         children: [
-          Icon(Icons.account_circle,
-              color: Color(0xFF0F4FA6), size: 30), // Profile Icon
-          SizedBox(width: 8.0), // Add some space between the icon and title
+          Container(width:MediaQuery.of(context).size.width*0.01),
+          // Icon(Icons.account_circle,
+          //     color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.06), // Profile Icon
+          IconButton(icon:Icon(Icons.arrow_back, color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.045),onPressed:(){Navigator.pop(context);}),
+          Container(width:MediaQuery.of(context).size.width*0.05),// Add some space between the icon and title
           Text(
             title,
             style: GoogleFonts.raleway(
-                color: Colors.black, fontWeight: FontWeight.bold),
+                color: Colors.black, fontWeight: FontWeight.bold, fontSize:30),
           ),
-          Container(width:MediaQuery.of(context).size.width*0.3),
+          Container(width:MediaQuery.of(context).size.width*0.45),
           row,
         ],
+      ),
+      ]
       ),
     );
   }
@@ -221,6 +200,30 @@ class ChatScreen extends StatefulWidget with Functions {
 
 class _ChatScreenState extends State<ChatScreen> {
   _ChatScreenState({required this.user}) : super();
+  @override
+  initState() {
+    // ignore: avoid_print
+    Future.delayed(Duration.zero, () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Note'),
+            content: Text('Please note that this is not meant to serve as a diagnoser. We can only assess symptoms and provide a opinion that is not proefessional. We hope you enjoy your experience, and thanks!'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+   });
+    
+  }
   var user;
   List messages = [
     Message(
@@ -241,6 +244,7 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _textEditingController = TextEditingController();
   int currentProductIndex = 0;
   var currentPhotoIndex = 0;
+  var _isfocusssed=false;
   ScrollController _scrollController = ScrollController();
 
   _scrollToBottom() {
@@ -250,9 +254,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _sendMessage(user,credits) async {
     //credits later
     if (_textEditingController.text.isNotEmpty) {
-      if(credits>0){
-        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
-      }
       setState(() {
         String text = _textEditingController.text;
         Message newMessage = Message(sender: 'You', text: text, list: []);
@@ -275,39 +276,80 @@ class _ChatScreenState extends State<ChatScreen> {
         // Simulate bot response
         _scrollToBottom();
         if(credits>0){
-          _simulateBotResponse();
+          _simulateBotResponse(credits);
+        }else{
+          Message errorMessage= Message(sender: 'Error', text: "There are insufficient credits. Please buy more.", list: []);
+         messages.add(errorMessage);
+         messages.remove(true);
         }
       });
     }
   }
 
-  Future<void> _simulateBotResponse() async {
+  Future<void> _simulateBotResponse(credits) async {
     // Simulating a delayed bot response
     setState(() {
       messages.add(true);
     });
     List<dynamic> response = await Functions.responser2(chat_history2);
-    var sentence = response[0];
-    sentence = sentence.replaceAll('<END_OF_TURN>', '');
-    sentence = sentence.replaceAll('\n', '');
-    Message botMessage = Message(sender: 'Bot', text: sentence, list: []);
-    chat_history =
-        chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
-    chat_history2 = chat_history2 +
-        [
-          {"role": "assistant", "content": botMessage.text}
-        ];
-    setState(() {
-      messages.add(botMessage);
-      if (response[2] == '3') {
-        Message productMessage = Message(
-            sender: 'Shopper',
-            text: "Heres a few items  you can buy:",
-            list: response[3]);
-        messages.add(productMessage);
+    print(response);
+    if(response[1]=='fail' || response[3]=='fail'){
+      if(response[0]=='fail' || response[2]=='fail'){
+         Message errorMessage= Message(sender: 'Error', text: "There was an error in sending a message. Please try again later.", list: []);
+         messages.add(errorMessage);
+         messages.remove(true);
+      }else{
+        if(credits>0){
+          await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+        }
+        var sentence = response[0];
+        sentence = sentence.replaceAll('<END_OF_TURN>', '');
+        sentence = sentence.replaceAll('\n', '');
+
+        Message botMessage = Message(sender: 'Bot', text: sentence, list: []);
+          chat_history =
+              chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
+          chat_history2 = chat_history2 +
+              [
+                {"role": "assistant", "content": botMessage.text}
+              ];
+          setState(() {
+            messages.add(botMessage);
+             if (response[2] == '3') {
+              Message errorMessage = Message(sender: 'Error', text: "There was an error in finding products. Please try again later.", list: []);
+              messages.add(errorMessage);
+             }
+            messages.remove(true);
+          });
       }
-      messages.remove(true);
-    });
+    }
+    else{
+      if(credits>0){
+        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+      }
+      var sentence = response[0];
+      sentence = sentence.replaceAll('<END_OF_TURN>', '');
+      sentence = sentence.replaceAll('\n', '');
+
+      Message botMessage = Message(sender: 'Bot', text: sentence, list: []);
+        chat_history =
+            chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
+        chat_history2 = chat_history2 +
+            [
+              {"role": "assistant", "content": botMessage.text}
+            ];
+        setState(() {
+          messages.add(botMessage);
+          if (response[2] == '3') {
+            Message productMessage = Message(
+                sender: 'Shopper',
+                text: "Heres a few items  you can buy:",
+                list: response[3]);
+            messages.add(productMessage);
+          }
+          messages.remove(true);
+        });
+    }
     Future.delayed(Duration(seconds: 6), () {
       setState(() {
         _scrollToBottom();
@@ -329,12 +371,12 @@ class _ChatScreenState extends State<ChatScreen> {
             var data = (items as DocumentSnapshot).data() as Map;
     return Scaffold(
         appBar: CustomAppBar(
-          title: "  Eva",
+          title: "Eva",
           row:Column(children: <Widget>[
             Container(height:MediaQuery.of(context).size.height*0.01),
-            Text('Credits: ${data['Credits']}', style:TextStyle(fontSize:12.0)),
+            Text('Credits: ${data['Credits']}', style:TextStyle(fontSize:12.0, color:Colors.black), textAlign: TextAlign.right),
             TextButton(
-              child:Text("Add more"), 
+              child:Text("Add more", style:TextStyle(fontSize:15), textAlign: TextAlign.right), 
               style:TextButton.styleFrom(
                 minimumSize: Size.zero,
                 padding: EdgeInsets.zero,
@@ -383,8 +425,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     } else if (message.sender == 'You') {
                       return _buildMessageBubble(message);
                     } else if (message.sender == 'Bot') {
-                      return _buildBotMessageBubble(message);
-                    } else {
+                      return _buildBotMessageBubble(message, Color.fromARGB(255, 215, 215, 215));
+                    } else if (message.sender == 'Error') {
+                      return _buildBotMessageBubble(message, Color.fromARGB(255, 255, 86, 74));
+                    }else {
                       return _buildProductListMessage(message);
                     }
                   },
@@ -400,11 +444,25 @@ class _ChatScreenState extends State<ChatScreen> {
                     bottom: BorderSide(color: Colors.grey),
                   ),
                 ),
-                child: Row(
+                child:Column(children:[ 
+                  Container(height:MediaQuery.of(context).size.height*0.01),
+                  Text(
+                      'Cannot exceed 100 characters.',
+                      style: TextStyle(color: Color(0xFF0F4FA6)),
+                    ),
+                  Container(height:MediaQuery.of(context).size.height*0.02),
+                  Row(
                   children: <Widget>[
                     Expanded(
                       child: TextField(
                         controller: _textEditingController,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(100),
+                        ],
+                         onTap: () {
+                            var _isfocusssed= true;
+
+                        },
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Type your message...',
@@ -420,13 +478,15 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ],
                 ),
+                ]
+                ),
               ),
             ],
           ),
         ));
     }
       return Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
       );
     });
   }
@@ -475,7 +535,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildBotMessageBubble(Message message) {
+  Widget _buildBotMessageBubble(Message message, color) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
@@ -490,16 +550,34 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           SizedBox(height: 4.0),
-          Container(
+          color == Color.fromARGB(255, 255, 86, 74)
+          ?Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Color.fromARGB(255, 215, 215, 215),
+              color: color,
               borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(16),
                   bottomRight: Radius.circular(16),
                   topRight: Radius.circular(16)),
             ),
-            child: Text(
+            child:Text(
+              message.text,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.white,
+              ),
+            ),
+          )
+        :Container(
+            padding: EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topRight: Radius.circular(16)),
+            ),
+            child:Text(
               message.text,
               style: TextStyle(
                 fontSize: 16.0,
@@ -507,6 +585,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
+
         ],
       ),
     );
@@ -586,7 +665,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 SizedBox(height: 8.0),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: Color.fromARGB(255, 245, 245,
+                    backgroundColor: Color.fromARGB(255, 245, 245,
                         245), // Match the container background color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
@@ -811,18 +890,16 @@ class Message {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final cameras = await availableCameras();
-  final firstCamera = cameras.first;
   await MobileAds.instance.initialize();
   stripe.Stripe.publishableKey =
-      "pk_test_51NmiBSGseqFBdXVsWiAI51HJYB3Z34pDouqmxbo9jIHvkIK1VYNEYaUVojJGJmOqA7LrXAF7OPje6LlE8GFdko4Y00Y1VYrnvu";
+      "pk_live_51Od38RFqQTPds4FKYNCyxuCu8TPjZpvzmg0TKQOC8i5Ii5YqoQfVeeoT4faHoddV7WpXdlgszEtp69YrWUftN0cL005BkBNg1u";
   await dotenv.load(fileName: "assets/.env");
   await Firebase.initializeApp();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var email = prefs.getString("email");
   final List<Widget> _widgetOptions = [
     HomePage(user: "$email"),
-    ChatScreen(user: "$email"),
+    ChallengeScreen(user: "$email"),
     Planner(user: "$email"),
     // Planner(user: "$email"),
     JournalPage(user: "$email"),
@@ -1003,14 +1080,36 @@ class _AddExercisePageState extends State<AddExercisePage> {
         },
       ),
     ).load();
-    _dataFuture = fetchExercises();
-    _dataFuture.then((items) {
+    _dataFuture = FirebaseFirestore.instance.collection('Exercises').doc('List').get();
+    _dataFuture.then((snapshot) {
+      final data = snapshot.data();
+      var items = data!['list'];
       setState(() {
-        _searchResult = List.from(
-            items); // Create a new list with the same contents as items
+        _searchResult = List.from(items);
       });
     });
   }
+  bool listContains(Map<String, dynamic> item, List<Map<dynamic, dynamic>> list) {
+  for (var element in list) {
+    if (element['gifUrl'] == item['gifUrl'] &&
+        element['name'] == item['name'] &&
+        element['equipment'] == item['equipment'] &&
+        element['id'] == item['id'] &&
+        element['target'] == item['target'] &&
+        element['bodyPart'] == item['bodyPart']) {
+      return true;
+    }
+  }
+  return false;
+}
+Map<String, dynamic>? findDictionaryById(List list, String id) {
+  for (var dictionary in list) {
+    if (dictionary['id'] == id) {
+      return dictionary;
+    }
+  }
+  return null; // If no match is found
+}
 
   List<Map> selectedExercises = [];
 
@@ -1028,25 +1127,30 @@ class _AddExercisePageState extends State<AddExercisePage> {
             style: TextStyle(color: Colors.black),
           ),
         ),
-        body: FutureBuilder<List>(
+        body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             future: _dataFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
                 );
               } else if (snapshot.hasError) {
                 return Center(
                   child: Text('Error: ${snapshot.error}'),
                 );
               } else {
-                final items = snapshot.data;
-                void _sortExercises(index) {
-                  temp = _searchResult[index];
-                  items!.remove(_searchResult[index]);
-                  items.insert(0, temp);
-                  _searchResult.removeAt(index);
-                  _searchResult.insert(0, temp);
+                final data = snapshot.data;
+                var items=data!['list'];
+                void _sortExercises(id) {
+                  setState((){
+                    temp= findDictionaryById(_searchResult, id);
+                    items!.removeWhere((exercise) =>
+                      exercise['id'] == temp['id']);
+                    items.insert(0, temp);
+                    _searchResult.removeWhere((exercise) =>
+                        exercise['id'] == temp['id']);
+                    _searchResult.insert(0, temp);
+                  });
                 }
 
                 void _filterSearchResults(String query) {
@@ -1072,17 +1176,23 @@ class _AddExercisePageState extends State<AddExercisePage> {
                       _searchResult = tempList
                           .toList(); // Create a new list instance with filtered items
                       bob = "YEA";
+                      print(_searchResult);
+
                     });
                   } else {
                     setState(() {
                       _searchResult = items!.toList();
                     });
                   }
+                  for(var tobeadded in selectedExercises){
+                        _sortExercises(tobeadded['id']);
+                      }
                 }
 
                 return SingleChildScrollView(
                     child: Column(
                   children: [
+                    Container(height:MediaQuery.of(context).size.height*0.03),
                     Padding(
                       padding: EdgeInsets.all(16.0),
                       child: TextField(
@@ -1098,15 +1208,16 @@ class _AddExercisePageState extends State<AddExercisePage> {
                         ),
                       ),
                     ),
-                    if (_bannerAd != null)
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Container(
-                          width: _bannerAd!.size.width.toDouble(),
-                          height: _bannerAd!.size.height.toDouble(),
-                          child: AdWidget(ad: _bannerAd!),
-                        ),
-                      ),
+                    Container(height:MediaQuery.of(context).size.height*0.03),
+                    // if (_bannerAd != null)
+                    //   Align(
+                    //     alignment: Alignment.topCenter,
+                    //     child: Container(
+                    //       width: _bannerAd!.size.width.toDouble(),
+                    //       height: _bannerAd!.size.height.toDouble(),
+                    //       child: AdWidget(ad: _bannerAd!),
+                    //     ),
+                    //   ),
                     Stack(children: [
                       Container(
                         height: MediaQuery.of(context).size.height * 0.75,
@@ -1116,17 +1227,23 @@ class _AddExercisePageState extends State<AddExercisePage> {
                             return GestureDetector(
                                 onTap: () {
                                   setState(() {
+                                    print(selectedExercises);
+                                    print(listContains(_searchResult[index], selectedExercises));
+                                    print(_searchResult[index]);
                                     // Toggle exercise selection
-                                    if (selectedExercises
-                                        .contains(_searchResult[index])) {
-                                      selectedExercises
-                                          .remove(_searchResult[index]);
+                                    if (listContains(_searchResult[index], selectedExercises)) {
+
+                                       selectedExercises.removeWhere((exercise) =>
+          exercise['id'] == _searchResult[index]['id']);
                                     } else {
                                       selectedExercises
                                           .add(_searchResult[index]);
                                     }
-                                    _sortExercises(index);
+                                    print(selectedExercises);
                                   });
+                                  for (var tobeadded in selectedExercises){
+                                    _sortExercises(tobeadded['id']);
+                                  }
                                 },
                                 child: Card(
                                   elevation: 4,
@@ -1148,13 +1265,12 @@ class _AddExercisePageState extends State<AddExercisePage> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          trailing: selectedExercises.contains(
-                                                  _searchResult[index])
+                                          trailing: listContains(_searchResult[index], selectedExercises)
                                               ? Icon(Icons.check,
                                                   color: Colors.green)
                                               : Icon(
                                                   Icons.add,
-                                                  color: Color(0xFF007BFF),
+                                                  color: Color(0xFF0F4FA6),
                                                 ),
                                         ),
                                         SizedBox(height: 10),
@@ -1197,6 +1313,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
                         bottom: 64.0,
                         right: 12.0,
                         child: FloatingActionButton(
+                          backgroundColor: Color(0xFF0F4FA6),
                           onPressed: () {
                             // Save selected exercises and navigate back to the previous page
                             Navigator.pop(context, selectedExercises);
@@ -1247,156 +1364,161 @@ class _AddExercisePageState extends State<AddExercisePage> {
 //       ),
 //     );
 
-class SearchBarPage extends StatefulWidget {
-  const SearchBarPage({super.key});
+// class SearchBarPage extends StatefulWidget {
+//   const SearchBarPage({super.key});
 
-  @override
-  _SearchBarPageState createState() => _SearchBarPageState();
-}
+//   @override
+//   _SearchBarPageState createState() => _SearchBarPageState();
+// }
 
-class _SearchBarPageState extends State<SearchBarPage> {
-  late Future<List> _dataFuture;
-  var bob = "NO";
-  List _searchResult = [];
-  void initState() {
-    super.initState();
-    _dataFuture = fetchExercises();
-    _dataFuture.then((items) {
-      setState(() {
-        _searchResult = List.from(
-            items); // Create a new list with the same contents as items
-      });
-    });
-  }
+// class _SearchBarPageState extends State<SearchBarPage> {
+//   late var _dataFuture;
+//   var bob = "NO";
+//   List _searchResult = [];
+//   void initState() {
+//     super.initState();
+//     _dataFuture = FirebaseFirestore.instance.collection('Exercises').doc('List').get();
+//     _dataFuture['list'].then((items) {
+//       setState(() {
+//         _searchResult = List.from(
+//             items); // Create a new list with the same contents as items
+//       });
+//     });
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: FutureBuilder<List>(
-            future: _dataFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else {
-                final items = snapshot.data;
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//         body: FutureBuilder<List>(
+//             future: _dataFuture,
+//             builder: (context, snapshot) {
+//               if (snapshot.connectionState == ConnectionState.waiting) {
+//                 return Center(
+//                   child: CircularProgressIndicator(),
+//                 );
+//               } else if (snapshot.hasError) {
+//                 return Center(
+//                   child: Text('Error: ${snapshot.error}'),
+//                 );
+//               } else {
+//                 final items = snapshot.data;
 
-                void _filterSearchResults(String query) {
-                  if (query.isNotEmpty) {
-                    var tempList = [];
-                    items!.forEach((item) {
-                      if (item['name']
-                              .toLowerCase()
-                              .contains(query.toLowerCase()) ||
-                          item['target']
-                              .toLowerCase()
-                              .contains(query.toLowerCase()) ||
-                          item['bodyPart']
-                              .toLowerCase()
-                              .contains(query.toLowerCase()) ||
-                          item['equipment']
-                              .toLowerCase()
-                              .contains(query.toLowerCase())) {
-                        tempList.add(item);
-                      }
-                    });
-                    setState(() {
-                      _searchResult = tempList
-                          .toList(); // Create a new list instance with filtered items
-                      bob = "YEA";
-                    });
-                  } else {
-                    setState(() {
-                      _searchResult = items!.toList();
-                    });
-                  }
-                }
+//                 void _filterSearchResults(String query) {
+//                   if (query.isNotEmpty) {
+//                     var tempList = [];
+//                     items!.forEach((item) {
+//                       if (item['name']
+//                               .toLowerCase()
+//                               .contains(query.toLowerCase()) ||
+//                           item['target']
+//                               .toLowerCase()
+//                               .contains(query.toLowerCase()) ||
+//                           item['bodyPart']
+//                               .toLowerCase()
+//                               .contains(query.toLowerCase()) ||
+//                           item['equipment']
+//                               .toLowerCase()
+//                               .contains(query.toLowerCase())) {
+//                         tempList.add(item);
+//                       }
+//                     });
+//                     setState(() {
+//                       _searchResult = tempList
+//                           .toList(); // Create a new list instance with filtered items
+//                       bob = "YEA";
+//                     }); 
+//                   } else {
+//                     setState(() {
+//                       _searchResult = items!.toList();
+//                     });
+//                   }
+//                   if(query==""){
+//                     setState(() {
+//                       _searchResult = items!.toList();
+//                     });
+//                   }
+//                 }
 
-                return Column(
-                  children: [
-                    Container(height: MediaQuery.of(context).size.height * 0.1),
-                    Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: TextField(
-                        onChanged: (value) {
-                          _filterSearchResults(value);
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _searchResult.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            elevation: 4,
-                            margin: EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _searchResult[index]['name'],
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Target: ${_searchResult[index]['target']}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    'Body Part: ${_searchResult[index]['bodyPart']}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    'Equipment: ${_searchResult[index]['equipment']}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Center(
-                                    child: Image.network(
-                                      '${_searchResult[index]['gifUrl']}', // Replace with your actual image URL
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.3,
-                                      width:
-                                          MediaQuery.of(context).size.height *
-                                              0.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              }
-            }));
-  }
-}
+//                 return Column(
+//                   children: [
+//                     Container(height: MediaQuery.of(context).size.height * 0.1),
+//                     Padding(
+//                       padding: EdgeInsets.all(16.0),
+//                       child: TextField(
+//                         onChanged: (value) {
+//                           _filterSearchResults(value);
+//                         },
+//                         decoration: InputDecoration(
+//                           hintText: 'Search',
+//                           prefixIcon: Icon(Icons.search),
+//                           border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(10.0),
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                     Expanded(
+//                       child: ListView.builder(
+//                         itemCount: _searchResult.length,
+//                         itemBuilder: (context, index) {
+//                           return Card(
+//                             elevation: 4,
+//                             margin: EdgeInsets.all(16),
+//                             shape: RoundedRectangleBorder(
+//                               borderRadius: BorderRadius.circular(10),
+//                             ),
+//                             child: Padding(
+//                               padding: EdgeInsets.all(16),
+//                               child: Column(
+//                                 crossAxisAlignment: CrossAxisAlignment.start,
+//                                 children: [
+//                                   Text(
+//                                     _searchResult[index]['name'],
+//                                     style: TextStyle(
+//                                       fontSize: 24,
+//                                       fontWeight: FontWeight.bold,
+//                                     ),
+//                                   ),
+//                                   SizedBox(height: 10),
+//                                   Text(
+//                                     'Target: ${_searchResult[index]['target']}',
+//                                     style: TextStyle(fontSize: 16),
+//                                   ),
+//                                   SizedBox(height: 5),
+//                                   Text(
+//                                     'Body Part: ${_searchResult[index]['bodyPart']}',
+//                                     style: TextStyle(fontSize: 16),
+//                                   ),
+//                                   SizedBox(height: 5),
+//                                   Text(
+//                                     'Equipment: ${_searchResult[index]['equipment']}',
+//                                     style: TextStyle(fontSize: 16),
+//                                   ),
+//                                   SizedBox(height: 20),
+//                                   Center(
+//                                     child: Image.network(
+//                                       '${_searchResult[index]['gifUrl']}', // Replace with your actual image URL
+//                                       height:
+//                                           MediaQuery.of(context).size.height *
+//                                               0.3,
+//                                       width:
+//                                           MediaQuery.of(context).size.height *
+//                                               0.3,
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             ),
+//                           );
+//                         },
+//                       ),
+//                     ),
+//                   ],
+//                 );
+//               }
+//             }));
+//   }
+// }
 
 class Planner extends StatefulWidget {
   const Planner({super.key, required this.user});
@@ -1423,7 +1545,7 @@ class _PlannerState extends State<Planner> {
 
   Future<List> futureData() async {
     // Simulate fetching data from a source (e.g., Firestore)
-    return [await login.doc(user).get(), await fetchExercises()];
+    return [await login.doc(user).get(), await FirebaseFirestore.instance.collection('Exercises').doc('List').get()];
   }
 
   Widget build(BuildContext context) {
@@ -1435,7 +1557,7 @@ class _PlannerState extends State<Planner> {
           }
           if (snapshot.connectionState == ConnectionState.done) {
             final List? items = snapshot.data;
-            var exerciseItems = items![1];
+            var exerciseItems = items![1]['list'];
             data = (items![0] as DocumentSnapshot).data() as Map;
             if (data['planner'] == null) {
               data['planner'] = {};
@@ -1495,10 +1617,13 @@ class _PlannerState extends State<Planner> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        Container(height:MediaQuery.of(context).size.height*0.02),
                         Container(
                           height: MediaQuery.of(context).size.height * 0.38,
                           width: MediaQuery.of(context).size.width * 0.9,
                           child: SfDateRangePicker(
+                            todayHighlightColor: Color(0xFF0F4FA6),
+                            selectionColor: Color(0xFF0F4FA6),
                             initialSelectedDate:
                                 DateTime(now.year, now.month, now.day),
                             controller: _calendarController,
@@ -1531,7 +1656,7 @@ class _PlannerState extends State<Planner> {
                             onPressed: () {
                               _navigateToAddExercisePage();
                             },
-                            child: Icon(Icons.add, color: Color(0xFF007BFF)),
+                            child: Icon(Icons.add, color: Color(0xFF0F4FA6)),
                           ),
                         ]),
                         Stack(children: [
@@ -1606,7 +1731,7 @@ class _PlannerState extends State<Planner> {
                   ),
                 ),
                 floatingActionButton: FloatingActionButton(
-                  backgroundColor: Color(0xFF007BFF),
+                  backgroundColor: Color(0xFF0F4FA6),
                   onPressed: () {
                     showDialog(
                         context: context,
@@ -1617,7 +1742,7 @@ class _PlannerState extends State<Planner> {
                 ));
           }
           return Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
           );
         });
   }
@@ -1638,7 +1763,6 @@ class _NewsPageState extends State<NewsPage> {
   @override
   void initState() {
     super.initState();
-    newsArticles = fetchNews();
   }
 
   @override
@@ -1675,9 +1799,7 @@ class NewsArticleCard extends StatelessWidget {
     final String formattedDate = article['date'];
     final String imageUrl = article['image'] != null
         ? article['image']
-        : (article['image'] != null
-            ? article['image']
-            : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
+        : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg';
     return Card(
       margin: EdgeInsets.all(10),
       child: ExpansionTile(
@@ -1687,7 +1809,20 @@ class NewsArticleCard extends StatelessWidget {
             fontWeight: FontWeight.bold, // Make the title bold
           ),
         ),
-        leading: Image.network(imageUrl, width: 50, height: 50),
+       leading: Image.network(
+        imageUrl,
+        width: 50,
+        height: 50,
+        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+          // This function gets called when an error occurs while loading the image
+          // You can return a different widget here, like another Image.network with a fallback image URL
+          return Image.network(
+            'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg', // Provide the URL of the fallback image here
+            width: 50,
+            height: 50,
+          );
+        },
+      ),
         subtitle: Text(formattedDate),
         children: [
           Container(
@@ -1702,7 +1837,7 @@ class NewsArticleCard extends StatelessWidget {
                         mode: LaunchMode.externalApplication);
                   },
                   style: OutlinedButton.styleFrom(
-                    primary: Colors.transparent, // Transparent background
+                    backgroundColor: Colors.transparent, // Transparent background
                     side:
                         BorderSide(color: Color(0xFF007BFF)), // Add an outline
                   ),
@@ -1748,7 +1883,7 @@ class _ProfilePageState extends State<ProfilePage> {
             var data = (items as DocumentSnapshot).data() as Map;
             var questionAnswerList = data['Information'];
             return Scaffold(
-                appBar: AppBar(title: Text('Profile')),
+                appBar: AppBar(title: Text('Profile'), backgroundColor: Color(0xFF0F4FA6),),
                 body: SingleChildScrollView(
                   child: Center(
                     child: Padding(
@@ -1761,7 +1896,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               height:
                                   MediaQuery.of(context).size.height * 0.025),
                           CircleAvatar(
-                            backgroundColor: Color(0xFF007BFF),
+                            backgroundColor: Color(0xFF0F4FA6),
                             radius: 60.0,
                             child: Icon(
                               Icons.account_circle,
@@ -1854,7 +1989,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          Text(
+                                                          Container(height:MediaQuery.of(context).size.height*0.03),
+                                                          Padding(padding: EdgeInsets.fromLTRB(10,0,0,0),
+                                                          
+                                                          child:Text(
                                                             'Edit Answer',
                                                             style: TextStyle(
                                                                 fontSize: 18,
@@ -1862,8 +2000,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                                                     FontWeight
                                                                         .bold),
                                                           ),
-                                                          SizedBox(height: 8),
-                                                          Text(
+                                                          ),
+                                                          Container(height:MediaQuery.of(context).size.height*0.05),
+                                                          Padding(padding:EdgeInsets.fromLTRB(15, 0, 0, 0), child:Text(
                                                             questionAnswerList[
                                                                         index][
                                                                     'question'] ??
@@ -1873,22 +2012,34 @@ class _ProfilePageState extends State<ProfilePage> {
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .bold),
-                                                          ),
+                                                          )),
                                                           SizedBox(height: 16),
-                                                          TextField(
-                                                            controller:
-                                                                answerController,
-                                                            maxLines: 3,
-                                                            decoration:
-                                                                InputDecoration(
-                                                              border:
-                                                                  OutlineInputBorder(),
-                                                              hintText:
-                                                                  'Enter your answer...',
+                                                          Padding(
+                                                          padding:EdgeInsets.fromLTRB(MediaQuery.of(context).size.width*0.05,0,0,0),
+                                                          child:Container(
+                                                            width:MediaQuery.of(context).size.width*0.9,
+                                                            child: TextField(
+                                                              controller:
+                                                                  answerController,
+                                                              maxLines: 3,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    OutlineInputBorder(),
+                                                                hintText:
+                                                                    'Enter your answer...',
+                                                              ),
                                                             ),
-                                                          ),
-                                                          SizedBox(height: 16),
-                                                          ElevatedButton(
+                                                          )),
+                                                          Container(height:MediaQuery.of(context).size.height*0.03),
+                                                          Padding(
+                                                            padding:EdgeInsets.fromLTRB(MediaQuery.of(context).size.width*0.8,0,0,0),
+                                                            child:ElevatedButton(
+                                                            style: ElevatedButton.styleFrom(
+                                                              backgroundColor: Color(0xFF0F4FA6),
+                                                              shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(15.0),
+                                                            ),),
                                                             onPressed:
                                                                 () async {
                                                               // Save the updated answer and close the bottom sheet
@@ -1913,6 +2064,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                                             },
                                                             child: Text('Save'),
                                                           ),
+                                                          ),
+                                                          Container(height:MediaQuery.of(context).size.height*0.03),
                                                         ],
                                                       ),
                                                     ),
@@ -1922,8 +2075,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             },
                                             child: Icon(
                                               Icons.edit,
-                                              color: Colors
-                                                  .blue, // Customize the icon color
+                                              color: Color(0xFF0F4FA6), // Customize the icon color
                                             ),
                                           ),
                                         ],
@@ -1938,7 +2090,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ));
           }
           return Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
           );
         });
   }
@@ -2260,7 +2412,7 @@ class PostList extends StatelessWidget {
           future: UserName(userId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator(); // While waiting for the data
+              return CircularProgressIndicator(color:Color(0xFF0F4FA6)); // While waiting for the data
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
@@ -2363,7 +2515,7 @@ class PostList extends StatelessWidget {
       stream: FirebaseFirestore.instance.collection('posts').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return CircularProgressIndicator();
+          return CircularProgressIndicator(color:Color(0xFF0F4FA6));
         }
         var posts = snapshot.data!.docs;
 
@@ -2613,7 +2765,7 @@ class CommentList extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return CircularProgressIndicator();
+          return CircularProgressIndicator(color:Color(0xFF0F4FA6));
         }
 
         var comments = snapshot.data!.docs;
@@ -2728,6 +2880,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Purchase Page'),
+        backgroundColor: Color(0xFF0F4FA6),
       ),
       body: Center(
         child: Column(
@@ -2739,9 +2892,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               child: Text(
                 'Enter the amount of credits you would like to purchase.',
                 style: TextStyle(fontSize: 20.0),
+                textAlign:TextAlign.center,
               ),
             ),
-            SizedBox(height: 20.0),
+            SizedBox(height: MediaQuery.of(context).size.height*0.001),
+            Padding(
+              padding: EdgeInsets.all(15),
+              child: Text(
+                '(A minimum of 100 credits is required for purchase)',
+                style: TextStyle(fontSize: 13.0, color:Colors.grey),
+                textAlign:TextAlign.center,
+              ),
+            ),
+            SizedBox(height: MediaQuery.of(context).size.height*0.05),
             AmountTextField(
               onChanged: (amount) {
                 // Use the entered amount in your logic
@@ -2750,15 +2913,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 });
               },
             ),
-            ElevatedButton(
+            Container(height:MediaQuery.of(context).size.height*0.02),
+            Container(
+            width:MediaQuery.of(context).size.width*0.9,
+            height:MediaQuery.of(context).size.height*0.05,
+            child:ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF0F4FA6)),
               onPressed: () {
+                if(_amount>=100){
+                  makePayment((_amount * 1).round(), _amount);
+                }
                 // Implement payment logic here
                 // You can navigate to a payment screen or handle payment processing.
                 // For simplicity, we'll just display a message for now.
-                makePayment((_amount * 8).round(), _amount);
                 // fetchOffers,
               },
               child: Text('Pay Now'),
+            ),
             ),
             SizedBox(height: 20.0),
           ],
@@ -2903,18 +3074,73 @@ class _HomePageState extends State<HomePage> {
   late var combinedList = [];
   late var newData = {};
   late List workoutRoutines;
+  var _newstrue=false;
+  var _isLoading=true;
   final ValueNotifier<String> selectedFeeling = ValueNotifier<String>('');
   CollectionReference login = FirebaseFirestore.instance.collection('audios');
   void initState() {
+    combinedList = [];
     super.initState();
+    fetchNews();
   }
+  var article = [];
+  List NewsData(int index) {
+    final desc = article[index]['body'];
+    final name = article[index]['title'];
+    final url = article[index]['url'];
+    final String formattedDate = article[index]['date'];
+    final String imageUrl = article![index]['image'] != null &&
+            article[index]['image']!= null
+        ? article[index]['image']
+        : (article[index]['image'] != null
+            ? article[0]['image']
+            : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
+    return ([name, desc, formattedDate, imageUrl, url]);
+  }
+
+Future<void> fetchNews() async {
+  final headers = {
+    "content-type": "application/json",
+    "X-RapidAPI-Key": "24d7fdb755mshe9ad7b273211de1p160e9bjsn32244367e3e3",
+    "X-RapidAPI-Host": "google-api31.p.rapidapi.com"
+  };
+  Map<String, dynamic> payload = {
+    "text": "Health",
+    "region": "us-en,",
+    "max_results": 100
+};
+
+  var response = await http.post(
+    Uri.parse(
+        'https://google-api31.p.rapidapi.com/'),
+    headers: headers,
+    body: json.encode(payload),
+  );
+
+  if (response.statusCode == 200) {
+    // Request succeeded, parse the response
+    var data = json.decode(response.body);
+    // Handle the data
+    combinedList=[];
+    setState(() {
+      article=data["news"];
+      _isLoading = false;
+      _newstrue=true;
+    });
+  } else {
+    // Request failed
+    setState((){
+      _isLoading=false;
+      _newstrue=false;
+    });
+  }
+}
 
   Future<List> futureData() async {
     // Simulate fetching data from a source (e.g., Firestore)
     return [
       await login.doc(user).get(),
-      await fetchExercises(),
-      await fetchNews()
+      await FirebaseFirestore.instance.collection('Exercises').doc('List').get(),
     ];
   }
 
@@ -2929,25 +3155,12 @@ class _HomePageState extends State<HomePage> {
               }
               if (snapshot.connectionState == ConnectionState.done) {
                 final List? items = snapshot.data;
-                var exerciseItems = items![1];
+                var exerciseItems = items![1]['list'];
+                var quote = items![1]['quote'];
+                combinedList = [];
                 data = (items![0] as DocumentSnapshot).data() as Map;
                 if (data['planner'] == null) {
                   data['planner'] = {};
-                }
-                print(data);
-                var article = snapshot.data![2];
-                List NewsData(int index) {
-                  final desc = article[index]['body'];
-                  final name = article[index]['title'];
-                  final url = article[index]['url'];
-                  final String formattedDate = article[index]['date'];
-                  final String imageUrl = article![index]['image'] != null &&
-                          article[index]['image']!= null
-                      ? article[index]['image']
-                      : (article[index]['image'] != null
-                          ? article[0]['image']
-                          : 'https://st3.depositphotos.com/23594922/31822/v/450/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg');
-                  return ([name, desc, formattedDate, imageUrl, url]);
                 }
 
                 var thresholdDateString = DateTime(DateTime.now().year,
@@ -2959,7 +3172,9 @@ class _HomePageState extends State<HomePage> {
                     listOfDicts[i]['date'] = date;
                   }
                   if (dt1.compareTo(thresholdDateString) >= 0) {
-                    combinedList.addAll(listOfDicts);
+                    if(combinedList!=listOfDicts){
+                      combinedList.addAll(listOfDicts);
+                    }
                   }
 
                   combinedList.sort((a, b) {
@@ -2968,6 +3183,67 @@ class _HomePageState extends State<HomePage> {
                     return dt1.compareTo(dt2);
                   });
                 });
+                var files = [];
+
+                Future<void> saveGifsAsFiles(var gifUrls) async {
+                  var index=0;
+                  for (var url in gifUrls) {
+                    if(index>1220){
+                      File file = await DefaultCacheManager().getSingleFile(url['gifUrl']);
+                      files.add(file);
+                    }
+                    index=index+1;
+                  }
+                }
+
+                Future<void> uploadGifsToFirebaseStorage(List files, gifUrls) async {
+                  final FirebaseStorage storage = FirebaseStorage.instance;
+                  var index=1221;
+                  for (File file in files) {
+                    // Create a reference to the location you want to upload to
+                    Reference ref = storage.ref().child('gifs/${gifUrls[index]['name']}.gif');
+                    index=index+1;
+
+                    // Upload the file to Firebase Storage
+                    await ref.putFile(file);
+                  }
+                }
+                Future<void> addListToDocument(List<dynamic> listData) async {
+                  try {
+                    // Reference to the document in the "Exercises" collection
+                    DocumentReference docRef = FirebaseFirestore.instance.collection('Exercises').doc('List');
+
+                    // Update the document with the list data
+                    await docRef.set({
+                      'list': listData,
+                    }, SetOptions(merge: true)); // Use merge to merge the new data with existing data if the document exists
+                  } catch (error) {
+                    print('Error adding list to document: $error');
+                    throw error; // Throw the error for handling at a higher level if needed
+                  }
+                }
+
+                Future<void> processUpload(gifUrls) async {
+                  await saveGifsAsFiles(exerciseItems); // Wait for GIFs to be saved
+                  await uploadGifsToFirebaseStorage(files, gifUrls); // Wait for GIFs to be uploaded
+                }
+                Future<void> convertToFirestore() async{
+                  var data=exerciseItems;
+                  for (int i = 0; i < data.length; i++) {
+                    if(data[i]['name']=='3/4 sit-up'){
+                      data[i]['gifUrl']="https://firebasestorage.googleapis.com/v0/b/healthcare-393311.appspot.com/o/gifs%2F3%3A4%20sit-up.gif?alt=media&token=13e74d4d-cc73-4eb0-b38c-398c90021bbd";
+                    }
+                    else{
+                      Reference ref = FirebaseStorage.instance.ref().child('gifs/${data[i]['name']}.gif');
+                      String downloadURL = await ref.getDownloadURL();
+                      data[i]['gifUrl']="${downloadURL}";
+                    }
+                  }
+                  addListToDocument(data);
+                  
+                }
+
+
 
                 return SingleChildScrollView(
                   child: Column(
@@ -2995,7 +3271,23 @@ class _HomePageState extends State<HomePage> {
                             height: MediaQuery.of(context).size.height * 0.01),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
-                      Align(
+                      GestureDetector(
+                      onTap:(){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>ChatScreen(user:"$user"),
+                            //MyHomePage(widgets: [
+                            //   HomePage(user: "$user"),
+                            //   ChatScreen(user: "$user"),
+                            //   Planner(user: "$user"),
+                            //   JournalPage(user: "$user"),
+                            //   // ProfilePage(user:"$email"),
+                            // ], selectedIndex: 1),
+                          ),
+                        );
+                      },
+                      child:Align(
                           alignment: Alignment.center,
                           child: Container(
                               width: MediaQuery.of(context).size.width * 0.95,
@@ -3066,7 +3358,7 @@ class _HomePageState extends State<HomePage> {
                                             'assets/images/homepagehealth.png')),
                                   ),
                                 ],
-                              ))),
+                              )))),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.02),
                       // Today's Exercises
@@ -3116,67 +3408,82 @@ class _HomePageState extends State<HomePage> {
                         _buildSectionTitle("Latest News"),
                         Container(
                             width: MediaQuery.of(context).size.width * 0.25),
-                        GestureDetector(
-                            child: Text("View All"),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      NewsPage(totalData: article),
-                                ),
-                              );
-                            }),
+                        _isLoading
+                          ?Center(
+                            
+                          )
+                          :_newstrue
+                            ?GestureDetector(
+                              child: Text("View All"),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        NewsPage(totalData: article),
+                                  ),
+                                );
+                              })
+                              :Center(
+                            
+                              )
                       ]),
 
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.4,
-                        width: MediaQuery.of(context).size.width,
-                        child: ListView(
-                          scrollDirection:
-                              Axis.horizontal, // Horizontal scrolling
-                          children: <Widget>[
-                            SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(
-                                title: NewsData(0)[0],
-                                image: NewsData(0)[3],
-                                description: NewsData(0)[1],
-                                url: NewsData(0)[4]),
-                            SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(
-                                title: NewsData(1)[0],
-                                image: NewsData(1)[3],
-                                description: NewsData(1)[1],
-                                url: NewsData(1)[4]),
-                            SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(
-                                title: NewsData(2)[0],
-                                image: NewsData(2)[3],
-                                description: NewsData(2)[1],
-                                url: NewsData(2)[4]),
-                            SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.03),
-                            NewsItemWidget(
-                                title: NewsData(3)[0],
-                                image: NewsData(3)[3],
-                                description: NewsData(3)[1],
-                                url: NewsData(3)[4]),
-                            SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width * 0.03),
-                            // Add more items as needed
-                          ],
-                        ),
-                      ),
+                      _isLoading
+                      ?Center(
+                        child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
+                      )
+                      :_newstrue
+                        ?Container(
+                          height: MediaQuery.of(context).size.height * 0.4,
+                          width: MediaQuery.of(context).size.width,
+                          child: ListView(
+                            scrollDirection:
+                                Axis.horizontal, // Horizontal scrolling
+                            children: <Widget>[
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.03),
+                              NewsItemWidget(
+                                  title: NewsData(0)[0],
+                                  image: NewsData(0)[3],
+                                  description: NewsData(0)[1],
+                                  url: NewsData(0)[4]),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.03),
+                              NewsItemWidget(
+                                  title: NewsData(1)[0],
+                                  image: NewsData(1)[3],
+                                  description: NewsData(1)[1],
+                                  url: NewsData(1)[4]),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.03),
+                              NewsItemWidget(
+                                  title: NewsData(2)[0],
+                                  image: NewsData(2)[3],
+                                  description: NewsData(2)[1],
+                                  url: NewsData(2)[4]),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.03),
+                              NewsItemWidget(
+                                  title: NewsData(3)[0],
+                                  image: NewsData(3)[3],
+                                  description: NewsData(3)[1],
+                                  url: NewsData(3)[4]),
+                              SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.03),
+                              // Add more items as needed
+                            ],
+                          ),
+                        )
+                        :Center(child:Text("Failed to load news articles. Please try again later.")),
+                        
                       Container(
                           height: MediaQuery.of(context).size.height * 0.01),
                       // Row(children: [
@@ -3203,16 +3510,15 @@ class _HomePageState extends State<HomePage> {
                       _buildSectionTitle('Quote Of The Day'),
                       Container(
                           height: MediaQuery.of(context).size.height * 0.025),
-                      _buildRandomQuote(),
+                      _buildRandomQuote(quote),
 
                       // Divider
-                      Divider(thickness: 2.0),
                     ],
                   ),
                 );
               }
               return Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
               );
             }));
   }
@@ -3270,19 +3576,33 @@ class _HomePageState extends State<HomePage> {
           FirebaseAuth.instance.signOut();
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => LoginPage()));
-        } else if (value == 'About') {
+        } else if (value == 'Profile') {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ProfilePage(user: user),
             ),
           );
+        } else if (value == 'Feedback') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FeedbackPage(user: user),
+            ),
+          );
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
         PopupMenuItem<String>(
-          value: 'About',
-          child: Text('About'),
+          value: 'Profile',
+          child: Text('Profile'),
+        ),
+        PopupMenuItem<String>(
+          value: 'Feedback',
+          child: Text(
+            'Feedback',
+            style: TextStyle(color: Colors.black),
+          ),
         ),
         PopupMenuItem<String>(
           value: 'Logout',
@@ -3340,13 +3660,14 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MyHomePage(widgets: [
-                HomePage(user: "$user"),
-                ChatScreen(user: "$user"),
-                Planner(user: "$user"),
-                JournalPage(user: "$user"),
-                // ProfilePage(user:"$email"),
-              ], selectedIndex: 1),
+              builder: (context) =>ChatScreen(user:"$user"),
+              //MyHomePage(widgets: [
+              //   HomePage(user: "$user"),
+              //   ChatScreen(user: "$user"),
+              //   Planner(user: "$user"),
+              //   JournalPage(user: "$user"),
+              //   // ProfilePage(user:"$email"),
+              // ], selectedIndex: 1),
             ),
           );
         },
@@ -3354,12 +3675,12 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
-  Widget _buildRandomQuote() {
+  Widget _buildRandomQuote(quote) {
     // You can add your random quote widget here
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Text(
-        "Today is your opportunity to build the tomorrow you want.\n\n -KEN POIROT",
+        "$quote",
         style: TextStyle(
           fontSize: 16,
           fontStyle: FontStyle.italic,
@@ -3468,7 +3789,7 @@ class NewsItemWidget extends StatelessWidget {
                                     mode: LaunchMode.externalApplication);
                               },
                               style: OutlinedButton.styleFrom(
-                                primary: Colors
+                                backgroundColor: Colors
                                     .transparent, // Transparent background
                                 side: BorderSide(
                                     color: Color(0xFF007BFF)), // Add an outline
@@ -3616,9 +3937,9 @@ class _JournalPageState extends State<JournalPage> {
     required this.user,
   });
   var currentDate=DateTime.now();
+  var randomprompt=(getUserTypeFirebase().toList()..shuffle()).first;
   @override
   Widget build(BuildContext context) {
-    print("USER $user");
     return FutureBuilder(
         future:
             FirebaseFirestore.instance.collection('audios').doc('$user').get(),
@@ -3631,7 +3952,7 @@ class _JournalPageState extends State<JournalPage> {
             var data = (items as DocumentSnapshot).data() as Map;
             var journalList = data['journal'];
             return Scaffold(
-                body: Column(
+                body: SingleChildScrollView(child:Column(
                   children: [
                     Container(
                         height: MediaQuery.of(context).size.height * 0.07),
@@ -3653,6 +3974,58 @@ class _JournalPageState extends State<JournalPage> {
                     ),
                     Container(
                         height: MediaQuery.of(context).size.height * 0.04),
+                    GestureDetector(onTap:(){
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                 builder: (context) =>
+                                  AddEntryPage(journalList: journalList, user: user, isprompt:true, prompt:"${randomprompt}"),
+                              ));
+                            }, child:Container(
+                      width:MediaQuery.of(context).size.width * 0.9,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20.0),
+                        border: Border.all(color: Color(0xFF0F4FA6), width: 2.0),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: MediaQuery.of(context).size.height * 0.01),
+                          Text(
+                            "Random Prompt",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10.0),
+                          Container(
+                          width:MediaQuery.of(context).size.width * 0.8,
+                          child:Text(
+                            "${randomprompt}",
+                            style: TextStyle(fontSize: 16.0),
+                          )),
+                          SizedBox(height: 10.0),
+                          Row(children:[Container(width:MediaQuery.of(context).size.width*0.77), Icon(Icons.arrow_forward, color:Color(0xFF0F4FA6))]),
+                          Container(height:MediaQuery.of(context).size.height*0.01)
+                          // Align(
+                          
+                          // alignment:Alignment.center,
+                          // child:ElevatedButton(
+                          //   style:ElevatedButton.styleFrom(backgroundColor:Colors.white, side:BorderSide(color:Color(0xFF0F4FA6))),
+                          //   onPressed: (){
+                          //     Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //        builder: (context) =>
+                          //         AddEntryPage(journalList: journalList, user: user, isprompt:true, prompt:"${randomprompt}"),
+                          //     ));
+                          //   },
+                          //   child: Text("Answer", style:TextStyle(color:Colors.black)),
+                          // ),)
+                        ],
+                      ),
+                    )),
                     Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
@@ -3671,16 +4044,13 @@ class _JournalPageState extends State<JournalPage> {
                       ),
                     ),
                     Container(
-                        height: MediaQuery.of(context).size.height * 0.04),
+                        height: MediaQuery.of(context).size.height * 0.00),
                     Container(
-                      height: MediaQuery.of(context).size.height * 0.555,
+                      height: MediaQuery.of(context).size.height * 0.425,
                       width: MediaQuery.of(context).size.width * 0.9,
                       child: ListView.builder(
                         itemCount: journalList.length, // Number of items
                         itemBuilder: (context, index) {
-                          print(journalList);
-                          print(currentDate);
-                          print(journalList[index]['date']);
                           if(DateFormat('yyyy-MM-dd').format(DateFormat('yyyy-MM-dd').parse(journalList[index]['date']))==DateFormat('yyyy-MM-dd').format(currentDate)){
                             return GestureDetector(
                                 onTap: () {
@@ -3688,7 +4058,7 @@ class _JournalPageState extends State<JournalPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ViewEntryPage(
-                                          journalList: journalList[index]),
+                                          journalList: journalList[index], user:user, totalJournals:journalList),
                                     ),
                                   );
                                 },
@@ -3804,22 +4174,23 @@ class _JournalPageState extends State<JournalPage> {
                     ),
                   ],
                 ),
+                ),
                 floatingActionButton: FloatingActionButton(
-                  backgroundColor: Color(0xFF007BFF),
+                  backgroundColor: Color(0xFF0F4FA6),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            AddEntryPage(journalList: journalList, user: user),
+                            AddEntryPage(journalList: journalList, user: user, isprompt:false, prompt:""),
                       ),
                     ).then((value) { setState(() {});});
                   },
-                  child: Icon(Icons.add),
+                  child: Icon(Icons.add,),
                 ));
           }
           return Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
           );
         });
   }
@@ -3827,26 +4198,47 @@ class _JournalPageState extends State<JournalPage> {
 
 class AddEntryPage extends StatefulWidget {
   const AddEntryPage(
-      {super.key, required this.journalList, required this.user});
+      {super.key, required this.journalList, required this.user, required this.isprompt, required this.prompt});
   final journalList;
   final user;
+  final isprompt;
+  final prompt;
   @override
   _AddEntryPageState createState() =>
-      _AddEntryPageState(journalList: journalList, user: user);
+      _AddEntryPageState(journalList: journalList, user: user, isprompt:isprompt, prompt:prompt);
 }
 
 class _AddEntryPageState extends State<AddEntryPage> {
-  _AddEntryPageState({required this.journalList, required this.user}) : super();
+  _AddEntryPageState({required this.journalList, required this.user, required this.isprompt, required this.prompt}) : super();
+  var isprompt;
   var journalList;
+  var prompt;
   var user;
   String title = 'Journal Entry';
   String description = 'No description provided';
   String audioFilePath = '';
+  final List<XFile> recordedVideos = [];
   String imageFilePath = '';
+  var audioRecord=Record();
   int selectedContainerIndex = 0;
   var dateControl = DateTime.now();
   String type = 'Journal Entry';
+  List<String> _recordedAudioPaths = [];
+  AudioPlayer _audioPlayer = AudioPlayer();
+  File? _pickedImage;
+  List<File> _pickedImages = [];
+  List<File> _pickedVideos = [];
+  var pickedFile;
+  bool _isImageGood = false;
+   List<VideoPlayerController> _controllers = [];
+  String imageName = DateTime.now().toString();
   var listToAdd = [];
+  void initState() {
+    super.initState();
+  }
+
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -3875,30 +4267,48 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 ),
               ),
               Container(width: MediaQuery.of(context).size.width * 0.14),
-              Text(
-                "Write An Entry",
-                style: GoogleFonts.raleway(
-                  fontSize: 15,
-                  // Adjust the font size as needed
-                  // Adjust the font weight as needed
-                  // You can also set other text styles here
+              isprompt
+                ?Text(
+                  "Answer an Prompt",
+                  style: GoogleFonts.raleway(
+                    fontSize: 13,
+                    // Adjust the font size as needed
+                    // Adjust the font weight as needed
+                    // You can also set other text styles here
+                  ),
+                )
+                :Text(
+                  "Write An Entry",
+                  style: GoogleFonts.raleway(
+                    fontSize: 15,
+                    // Adjust the font size as needed
+                    // Adjust the font weight as needed
+                    // You can also set other text styles here
+                  ),
                 ),
-              ),
+              
               Container(width: MediaQuery.of(context).size.width * 0.14),
               GestureDetector(
                 onTap: () async {
+                  if(isprompt){
+                    type='Prompt';
+                  }
+                  Navigator.pop(context);
                   journalList.add({
-                    'date': '${DateFormat('yyyy-MM-dd').parse(DateFormat('yyyy-MM-dd').format(dateControl))}',
+                    'date': '${imageName}',
                     'title': title,
                     'description': description,
-                    'type': type
+                    'type': "${type}",
+                    'Prompt': "${prompt}",
                   });
                   await FirebaseFirestore.instance
                       .collection('audios')
                       .doc('$user')
                       .update({'journal': journalList});
-                  Navigator.pop(context);
                   setState(() {});
+                  _pickedImages.forEach((File image) {
+                    uploadImageToFirebase(image);
+                  });
                 },
                 child: Container(
                   child: Center(
@@ -3913,71 +4323,61 @@ class _AddEntryPageState extends State<AddEntryPage> {
               ),
             ]),
             Container(height: MediaQuery.of(context).size.height * 0.04),
-            Text("Select a Date:"),
-            Container(height: MediaQuery.of(context).size.height * 0.02),
-            CalendarTimeline(
-              initialDate: dateControl,
-              firstDate: DateTime(2015, 1, 1),
-              lastDate: DateTime(2025, 12, 31),
-              onDateSelected: (date) => dateControl = date,
-              leftMargin: 20,
-              monthColor: Colors.blueGrey,
-              dayColor: Colors.teal[200],
-              activeDayColor: Colors.white,
-              activeBackgroundDayColor: Color(0xFF0F4FA6),
-              dotsColor: Colors.white,
-              locale: 'en_ISO',
-            ),
-            Container(height: MediaQuery.of(context).size.height * 0.03),
-            Text("Type"),
+            !isprompt
+              ?Text("Type", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17))
+              :Text("Question:", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17)),
             Container(height: MediaQuery.of(context).size.height * 0.01),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.1,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 2, // Number of containers
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedContainerIndex = index;
-                        if (index == 0) {
-                          type = 'Journal Entry';
-                        } else {
-                          type = "To-do";
-                        }
-                      });
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      height: MediaQuery.of(context).size.height *
-                          0.07, // Adjust the width as needed
-                      margin: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: selectedContainerIndex == index
-                              ? Color(0xFF0F4FA6)
-                              : Colors.black,
-                          width: selectedContainerIndex == index ? 2.5 : 1.5,
+            !isprompt
+              ?Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.1,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 2, // Number of containers
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedContainerIndex = index;
+                          if (index == 0) {
+                            type = 'Journal Entry';
+                          } else {
+                            type = "To-do";
+                          }
+                        });
+                      },
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        height: MediaQuery.of(context).size.height *
+                            0.07, // Adjust the width as needed
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: selectedContainerIndex == index
+                                ? Color(0xFF0F4FA6)
+                                : Colors.black,
+                            width: selectedContainerIndex == index ? 2.5 : 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        borderRadius: BorderRadius.circular(10),
+                        child: Center(
+                          child: index == 0
+                              ? Text("Journal Entry",
+                                  style: TextStyle(color: Colors.black))
+                              : Text("To-do",
+                                  style: TextStyle(color: Colors.black)),
+                        ),
                       ),
-                      child: Center(
-                        child: index == 0
-                            ? Text("Journal Entry",
-                                style: TextStyle(color: Colors.black))
-                            : Text("To-do",
-                                style: TextStyle(color: Colors.black)),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            Text("Title"),
+                    );
+                  },
+                ),
+              )
+              :Container(child:Text("${prompt}")),
+            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Text("Title", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17)),
             TextField(
+              style: TextStyle(fontWeight: FontWeight.bold),
               onChanged: (value) {
                 setState(() {
                   title = value;
@@ -3988,30 +4388,344 @@ class _AddEntryPageState extends State<AddEntryPage> {
                 hintText: 'Name Your Entry',
               ),
             ),
-            Container(height: MediaQuery.of(context).size.height * 0.02),
-            Text("Description"),
             Container(height: MediaQuery.of(context).size.height * 0.01),
-            Container(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height *
-                  0.32, // Set the width to expand across the screen
-              child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    description = value;
-                  });
-                },
-                maxLines: null, // Set maxLines to null for multiple lines
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Write about your day...',
+            !isprompt
+              ?Text("Description", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17))
+              :Text("Answer", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17)),
+            Container(height: MediaQuery.of(context).size.height * 0.01),
+            !isprompt
+              ?Container(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height *
+                    0.18, // Set the width to expand across the screen
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      description = value;
+                    });
+                  },
+                  maxLines: null, // Set maxLines to null for multiple lines
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Write about your day...',
+                  ),
+                ),
+              )
+              :Container(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height *
+                    0.18, // Set the width to expand across the screen
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {
+                      description = value;
+                    });
+                  },
+                  maxLines: null, // Set maxLines to null for multiple lines
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Write your answer...',
+                  ),
                 ),
               ),
+            Container(height: MediaQuery.of(context).size.height * 0.02),
+            Text("Images:", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17)),
+            Container(height: MediaQuery.of(context).size.height * 0.02),
+            _pickedImages.isNotEmpty ? Container(
+            width:MediaQuery.of(context).size.width * 1,
+            height:MediaQuery.of(context).size.height * 0.22,
+            child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 4.0,
+                        mainAxisSpacing: 4.0,
+                      ),
+                      itemCount: _pickedImages.length,
+                      itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(
+                            image: FileImage(_pickedImages[index]),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color:Colors.red),
+                        onPressed: () {
+                          setState(() {
+                            _pickedImages.removeAt(index);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
+          ) : Container(height:MediaQuery.of(context).size.height * 0.22,child:Text("NO IMAGES YET")), 
+          // Container(height: MediaQuery.of(context).size.height * 0.00),
+          //   _pickedVideos.isNotEmpty ? Container(
+          //   width:MediaQuery.of(context).size.width * 1,
+          //   height:MediaQuery.of(context).size.height * 0.17,
+          //   child: ListView.builder(
+          //     scrollDirection: Axis.horizontal,
+          //     itemCount: _pickedVideos.length,
+          //     itemBuilder: (BuildContext context, int index) {
+          //       return Padding(
+          //         padding: const EdgeInsets.all(8.0),
+          //         child: Stack(
+          //           alignment: Alignment.topRight,
+          //           children: [
+          //             Container(
+          //               width: 150,
+          //               height: 150,
+          //               child:VideoPlayer(_controllers[index]),
+          //             ),
+          //             IconButton(
+          //               icon: Icon(Icons.close, color:Colors.red),
+          //               onPressed: () {
+          //                 setState(() {
+          //                   _pickedVideos.removeAt(index);
+          //                 });
+          //               },
+          //             ),
+          //           ],
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ) : Container(height:MediaQuery.of(context).size.height * 0.17,child:Text("NO VIDEOS YET")), 
+            
+          !isprompt
+            ?Container(height: MediaQuery.of(context).size.height * 0.02)
+            :Container(height: MediaQuery.of(context).size.height * 0.08),
+            Align(alignment: Alignment.center,
+            child:PopupMenuButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15.0))
+                ),
+                child: Container(
+                  width:MediaQuery.of(context).size.height * 0.07,
+                  height:MediaQuery.of(context).size.height * 0.07,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Color(0xFF0F4FA6), // Set the desired border color here
+                      width: 2.0, // Set the desired border width here
+                    ),
+                  ),
+                  child: Icon(Icons.add, color:Color(0xFF0F4FA6))
+              ),
+              onSelected: (value) {
+                if (value == "Image") {
+                  showOptions(context, "image");
+                }else if(value == "photo"){
+                  showOptions(context, "photo");
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry>[
+                PopupMenuItem(
+                  value: "Image",
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Icon(Icons.image),
+                      ),
+                      const Text(
+                        'Select a Image',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: "photo",
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Icon(Icons.camera_alt)
+                      ),
+                      const Text(
+                        'Take a Photo',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ],
+                  ),
+                ),
+                
+              ],
+            )
+            ),
+            
           ],
         ),
       ),
     ));
+  }
+  // void showVideoOptions(BuildContext context) async {
+  //   final pickedVideo = await showDialog<File>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text("Take a Video"),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             ElevatedButton(
+  //               style:ElevatedButton.styleFrom(backgroundColor: Color(0xFF0F4FA6)),
+  //               onPressed: () async {
+  //                 pickedFile = await ImagePicker().pickVideo(source: ImageSource.camera);
+  //                 print("PICKED FILE:${pickedFile}");
+  //                 if (pickedFile != null) {
+  //                   setState(() {
+  //                     print("${pickedFile.path}");
+  //                     _pickedVideos.add(File(pickedFile.path));
+  //                     _isImageGood = true;
+  //                     _controller=VideoPlayerController.file(File(pickedFile.path))..initialize().then((_){setState(){_controller.play();}});
+  //                     _controllers.add();
+  //                     print("PICKED VIDS:${_pickedVideos}");
+  //                   });
+  //                 }
+  //               },
+                
+  //               child: Text("Take a Video"),
+  //             ),
+  //             ElevatedButton(
+  //               style:ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 82, 5, 0)),
+  //               onPressed: () {
+  //                 if (true==true) {
+  //                   Navigator.pop(context, _pickedImage);
+  //                 } else {
+  //                   showDialog(
+  //                     context: context,
+  //                     builder: (context) {
+  //                       return AlertDialog(
+  //                         title: Text('Please take a video first'),
+  //                         actions: [
+  //                           TextButton(
+  //                             onPressed: () => Navigator.pop(context),
+  //                             child: Text('OK'),
+  //                           ),
+  //                         ],
+  //                       );
+  //                     },
+  //                   );
+  //                 }
+  //               },
+  //               child: Text('Cancel'),
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+
+  //   if (pickedVideo != null) {
+  //     // Upload the image to Firebase Storage
+      
+  //   }
+  // }
+
+
+  void showOptions(BuildContext context, type) async {
+    final pickedImage = await showDialog<File>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: type=="photo"
+                ? Text('Take a photo')
+                : Text("Select a image"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                style:ElevatedButton.styleFrom(backgroundColor: Color(0xFF0F4FA6)),
+                onPressed: () async {
+                  if(type=="photo"){
+                    pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+                  }else{
+                    pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+                  }
+                  
+                  if (pickedFile != null) {
+                    setState(() {
+                      _pickedImages.add(File(pickedFile.path));
+                      _isImageGood = true;
+                    });
+                  }
+                },
+                
+                child: type=="photo"
+                  ? Text('Take a photo')
+                  : Text("Choose an image"),
+              ),
+              ElevatedButton(
+                style:ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 82, 5, 0)),
+                onPressed: () {
+                  if (true==true) {
+                    Navigator.pop(context, _pickedImage);
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('Please take a photo first'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text('Cancel'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (pickedImage != null) {
+      // Upload the image to Firebase Storage
+      
+    }
+  }
+
+  Future<void> uploadImageToFirebase(File imageFile) async {
+    try {
+      FirebaseStorage storage = FirebaseStorage.instance;
+      Reference ref = storage.ref().child('${user}/images/$imageName/${path.basename(imageFile.path)}');
+      UploadTask uploadTask = ref.putFile(imageFile);
+    } catch (e) {
+      print('Error uploading image: $e');
+      // Handle error accordingly
+    }
+  }
+  Future<void> uploadVideoeToFirebase(File imageFile) async {
+    try {
+      FirebaseStorage storage = FirebaseStorage.instance;
+      Reference ref = storage.ref().child('${user}/videos/$imageName/${path.basename(imageFile.path)}');
+      UploadTask uploadTask = ref.putFile(imageFile);
+      await uploadTask.whenComplete(() => print('Image uploaded to Firebase'));
+    } catch (e) {
+      print('Error uploading image: $e');
+      // Handle error accordingly
+    }
   }
 }
 
@@ -4029,134 +4743,59 @@ class JournalEntry {
   });
 }
 
-class TakePictureScreen extends StatefulWidget {
-  final CameraDescription camera;
-
-  TakePictureScreen({required this.camera});
-
-  @override
-  _TakePictureScreenState createState() => _TakePictureScreenState();
-}
-
-class _TakePictureScreenState extends State<TakePictureScreen> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-  late File _capturedImage;
-  bool _showCapturedImage = false;
-  @override
-  void initState() {
-    super.initState();
-    _controller = CameraController(widget.camera, ResolutionPreset.medium);
-    _initializeControllerFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _captureImage() async {
-    try {
-      final image = await _controller.takePicture();
-      setState(() {
-        _capturedImage = File(image.path);
-        _showCapturedImage = true;
-      });
-    } catch (e) {
-      print('Error taking picture: $e');
-    }
-  }
-
-  void _proceedWithImage() {
-    // Add your logic for proceeding with the captured image here.
-    // This can include saving the image or navigating to a new screen.
-  }
-
-  void _cancelImageCapture() {
-    setState(() {
-      _showCapturedImage = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_showCapturedImage) {
-      return Stack(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: Image.file(_capturedImage), // Display the captured image
-          ),
-          Positioned(
-            bottom: 20,
-            left: MediaQuery.of(context).size.width * 0.35,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _proceedWithImage,
-                  child: Text('Proceed'),
-                ),
-                SizedBox(width: 16.0),
-                ElevatedButton(
-                  onPressed: _cancelImageCapture,
-                  child: Text('Cancel'),
-                ),
-              ],
-            ),
-          )
-        ],
-      );
-    } else {
-      return FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Stack(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: CameraPreview(_controller),
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: MediaQuery.of(context).size.width * 0.5,
-                  child: FloatingActionButton(
-                    // Provide an onPressed callback.
-                    onPressed: _captureImage,
-                    child: const Icon(Icons.camera_alt),
-                  ),
-                )
-              ],
-            );
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      );
-    }
-  }
-}
 
 class ViewEntryPage extends StatefulWidget {
-  const ViewEntryPage({super.key, required this.journalList});
+  const ViewEntryPage({super.key, required this.journalList, required this.user, required this.totalJournals});
   final journalList;
+  final totalJournals;
+  final user;
   @override
   _ViewEntryPageState createState() =>
-      _ViewEntryPageState(journalList: journalList);
+      _ViewEntryPageState(journalList: journalList, user:user, totalJournals:totalJournals);
 }
 
 class _ViewEntryPageState extends State<ViewEntryPage> {
-  _ViewEntryPageState({required this.journalList}) : super();
+  _ViewEntryPageState({required this.journalList, required this.user, required this.totalJournals}) : super();
+  var totalJournals;
   var journalList;
+  var user;
+  String? _selectedImageUrl;
+  List<String> _imageUrls = [];
+  bool _isLoading = true;
+  void initState() {
+    super.initState();
+    // Fetch image URLs from Firebase Storage
+    fetchImageUrls();
+  }
+
+  Future<void> fetchImageUrls() async {
+    try {
+      // Replace 'images' with your Firebase Storage directory
+       final ListResult result =
+        await FirebaseStorage.instance.ref('${user}/images/${journalList['date']}').listAll();
+
+      List<String> urls = [];
+
+      for (Reference ref in result.items) {
+        // Get download URL for each image
+        String url = await ref.getDownloadURL();
+        urls.add(url);
+      }
+
+      setState(() {
+        _imageUrls = urls;
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching image URLs: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -4196,7 +4835,7 @@ class _ViewEntryPageState extends State<ViewEntryPage> {
               // You can also set other text styles here
             ),
           ),
-          Container(width: MediaQuery.of(context).size.width * 0.065),
+          Spacer(),
           Text(
             "${DateFormat('MM/dd/yyyy').format(DateTime.parse(journalList['date']))}",
             style: GoogleFonts.raleway(
@@ -4208,17 +4847,1817 @@ class _ViewEntryPageState extends State<ViewEntryPage> {
           )
         ]),
         Container(height: MediaQuery.of(context).size.height * 0.04),
-        Text("${journalList['type']}"),
+        journalList["type"]=='Prompt'
+          ?Column(children:[Row(children:[Container(width:MediaQuery.of(context).size.width*0.3,child:Text("${journalList['type']}", style:TextStyle(fontSize:20, fontWeight:FontWeight.bold))), Container(width:MediaQuery.of(context).size.width*0.6)]),Container(height:MediaQuery.of(context).size.height*0.02,), Text("${journalList['Prompt']}", style:TextStyle(fontSize:17))])
+          :Text("${journalList['type']}", style:TextStyle(fontSize:17)),
+        
         Container(height: MediaQuery.of(context).size.height * 0.02),
-        Text("Description", style: TextStyle(fontWeight: FontWeight.bold)),
+        journalList["type"]!='Prompt'
+          ?Text("Description", style: TextStyle(fontWeight: FontWeight.bold, fontSize:20))
+          :Text("Your Answer", style: TextStyle(fontWeight: FontWeight.bold, fontSize:20)),
         Container(height: MediaQuery.of(context).size.height * 0.02),
         Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height *
-              0.32, // Set the width to expand across the screen
-          child: Text("${journalList['description']}"),
+              0.26, // Set the width to expand across the screen
+          child: SingleChildScrollView(child:Text("${journalList['description']}",style:TextStyle(fontSize:17))),
         ),
-      ]),
+        Text("Images:", style: TextStyle(fontWeight: FontWeight.bold, fontSize:20)),
+        _isLoading
+          ? Center(
+              child: CircularProgressIndicator(color:Color(0xFF0F4FA6)),
+            )
+          : _imageUrls.isEmpty
+              ? Container(height:MediaQuery.of(context).size.height*0.2,child:Center(
+                  child: Text('No images found'),
+                ))
+              : Stack(
+                  children: [
+                    Container(
+                    height:MediaQuery.of(context).size.height*0.2,
+                    child:GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 4.0,
+                        mainAxisSpacing: 4.0,
+                      ),
+                      itemCount: _imageUrls.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedImageUrl = _imageUrls[index];
+                            });
+                          },
+                          child: Image.network(
+                            height:MediaQuery.of(context).size.height*0.1,
+                            width:MediaQuery.of(context).size.height*0.15,
+                            _imageUrls[index],
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    )),
+                    if (_selectedImageUrl != null)
+                      Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedImageUrl = null;
+                              });
+                            },
+                            child: Image.network(
+                              _selectedImageUrl!,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+      journalList["type"]!='Prompt'
+      ?Container(height:MediaQuery.of(context).size.height*0.18)
+      :Container(height:MediaQuery.of(context).size.height*0.14),
+       Align(alignment:Alignment.bottomRight, child:Row(children:[Container(width:MediaQuery.of(context).size.width*0.74),FloatingActionButton(
+      onPressed:(){},
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child:Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.red, width: 2.0),
+        ),
+        child: IconButton(
+          icon: Icon(Icons.delete, color: Colors.red),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Confirm Delete"),
+                  content: Text("Are you sure you want to delete?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Close the dialog
+                        Navigator.pop(context);
+                      },
+                      child: Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyHomePage(widgets: [
+                          HomePage(user: user),
+                          ChallengeScreen(user: user),
+                          Planner(user: user),
+                          // Planner(user: "$email"),
+                          JournalPage(user: user),
+                          // PostPage(currentUser: "$email"),    // ProfilePage(user:"$email"),
+                        ], selectedIndex:3),
+                        ));
+                        totalJournals.remove(journalList);
+                        await FirebaseFirestore.instance.collection('audios')
+                                                            .doc(user)
+                                                            .update({
+                                                          'journal':
+                                                              totalJournals
+                                                        });
+                        // Close the dialog
+                      setState((){});
+                      // ).then((value) {
+                      //   // Handle the popped data here
+                      //   setState(() {
+                      //     // Update the state or perform any necessary actions
+                      //   });
+                      // });
+                
+                        // Call the delete function
+                      },
+                      child: Text("Delete"),
+                    ),
+                  ],
+                );
+              }, // Add your delete functionality here
+            );
+          }
+      ),
+    ),)]),
+
+            )]),
     )));
   }
 }
+class FeedbackPage extends StatefulWidget {
+  final String user;
+
+  const FeedbackPage({Key? key, required this.user}) : super(key: key);
+
+  @override
+  _FeedbackPageState createState() => _FeedbackPageState(user:user);
+}
+
+class _FeedbackPageState extends State<FeedbackPage> {
+  _FeedbackPageState({required this.user}) : super();
+  String _feedback = '';
+  var response;
+  var user;
+
+  void _submitFeedback(user) async {
+  if (_feedback.isNotEmpty) {
+    // Get the current timestamp
+    Timestamp timestamp = Timestamp.now();
+    
+    // Reference to the feedback document
+    DocumentReference feedbackDoc = FirebaseFirestore.instance.collection('Recommendations').doc('List');
+    feedbackDoc.set(
+      {'${timestamp}':{
+      "text":_feedback,
+      "user":"${user}",
+      "emotion":"${response}",
+      }},
+      SetOptions(merge: true))
+    ;
+
+    // Show a confirmation dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Feedback Submitted'),
+          content: Text('Thank you for your feedback!'),
+          actions: <Widget>[
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                    backgroundColor:Color(0xFF0F4FA6),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Clear the feedback text field
+  }
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(child:Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(height:MediaQuery.of(context).size.height*0.05),
+            Row(children:[ Container(width:MediaQuery.of(context).size.width*0.02,),GestureDetector(child:Icon(Icons.arrow_back_rounded), onTap:(){Navigator.pop(context);}), Container(width:MediaQuery.of(context).size.width*0.02,), Text("Feedback")]),
+            Container(height:MediaQuery.of(context).size.height*0.04),
+            Row(children:[Container(width:MediaQuery.of(context).size.width*0.03,), Text("Rate Your Experience", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17),)]),
+            Container(height:MediaQuery.of(context).size.height*0.025),
+
+            Row(children:[
+              Container(width:MediaQuery.of(context).size.width*0.025),
+              Container( 
+              width:MediaQuery.of(context).size.width*0.95,
+              child:
+                EmojiFeedback(
+                animDuration: const Duration(milliseconds: 300),
+                curve: Curves.bounceIn,
+                inactiveElementScale: .5,
+                onChanged: (value) {
+                  response=value;
+                },
+              ),
+            ),]),
+            Container(height:MediaQuery.of(context).size.height*0.05),
+            Row(children:[Container(width:MediaQuery.of(context).size.width*0.02,), Text("Write Your Comment", style:TextStyle(fontWeight:FontWeight.bold, fontSize:17),)]),
+            Container(height:MediaQuery.of(context).size.height*0.03),
+            Row(children: [
+              Container(width:MediaQuery.of(context).size.width*0.05),
+              Container(
+                width:MediaQuery.of(context).size.width*0.9,
+                child:TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _feedback = value;
+                  });
+                },
+                maxLines: 5,
+                decoration: InputDecoration(
+                  hintText: 'Enter your feedback here',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+              )),
+              Container(width:MediaQuery.of(context).size.width*0.05),
+            ],), 
+            Container(height:MediaQuery.of(context).size.height*0.05),
+            Row(children:[
+              Container(
+                width:MediaQuery.of(context).size.width*0.05,),
+              Container(
+                width:MediaQuery.of(context).size.width*0.9,
+                height:MediaQuery.of(context).size.height*0.06,
+                child:ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:Color(0xFF0F4FA6),// Match the container background color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the button border radius
+                    ),
+                  ),
+              onPressed: _feedback.isEmpty ? null : (){_submitFeedback(user);},
+              child: Text('Submit Feedback'),
+            ),)]),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+}
+
+
+class ChallengeCard extends StatelessWidget {
+  final Color color;
+  final String title;
+  final String data;
+  final onpress;
+
+  const ChallengeCard({
+    required this.color,
+    required this.title,
+    required this.data,
+    required this.onpress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.3,
+      width: MediaQuery.of(context).size.width * 0.44,
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8.0),
+              Text('Challenge: $data'),
+              SizedBox(height: 8.0),
+            ],
+          ),
+          Positioned(
+            bottom: MediaQuery.of(context).size.width*0.00,
+            right: MediaQuery.of(context).size.width*0.00,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromARGB(255, 147, 127, 239),
+                    spreadRadius: 2.0,
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(Icons.play_arrow),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => onpress),
+                  );// S
+                },
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+class RelaxationPage extends StatefulWidget {
+  @override
+  RelaxationPage({required this.level, required this.data}); 
+  final level;// Constructor with the parameter
+  final data;
+  _RelaxationPageState createState() => _RelaxationPageState(level:level, data:data);
+}
+
+
+class _RelaxationPageState extends State<RelaxationPage> {
+  _RelaxationPageState({required this.level, required this.data}) : super();
+  final level;
+  final data;
+  AudioPlayer audioPlayer = AudioPlayer();
+  int audioDurationInSeconds = 10000000000000;
+  late Timer _timer;
+  var x=0;
+
+  @override
+  void initState() {
+    super.initState();
+    playAudio();
+    startTimer();
+    if(x==1){
+      audioPlayer.dispose();
+      _timer.cancel();
+    }
+  }
+  @override
+  void dispose() {
+    audioPlayer.dispose();
+    _timer.cancel();
+    x=1;
+    Future.delayed(Duration(milliseconds: 4000), (){
+      audioPlayer.dispose();
+      _timer.cancel();
+    });
+    super.dispose();
+  }
+
+  Future<void> playAudio() async {
+    // Load the audio file from assets
+    // final ByteData data = await rootBundle.load('https://firebasestorage.googleapis.com/v0/b/healthcare-393311.appspot.com/o/audios%2Fdeep-meditation-192828.mp3?alt=media&token=8132aaf7-373a-4e87-bac2-b1feb04a0a93');
+    // final buffer = data.buffer.asUint8List();
+    
+    // Play the audio from the loaded buffer
+    await audioPlayer.play(
+      'https://firebasestorage.googleapis.com/v0/b/healthcare-393311.appspot.com/o/audios%2Fdeep-meditation-192828.mp3?alt=media&token=8132aaf7-373a-4e87-bac2-b1feb04a0a93', isLocal:false,
+    );
+    audioPlayer.onDurationChanged.listen((Duration duration) {
+      setState(() {
+        if(level=='medium'){
+          audioDurationInSeconds=480;
+        }else if(level=='easy'){
+          audioDurationInSeconds=240;
+        }else{
+          audioDurationInSeconds = duration.inSeconds;
+        }
+
+      });
+      print('Audio Duration: $audioDurationInSeconds seconds');
+    });
+    // Future.delayed(Duration(seconds: 5), () async {
+    //   // Code to execute after a 2-second delay
+    //   var audioDuration = await audioPlayer.getDuration();
+    //   if (audioDuration != null) {
+    //     setState(() {
+    //       audioDurationInSeconds = audioDuration;
+    //       audioDurationInSeconds=(audioDurationInSeconds/1000).ceil();
+    //     });
+    //     print('Audio Duration: $audioDurationInSeconds seconds');
+    //   }
+    // });
+  }
+   void startTimer() {
+    const oneSecond = Duration(seconds: 1);
+    _timer = Timer.periodic(oneSecond, (timer) {
+      setState(() {
+        if (audioDurationInSeconds > 0) {
+          if(audioDurationInSeconds!=10000000000000){
+            audioDurationInSeconds--;
+          }
+        } else {
+          _timer.cancel(); 
+          audioPlayer.dispose();
+          
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CongratulationsPage(message:"Great Job with your meditating exercise!", data:data)),
+            );// Stop the timer when countdown reaches zero
+        }
+      });
+    });
+  }
+  String getFormattedTime(int seconds) {
+  int minutes = seconds ~/ 60;
+  int remainingSeconds = seconds % 60;
+  String formattedMinutes = minutes.toString().padLeft(2, '0');
+  String formattedSeconds = remainingSeconds.toString().padLeft(2, '0');
+  return '$formattedMinutes:$formattedSeconds';
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Container(
+        child: Column(
+          children: [
+            Container(height: MediaQuery.of(context).size.height * 0.06),
+            Row(children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white, size:MediaQuery.of(context).size.height * 0.04),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+              Container(width: MediaQuery.of(context).size.width * 0.8)
+            ]),
+            Container(height: MediaQuery.of(context).size.width * 0.12),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: AnimatedTextKit(
+                      animatedTexts: [
+                        TypewriterAnimatedText(
+                          'Relax your body...\nFocus on breathing...\nSlowly close your eyes...',
+                          textAlign: TextAlign.center,
+                          textStyle: const TextStyle(
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          speed: const Duration(milliseconds: 200),
+                        ),
+                      ],
+                      totalRepeatCount: 1,
+                      pause: const Duration(milliseconds: 200),
+                    ),
+                  ),
+                  Image.asset(
+                    'assets/images/pulsating_gif.gif',
+                    scale: 0.5,
+                  ),
+                  Container(height:MediaQuery.of(context).size.height*0.03),
+                  audioDurationInSeconds==10000000000000
+                    ?Text("Loading...", style:TextStyle(color:Colors.white, fontSize: 24, fontWeight: FontWeight.bold))
+                    :Text(
+                      '${getFormattedTime(audioDurationInSeconds)}',
+                      style: TextStyle(fontSize: 40, color:Colors.white,fontWeight:FontWeight.w400),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CongratulationsPage extends StatefulWidget {
+  @override
+  CongratulationsPage({required this.message, required this.data}); 
+  final message;// Constructor with the parameter
+  final data;
+  _CongratulationsPageState createState() => _CongratulationsPageState(message:message, data:data);
+}
+
+
+
+
+class _CongratulationsPageState extends State<CongratulationsPage> {
+  final String message; // Field to hold the message
+  final data;
+
+
+  _CongratulationsPageState({required this.message, required this.data,}):super(); // Constructor with message parameter
+  var label;
+  var sentence;
+  var newdata;
+  var done;
+  void initState() {
+     super.initState();
+      String formattedDate = DateFormat('MMMM d, y').format(DateTime.now());
+      if(message=="Great Job with your breathing exercise!"){
+        label="breathe";
+        sentence="completed a breathing routine on ${formattedDate}";
+      }else if(message=="Great Job with your drawing! Make sure to try again for new prompts/ideas."){
+        label="draw";
+        sentence="completed a drawing practice on ${formattedDate}";
+      }else if(message=="Great Job with your meditating exercise!"){
+        label="meditate";
+        sentence="completed a meditating session on ${formattedDate}";
+      }else{
+        label="memory";
+        sentence="completed a memory exercise on ${formattedDate}";
+      }
+      print("HIII ${data[1]}");
+      newdata={label:sentence};
+      print(newdata);
+      List finished=data[1];
+      finished.insert(0, newdata);
+      done=finished;
+      print(done);
+      print(finished);
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 1, 8, 84), // Background color
+      body: Column(
+        children: [
+          Container(height: MediaQuery.of(context).size.height * 0.05),
+          Image.asset('assets/images/award-gif-unscreen.gif'),
+          Container(height: MediaQuery.of(context).size.height * 0.05),
+          Text("Congratulations!", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 40)),
+          Container(height: MediaQuery.of(context).size.height * 0.03),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Text(
+              message, // Display the message passed from outside
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey, fontSize: 17),
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.07,
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.6,
+            height: MediaQuery.of(context).size.height * 0.06,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                backgroundColor: Color.fromARGB(255, 111, 228, 243), // Button color
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.pop(context);
+                await FirebaseFirestore.instance.collection('audios').doc('${data[0]}').update({'activity': done});
+                setState(){};
+              },
+              child: Text('Continue', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+class SudokuScreen extends StatefulWidget {
+ @override
+ _SudokuScreenState createState() => _SudokuScreenState();
+}
+class _SudokuScreenState extends State<SudokuScreen> {
+ List<List<int>> _puzzle = [];
+ List<List<int>> _solution = [];
+ int _selectedRow = -1;
+ int _selectedCol = -1;
+ bool _isComplete = false;
+@override
+ void initState() {
+ super.initState();
+ _generatePuzzle();
+ }
+void _generatePuzzle() {
+ // Generate a new Sudoku puzzle using an existing library or algorithm
+ // For simplicity, we'll just generate a random puzzle here
+ var rng = Random();
+ _solution = List.generate(9, (_) => List.generate(9, (_) => rng.nextInt(9) + 1));
+ _puzzle = List.generate(9, (_) => List.generate(9, (_) => 0));
+ for (int i = 0; i < 9; i++) {
+ for (int j = 0; j < 9; j++) {
+ if (rng.nextDouble() < 0.5) {
+ _puzzle[i][j] = _solution[i][j];
+ }
+ }
+ }
+ }
+void _checkComplete() {
+ // Check if the puzzle is complete
+ _isComplete = true;
+  for (int i = 0; i < 9; i++) {
+    for (int j = 0; j < 9; j++) {
+      if (_puzzle[i][j] == 0) {
+        _isComplete = false;
+      return;
+      }
+      if (_puzzle[i][j] != _solution[i][j]) {
+        _isComplete = false;
+      }
+    }
+  }
+ }
+void _selectCell(int row, int col) {
+ setState(() {
+ _selectedRow = row;
+ _selectedCol = col;
+ });
+ }
+void _enterNumber(int number) {
+ if (_selectedRow != -1 && _selectedCol != -1) {
+ setState(() {
+ _puzzle[_selectedRow][_selectedCol] = number;
+ _checkComplete();
+ });
+ }
+ }
+@override
+ Widget build(BuildContext context) {
+ return Scaffold(
+ appBar: AppBar(
+ title: Text('Sudoku'),
+ ),
+ body: Column(
+ children: <Widget>[
+ Expanded(
+ child: GridView.count(
+ crossAxisCount: 9,
+ children: List.generate(81, (index) {
+ int row = index ~/ 9;
+ int col = index % 9;
+ return GestureDetector(
+ onTap: () {
+ _selectCell(row, col);
+ },
+ child: Container(
+ alignment: Alignment.center,
+ decoration: BoxDecoration(
+ border: Border.all(
+ color: Colors.grey,
+ ),
+ color: _selectedRow == row && _selectedCol == col
+ ? Colors.yellow
+ : Colors.white,
+ ),
+ child: Text(
+ _puzzle[row][col] == 0 ? '' : _puzzle[row][col].toString(),
+ style: TextStyle(
+ fontSize: 24,
+ fontWeight: FontWeight.bold,
+ color: _puzzle[row][col] == _solution[row][col]
+ ? Colors.green
+ : Colors.black,
+ ),
+ ),
+ ),
+ );
+ }),
+ ),
+ ),
+ SizedBox(height: 16),
+ _isComplete
+ ? Text(
+ 'Congratulations! You solved the puzzle!',
+ style: TextStyle(
+ fontSize: 20,
+ fontWeight: FontWeight.bold,
+ color: Colors.green,
+ ),
+ )
+ : SizedBox(),
+ SizedBox(height: 16),
+ Column(children:[
+  Row()
+ ]),
+ Row(
+ mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+ children: <Widget>[
+ _buildNumberButton(1),
+ _buildNumberButton(2),
+ _buildNumberButton(3),
+ _buildNumberButton(4),
+ _buildNumberButton(5),
+ _buildNumberButton(6),
+ _buildNumberButton(7),
+ _buildNumberButton(8),
+ _buildNumberButton(9),
+ ],
+ ),
+ SizedBox(height: 16),
+ ElevatedButton(
+ child: Text('New Game'),
+ onPressed: () {
+ setState(() {
+ _generatePuzzle();
+ _selectedRow = -1;
+ _selectedCol = -1;
+ _isComplete = false;
+ });
+ },
+ ),
+ SizedBox(height: 16),
+],
+ ),
+ );
+ }
+Widget _buildNumberButton(int number) {
+ return ElevatedButton(
+ child: Text(number.toString()),
+ onPressed: () {
+ _enterNumber(number);
+ },
+ );
+ }
+}
+
+
+
+class MemoryGameScreen extends StatefulWidget {
+  @override// Define the parameter
+
+  MemoryGameScreen({required this.level, required this.data}); // Constructor with the parameter
+  final level; 
+  final data;
+
+  @override
+  _MemoryGameScreenState createState() => _MemoryGameScreenState(level:level, data:data);
+}
+
+class _MemoryGameScreenState extends State<MemoryGameScreen> {
+
+  _MemoryGameScreenState({required this.level, required this.data}) : super();
+  final level;
+  final data;
+  List<int> numbers = [];
+  List<int> visibleNumbers = [];
+  bool canTap = true;
+  int attempts = 0;
+  int firstIndex = -1;
+  var grids;
+
+  @override
+  void initState() {
+    super.initState();
+    initializeGame();
+  }
+
+  returnIcon(size, index){
+    final Map<int, Icon> memoryGameIcons = {
+      1: Icon(Icons.ac_unit,size:size, color:Colors.white),
+      2: Icon(Icons.access_alarm,size:size, color:Colors.white),
+      3: Icon(Icons.music_note,size:size, color:Colors.white),
+      4: Icon(Icons.camera_alt,size:size, color:Colors.white),
+      5: Icon(Icons.coffee,size:size, color:Colors.white),
+      6: Icon(Icons.account_circle,size:size, color:Colors.white),
+      7: Icon(Icons.home,size:size, color:Colors.white),
+      8: Icon(Icons.book,size:size, color:Colors.white),
+      9: Icon(Icons.add_box,size:size, color:Colors.white),
+      10: Icon(Icons.shopping_bag,size:size, color:Colors.white),
+      11: Icon(Icons.bed, size:size, color:Colors.white),
+      12: Icon(Icons.phone, size:size, color:Colors.white),
+      13: Icon(Icons.key, size:size, color:Colors.white),
+      14: Icon(Icons.fire_truck, size:size, color:Colors.white),
+      15: Icon(Icons.umbrella, size:size, color:Colors.white), 
+    };
+    return(memoryGameIcons[numbers[index]]);
+
+  }
+
+  void initializeGame() {
+    if(level=="difficult"){
+      grids=30;
+    }else if(level=="medium"){
+      grids=20;
+    }else{
+      grids=10;
+    }
+    numbers = List.generate(grids, (index) => index ~/ 2 + 1);
+    numbers.shuffle();
+    visibleNumbers = List.filled(numbers.length, 0);
+    canTap = true;
+    attempts = 0;
+    firstIndex = -1;
+  }
+
+  void handleTap(int index) {
+    if (!canTap || visibleNumbers[index] != 0) return;
+
+    setState(() {
+      visibleNumbers[index] = 1;
+    });
+
+    if (firstIndex == -1) {
+      firstIndex = index;
+    } else {
+      canTap = false;
+      Timer(Duration(seconds: 1), () {
+        setState(() {
+          checkMatch(index);
+        });
+      });
+    }
+  }
+
+  void checkMatch(int secondIndex) {
+    if (numbers[firstIndex] == numbers[secondIndex]) {
+      visibleNumbers[firstIndex] = 2;
+      visibleNumbers[secondIndex] = 2;
+    } else {
+      visibleNumbers[firstIndex] = 0;
+      visibleNumbers[secondIndex] = 0;
+    }
+
+    firstIndex = -1;
+    canTap = true;
+    attempts++;
+    checkGameEnd();
+  }
+
+  void checkGameEnd() {
+    if (visibleNumbers.every((element) => element == 2)) {
+       Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CongratulationsPage(message:"Great Job finishing the memory game!\n You took $attempts turns to solve it. ", data:data)),
+            );
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       title: Text('Game Over'),
+      //       content: Text('You completed the game in $attempts attempts!'),
+      //       actions: [
+      //         TextButton(
+      //           onPressed: () {
+      //             Navigator.of(context).pop();
+      //             initializeGame();
+      //           },
+      //           child: Text('Play Again'),
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children:[
+          Container(height:MediaQuery.of(context).size.height*0.05),
+           Row(
+        children: [
+          Container(width:MediaQuery.of(context).size.width*0.01),
+          // Icon(Icons.account_circle,
+          //     color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.06), // Profile Icon
+          IconButton(icon:Icon(Icons.arrow_back, color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.045),onPressed:(){Navigator.pop(context);Navigator.pop(context);}),
+        ]),
+          Container(height:MediaQuery.of(context).size.height*0.03),
+          Text("Memory  Game!", textAlign: TextAlign.center,style:TextStyle(fontSize: 30,letterSpacing:3.00, fontWeight:FontWeight.w500, color:Color.fromARGB(255, 99, 70, 203))),
+          Container(height:MediaQuery.of(context).size.height*0.02),
+          Text("Play a memory game by flipping two cards per turn to find matching pairs of icons. Remember the positions of previously flipped cards to match pairs efficiently and clear the board.", textAlign:TextAlign.center,  style:GoogleFonts.raleway(
+                color: Colors.black, fontSize:14),
+          ),
+          Container(height:MediaQuery.of(context).size.height*0.02),
+          Container(height:MediaQuery.of(context).size.height*0.64,width:MediaQuery.of(context).size.width*0.9,child:GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            mainAxisSpacing: 8.0,
+            crossAxisSpacing: 8.0,
+          ),
+          itemCount: numbers.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () => handleTap(index),
+              child: Container(
+                // width:MediaQuery.of(context).size.width*0.1,
+                // height:MediaQuery.of(context).size.width*0.1,
+                decoration: BoxDecoration(
+                  color: visibleNumbers[index] == 2 ? Colors.green : Colors.lightBlue,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Center(
+                  child: visibleNumbers[index] == 0
+                      ? Text(
+                          'Tap to reveal',
+                          textAlign:TextAlign.center,
+                          style: TextStyle(fontSize: 16.0),
+                        )
+                      : returnIcon(MediaQuery.of(context).size.width*0.08, index)
+                      // : Text(
+                      //     numbers[index].toString(),
+                      //     style: TextStyle(fontSize: 24.0),
+                      //   ),
+                ),
+              ),
+            );
+          },
+        )),]
+      ),
+    );
+  }
+}
+
+class GifPage extends StatefulWidget {
+  @override
+   final level;
+   final data; // Define the parameter
+
+  GifPage({required this.level, required this.data});
+  _GifPageState createState() => _GifPageState(level:level, data:data);
+}
+
+class _GifPageState extends State<GifPage> with SingleTickerProviderStateMixin {
+   _GifPageState({required this.level, required this.data}) : super();
+  final level;
+  final data;
+  late Timer _timer;
+  int _secondsRemaining = 600; // 10 minutes in seconds
+  bool _timerFinished = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    if(level=='difficult'){
+      _secondsRemaining=600;
+    }else if(level=='medium'){
+      _secondsRemaining=300;
+    }else{
+      _secondsRemaining=120;
+    }
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      } else {
+        _timer.cancel();
+        setState(() {
+          _timerFinished = true;
+        });
+         Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CongratulationsPage(message:"Great Job with your breathing exercise!", data:data)),
+            );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Widget _buildTimerContainer() {
+  int minutes = _secondsRemaining ~/ 60;
+  int seconds = _secondsRemaining % 60;
+  String timerText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+  return Container(
+    width:MediaQuery.of(context).size.width*0.176,
+    padding: EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      timerText,
+      style: TextStyle(fontSize: MediaQuery.of(context).size.width*0.045),
+    ),
+  );
+}
+
+  Widget _buildTimerFinishedContainer() {
+    return Container(
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        'Finished',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFffac94),
+      body: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.045),
+          Row(
+            children: [
+              SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+              IconButton(
+                icon: Icon(Icons.arrow_back,
+                    color: Colors.white,
+                    size: MediaQuery.of(context).size.height * 0.045),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+              Container(width:MediaQuery.of(context).size.width*0.66), // Add some space between back arrow and timer
+              _timerFinished
+                  ? _buildTimerFinishedContainer()
+                  : _buildTimerContainer(),
+            ],
+          ),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+          Text("Breathing Quest",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: MediaQuery.of(context).size.width*0.11,
+                  fontWeight: FontWeight.bold)),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+          Image.asset('assets/images/XbH6gP4.gif', scale: 0.5),
+        ],
+      ),
+    );
+  }
+}
+
+class DrawPage extends StatelessWidget {
+  final level;
+  final data;
+
+  DrawPage({required this.level, required this.data});
+  @override
+  List<String> selfCareTopics = [
+    "taking a walk in nature",
+    "reading a favorite book",
+    "drinking a cup of tea",
+    "listening to calming music",
+    "doing yoga exercises",
+    "watching a beautiful sunset",
+    "journaling your thoughts",
+    "taking a relaxing bath",
+    "having a spa day at home",
+    "cooking a favorite meal",
+    "connecting with friends",
+    "doing a workout session",
+    "growing plants or gardening",
+    "trying a new recipe",
+    "setting personal boundaries",
+    "learning a new skill",
+    "exploring creativity",
+    "doing a diy project",
+    "practicing mindfulness",
+    "trying meditation",
+    "learning to manage stress",
+    "practicing self-compassion",
+    "taking a mental health break",
+    "creating a self-care routine",
+    "reflecting on your goals",
+    "having a gratitude practice",
+    "taking time for hobbies",
+    "practicing self-reflection",
+    "doing a digital detox",
+    "exploring mindful activities",
+    "trying relaxation techniques",
+    "setting aside relaxation time",
+    "a sport that you like ",
+    "having a gratitude journal",
+    "trying laughter therapy",
+    "exploring coloring activities",
+    "trying guided imagery",
+    "creating a self-care playlist",
+    "taking time for self-care rituals",
+  ];
+  List<String> hardToDraw = [
+  "listening to calming music",
+  "watching a beautiful sunset",
+  "creating a self-care routine",
+  "trying laughter therapy",
+];
+List<String> notTooHardToDraw = [
+  "taking a walk in nature",
+  "reading a favorite book",
+  "drinking a cup of tea",
+  "journaling your thoughts",
+  "taking a relaxing bath",
+  "having a spa day at home",
+  "cooking a favorite meal",
+  "trying a new recipe",
+  "setting personal boundaries",
+  "exploring creativity",
+  "trying relaxation techniques",
+  "setting aside relaxation time",
+  "trying guided imagery",
+];
+List<String> easyToDraw = [
+  "doing yoga exercises",
+  "watching a beautiful sunset",
+  "connecting with friends",
+  "doing a workout session",
+  "growing plants or gardening",
+  "learning a new skill",
+  "practicing mindfulness",
+  "trying meditation",
+  "learning to manage stress",
+  "practicing self-compassion",
+  "taking a mental health break",
+  "reflecting on your goals",
+  "having a gratitude practice",
+  "taking time for hobbies",
+  "practicing self-reflection",
+  "doing a digital detox",
+  "exploring mindful activities",
+  "setting personal boundaries",
+  "trying guided imagery",
+  "creating a self-care playlist",
+  "taking time for self-care rituals",
+  "a sport that you like",
+  "having a gratitude journal",
+];
+
+
+
+  randomtopic(){
+    if(level=='difficult'){
+      hardToDraw.shuffle();
+      return(hardToDraw[0]);
+    }else if(level=='medium'){
+      notTooHardToDraw.shuffle();
+      return(notTooHardToDraw[0]);
+    }else{
+      easyToDraw.shuffle();
+      return(easyToDraw[0]);
+    }
+    }
+
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(child:SingleChildScrollView(child:Column(children:[
+        Container(height:MediaQuery.of(context).size.height*0.04,),
+        Row(
+            children: [
+              SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+              IconButton(
+                icon: Icon(Icons.arrow_back,
+                    color: Colors.black,
+                    size: MediaQuery.of(context).size.height * 0.035),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+              Container(width:MediaQuery.of(context).size.width*0.66), // Add some space between back arrow and timer
+              TextButton(
+                onPressed: () {
+                  // Add your finish button functionality here
+                  Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CongratulationsPage(message:"Great Job with your drawing! Make sure to try again for new prompts/ideas.", data:data), fullscreenDialog: true),
+                );//
+                },
+                child: Text(
+                  'Finish',
+                  style: TextStyle(fontSize: 17, color:Color(0xFF0F4FA6)),
+                ),
+              ),
+
+            ]
+        ),
+        Container(height:MediaQuery.of(context).size.height*0.04,),
+        Container(width:MediaQuery.of(context).size.width*0.95,child:
+        Text("Draw something about ${randomtopic()}",
+        textAlign:TextAlign.center,
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold)),),
+        Container(height:MediaQuery.of(context).size.height*0.05,),
+        Container(
+          width:MediaQuery.of(context).size.width*1,
+          height:MediaQuery.of(context).size.height*0.75,
+          child:DrawingBoard(
+      boardConstrained : true,
+  background: Container(width:MediaQuery.of(context).size.width*1, height:MediaQuery.of(context).size.height*1, color: Colors.white),
+  showDefaultActions: true, /// Enable default action options
+  showDefaultTools: true,   /// Enable default toolbar
+),)])),),
+    );
+  }
+}
+
+class DifficultySelectionPage extends StatefulWidget {
+  @override
+  @override
+   final page; // Define the parameter
+   final data;
+
+  DifficultySelectionPage({required this.page, required this.data});
+
+  _DifficultySelectionPageState createState() => _DifficultySelectionPageState(page:page, data:data);
+}
+
+class _DifficultySelectionPageState extends State<DifficultySelectionPage> {
+  _DifficultySelectionPageState({required this.page, required this.data}) : super();
+  final page;
+  final data;
+
+  String selectedLevel = 'easy';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          children: [
+            Container(height:MediaQuery.of(context).size.height*0.05),
+            Row(children: [
+              SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+              IconButton(
+                icon: Icon(Icons.arrow_back,
+                    color: Colors.white,
+                    size: MediaQuery.of(context).size.height * 0.045),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              Container(width:MediaQuery.of(context).size.width*0.6),
+              FloatingActionButton.extended(
+              onPressed: () {
+                if(page=='Drawing Challenge'){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DrawPage(level:selectedLevel, data:data,), fullscreenDialog: true),
+                  );
+                }else if(page=='Memory Challenge'){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MemoryGameScreen(level:selectedLevel, data:data)),
+                  );
+                }else if(page=='Breathing Challenge'){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => GifPage(level:selectedLevel, data:data)),
+                  );
+                }else if(page=='Meditation Challenge'){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RelaxationPage(level:selectedLevel, data:data)),
+                  );
+                }
+              },
+              label: Text(
+                'Next',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: MediaQuery.of(context).size.width*0.05,
+                ),
+              ),
+              backgroundColor: Colors.cyan,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+            ),
+            ],),
+            Container(height:MediaQuery.of(context).size.height*0.1),
+            Text(
+              'Choose A Level',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: MediaQuery.of(context).size.width*0.12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Container(height:MediaQuery.of(context).size.height*0.02),
+            Text(
+              'This is for the ${page}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: MediaQuery.of(context).size.width*0.06,
+                fontWeight: FontWeight.w300,
+              ),
+            ),
+            Container(height:MediaQuery.of(context).size.height*0.3),
+            ElevatedButton(
+              onPressed: () {
+                _showDifficultyDialog();
+              },
+              style: ElevatedButton.styleFrom(
+                shape: StadiumBorder(),
+                backgroundColor: Colors.blue,
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Text(
+                  'Select Difficulty: $selectedLevel',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDifficultyDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Difficulty'),
+          content: DropdownButton<String>(
+            value: selectedLevel,
+            items: <String>['easy', 'medium', 'difficult'].map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                selectedLevel = newValue!;
+              });
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class Timeline extends StatelessWidget {
+  const Timeline({
+    Key? key,
+    required this.children,
+    this.indicators,
+    this.isLeftAligned = true,
+    this.itemGap = 12.0,
+    this.gutterSpacing = 4.0,
+    this.padding = const EdgeInsets.all(8),
+    this.controller,
+    this.lineColor = Colors.grey,
+    this.physics,
+    this.shrinkWrap = true,
+    this.primary = false,
+    this.reverse = false,
+    this.indicatorSize = 30.0,
+    this.lineGap = 4.0,
+    this.indicatorColor = Colors.blue,
+    this.indicatorStyle = PaintingStyle.fill,
+    this.strokeCap = StrokeCap.butt,
+    this.strokeWidth = 2.0,
+    this.style = PaintingStyle.stroke,
+  })  : itemCount = children.length,
+        assert(itemGap >= 0),
+        assert(lineGap >= 0),
+        assert(indicators == null || children.length == indicators.length),
+        super(key: key);
+
+  final List<Widget> children;
+  final double itemGap;
+  final double gutterSpacing;
+  final List<Widget>? indicators;
+  final bool isLeftAligned;
+  final EdgeInsets padding;
+  final ScrollController? controller;
+  final int itemCount;
+  final ScrollPhysics? physics;
+  final bool shrinkWrap;
+  final bool primary;
+  final bool reverse;
+
+  final Color lineColor;
+  final double lineGap;
+  final double indicatorSize;
+  final Color indicatorColor;
+  final PaintingStyle indicatorStyle;
+  final StrokeCap strokeCap;
+  final double strokeWidth;
+  final PaintingStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: padding,
+      separatorBuilder: (_, __) => SizedBox(height: itemGap),
+      physics: physics,
+      shrinkWrap: shrinkWrap,
+      itemCount: itemCount,
+      controller: controller,
+      reverse: reverse,
+      primary: primary,
+      itemBuilder: (context, index) {
+        final child = children[index];
+        final _indicators = indicators;
+
+        Widget? indicator;
+        if (_indicators != null) {
+          indicator = _indicators[index];
+        }
+
+        final isFirst = index == 0;
+        final isLast = index == itemCount - 1;
+
+        final timelineTile = <Widget>[
+          CustomPaint(
+            foregroundPainter: _TimelinePainter(
+              hideDefaultIndicator: indicator != null,
+              lineColor: lineColor,
+              indicatorColor: indicatorColor,
+              indicatorSize: indicatorSize,
+              indicatorStyle: indicatorStyle,
+              isFirst: isFirst,
+              isLast: isLast,
+              lineGap: lineGap,
+              strokeCap: strokeCap,
+              strokeWidth: strokeWidth,
+              style: style,
+              itemGap: itemGap,
+            ),
+            child: SizedBox(
+              height: double.infinity,
+              width: indicatorSize,
+              child: indicator,
+            ),
+          ),
+          SizedBox(width: gutterSpacing),
+          Expanded(child: child),
+        ];
+
+        return IntrinsicHeight(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children:
+                isLeftAligned ? timelineTile : timelineTile.reversed.toList(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TimelinePainter extends CustomPainter {
+  _TimelinePainter({
+    required this.hideDefaultIndicator,
+    required this.indicatorColor,
+    required this.indicatorStyle,
+    required this.indicatorSize,
+    required this.lineGap,
+    required this.strokeCap,
+    required this.strokeWidth,
+    required this.style,
+    required this.lineColor,
+    required this.isFirst,
+    required this.isLast,
+    required this.itemGap,
+  })  : linePaint = Paint()
+          ..color = lineColor
+          ..strokeCap = strokeCap
+          ..strokeWidth = strokeWidth
+          ..style = style,
+        circlePaint = Paint()
+          ..color = indicatorColor
+          ..style = indicatorStyle;
+
+  final bool hideDefaultIndicator;
+  final Color indicatorColor;
+  final PaintingStyle indicatorStyle;
+  final double indicatorSize;
+  final double lineGap;
+  final StrokeCap strokeCap;
+  final double strokeWidth;
+  final PaintingStyle style;
+  final Color lineColor;
+  final Paint linePaint;
+  final Paint circlePaint;
+  final bool isFirst;
+  final bool isLast;
+  final double itemGap;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final indicatorRadius = indicatorSize / 2;
+    final halfItemGap = itemGap / 2;
+    final indicatorMargin = indicatorRadius + lineGap;
+
+    final top = size.topLeft(Offset(indicatorRadius, 0.0 - halfItemGap));
+    final centerTop = size.centerLeft(
+      Offset(indicatorRadius, -indicatorMargin),
+    );
+
+    final bottom = size.bottomLeft(Offset(indicatorRadius, 0.0 + halfItemGap));
+    final centerBottom = size.centerLeft(
+      Offset(indicatorRadius, indicatorMargin),
+    );
+
+    if (!isFirst) canvas.drawLine(top, centerTop, linePaint);
+    if (!isLast) canvas.drawLine(centerBottom, bottom, linePaint);
+
+    if (!hideDefaultIndicator) {
+      final Offset offsetCenter = size.centerLeft(Offset(indicatorRadius, 0));
+
+      canvas.drawCircle(offsetCenter, indicatorRadius, circlePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class Activity extends StatelessWidget {
+  final data;
+  final user;
+
+  const Activity({required this.data, required this.user});
+  List<Widget> generateContainerList(List dataList) {
+  List<Widget> containerList = [];
+
+  for (var item in dataList) {
+    final value = item.values.first;
+
+    containerList.add(Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(10),
+      margin: EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blue),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text("$user $value"),
+    ));
+  }
+
+  return containerList;
+}
+  
+  List<IconData> generateIconList(List dataList) {
+  List<IconData> iconList = [];
+
+  for (var item in dataList) {
+    final key = item.keys.first;
+
+    IconData? iconData;
+    switch (key) {
+      case 'memory':
+        iconData = Icons.lightbulb;
+        break;
+      case 'draw':
+        iconData = Icons.create;
+        break;
+      case 'meditate':
+        iconData = Icons.self_improvement;
+        break;
+      case 'breathe':
+        iconData = Icons.air;
+        break;
+      default:
+        iconData = Icons.question_mark;
+    }
+
+    if (iconData != null) {
+      iconList.add(iconData);
+    }
+  }
+
+  return iconList;
+}
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar:AppBar(leading: IconButton(icon:Icon(Icons.arrow_back, color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.045),onPressed:(){Navigator.pop(context);}), elevation:0.0, backgroundColor: Colors.transparent,foregroundColor:Colors.transparent, shadowColor: Colors.transparent,surfaceTintColor: Colors.transparent,scrolledUnderElevation: 0.0,),
+        body: Container(
+          child: SingleChildScrollView(child:Column(
+            children: [
+              Container(height:MediaQuery.of(context).size.height*0.045),
+        //       Row(
+        // children: [
+        //   Container(width:MediaQuery.of(context).size.width*0.01),
+        //   // Icon(Icons.account_circle,
+        //   //     color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.06), // Profile Icon
+        //   IconButton(icon:Icon(Icons.arrow_back, color: Color(0xFF0F4FA6), size: MediaQuery.of(context).size.height*0.045),onPressed:(){Navigator.pop(context);}),]),
+              Container(height:MediaQuery.of(context).size.height*0.01),
+              SingleChildScrollView(child:Column(children:[
+              Text(
+                "Activity Log",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Container(height:MediaQuery.of(context).size.height*0.07),
+              SingleChildScrollView(child:
+              Timeline(
+                children:generateContainerList(data),
+              // children: <Widget>[
+              //   Container(height: 100, color: Colors.grey),
+              //   Container(height: 50, color: Colors.grey),
+              //   Container(height: 200, color: Colors.grey),
+              //   Container(height: 100, color: Colors.grey),
+              // ],
+              indicators: generateIconList(data).map((iconData) => Icon(iconData)).toList())),
+              // Add other widgets here for your activity log content
+            ],
+          ),)]),),
+        ),
+      ),
+    );
+  }
+}
+class ChallengeScreen extends StatefulWidget with Functions {
+  const ChallengeScreen({super.key, required this.user});
+  final user;
+  @override
+  @override
+  _ChallengeScreenState createState() => _ChallengeScreenState(user: user);
+}
+
+class _ChallengeScreenState extends State<ChallengeScreen> {
+  _ChallengeScreenState({required this.user}) : super();
+  @override
+  var user;
+  CollectionReference login = FirebaseFirestore.instance.collection('audios');
+  Future<List> futureData() async {
+    // Simulate fetching data from a source (e.g., Firestore)
+    return [
+      await login.doc(user).get(),
+    ];
+  }
+  initState(){
+
+  }
+  Widget build(BuildContext context){
+    return Scaffold(
+        body: FutureBuilder(
+            future: futureData(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text("Something went wrong");
+              }
+              if (snapshot.connectionState == ConnectionState.done) {
+                final List? items = snapshot.data;
+                var data = (items![0] as DocumentSnapshot).data() as Map;
+                var activities=[user, data['activity']];
+                return Container(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.03),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(height:MediaQuery.of(context).size.height*0.08,),
+                        Container(child:Text(
+                          'Daily Challenges!',
+                          style: TextStyle(
+                            color: Colors.indigo[400],
+                            fontSize: 32.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                    ),
+                        Container(height:MediaQuery.of(context).size.height*0.00,),
+                        Row(children:[
+                          Column(children:[
+                            ChallengeCard(
+                              color: Colors.blue,
+                              title: 'Meditation Challenge',
+                              data: 'Meditate for 10 minutes',
+                              onpress:DifficultySelectionPage(page:'Meditation Challenge', data:activities)
+                            ),
+                            Container(height:MediaQuery.of(context).size.height*0.03,),
+                          ChallengeCard(
+                          color: Colors.purple,
+                          title: 'Breathing Challenge',
+                          data: 'Practice a breathing exercise for 10 minutes.',
+                          // onpress:GifPage(level:'medium')
+                          onpress:DifficultySelectionPage(page:'Breathing Challenge', data:activities)
+                        ),
+                          ]),
+                        Container(width:MediaQuery.of(context).size.width*0.06,),
+                        Column(children:[
+                          Container(height:MediaQuery.of(context).size.height*0.06,),
+                          InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Activity(data:activities[1], user:data['User'])),
+                              );// S
+                            },
+                            borderRadius: BorderRadius.circular(20.0),
+                            child: Container(
+                              width:MediaQuery.of(context).size.width * 0.44,
+                              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(width:MediaQuery.of(context).size.width * 0.00),
+                                  Text(
+                                    "Activity Log",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                  Container(width:MediaQuery.of(context).size.width * 0.05,),
+                                  Icon(
+                                    Icons.arrow_forward,
+                                    color: Colors.black,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(height:MediaQuery.of(context).size.height*0.02,),
+                          ChallengeCard(
+                          color: Colors.pink,
+                          title: 'Memory Challenge',
+                          data: 'Flip and match hidden icons for a challenging memory game experience! ',
+                          onpress:DifficultySelectionPage(page:'Memory Challenge', data:activities)
+                        ),
+                        Container(height:MediaQuery.of(context).size.height*0.03,),
+                        ChallengeCard(
+                          color: Color.fromARGB(255, 52, 217, 243),
+                          title: 'Drawing Challenge',
+                          data: 'Draw an image according to a prompt, or your own imagination.',
+                          onpress:DifficultySelectionPage(page:'Drawing Challenge', data:activities)
+                        ),
+                        ]),
+                        ]),
+                      ],
+                    ),
+                  ),
+                );
+              }else{
+                return Center(child:CircularProgressIndicator(color:Color(0xFF0F4FA6)));
+              }
+            }
+        )
+    );
+  }
+}
+
+

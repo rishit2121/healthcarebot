@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'main.dart';
 
 class Message {
   final String sender;
@@ -28,13 +29,13 @@ class _ChatDialogState extends State<ChatDialog> {
   final data;
   List messages = [
     Message(
-        sender: 'Eva',
+        sender: 'Jack',
         text: 'What are you looking to work on today?',
         list: []),
   ];
   TextEditingController dateInputController = TextEditingController();
   var chat_history =
-      '\nEva: What are you looking to work on today? <END_OF_TURN>';
+      '\nJack: What are you looking to work on today? <END_OF_TURN>';
   var chat_history2 = [
     {"role": "assistant", "content": "What are you looking to work on today?"},
   ];
@@ -45,9 +46,12 @@ class _ChatDialogState extends State<ChatDialog> {
   _scrollToBottom() {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
-
-  void _sendMessage() {
+   Future<void> _sendMessage(user,credits) async {
+    //credits later
     if (_textEditingController.text.isNotEmpty) {
+      if(credits>0){
+        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+      }
       setState(() {
         String text = _textEditingController.text;
         Message newMessage = Message(sender: 'You', text: text, list: []);
@@ -69,58 +73,192 @@ class _ChatDialogState extends State<ChatDialog> {
         _textEditingController.clear();
         // Simulate bot response
         _scrollToBottom();
-        _simulateBotResponse();
+        if(credits>0){
+            _simulateBotResponse(credits);
+          }else{
+            Message errorMessage= Message(sender: 'Error', text: "There are insufficient credits. Please buy more.", list: []);
+          messages.add(errorMessage);
+          messages.remove(true);
+          }
       });
     }
   }
-
-  Future<void> _simulateBotResponse() async {
+  // void _sendMessage() {
+  //   if (_textEditingController.text.isNotEmpty) {
+  //     setState(() {
+  //       String text = _textEditingController.text;
+  //       Message newMessage = Message(sender: 'You', text: text, list: []);
+  //       messages.add(newMessage);
+  //       var scrollPosition = _scrollController.position;
+  //       if (scrollPosition.viewportDimension < scrollPosition.maxScrollExtent) {
+  //         _scrollController.animateTo(
+  //           scrollPosition.maxScrollExtent,
+  //           duration: new Duration(milliseconds: 200),
+  //           curve: Curves.easeOut,
+  //         );
+  //       }
+  //       chat_history =
+  //           chat_history + "\n" + "User: " + newMessage.text + " <END_OF_TURN>";
+  //       chat_history2 = chat_history2 +
+  //           [
+  //             {"role": "user", "content": newMessage.text}
+  //           ];
+  //       _textEditingController.clear();
+  //       // Simulate bot response
+  //       _scrollToBottom();
+  //       _simulateBotResponse();
+  //     });
+  //   }
+  // }
+  Future<void> _simulateBotResponse(credits) async {
     // Simulating a delayed bot response
     setState(() {
       messages.add(true);
     });
     List<dynamic> response =
-        await Fitness_Functions.Fitness_responser(chat_history);
-    var sentence = response[0];
-    sentence = sentence.replaceAll('<END_OF_TURN>', '');
-    sentence = sentence.replaceAll('\n', '');
-    Message botMessage = Message(sender: 'Eva', text: sentence, list: []);
-    chat_history =
-        chat_history + "\n" + "Eva: " + botMessage.text + " <END_OF_TURN>";
-    chat_history2 = chat_history2 +
-        [
-          {"role": "assistant", "content": botMessage.text}
-        ];
-    setState(() {
-      messages.add(botMessage);
-      if (response[1] == '3') {
-        Message productMessage = Message(
-            sender: 'Trainer',
-            text: "Heres a few exercises you can add to your routine:",
-            list: response[2]);
-        print(response[2]);
-        messages.add(productMessage);
+        await Fitness_Functions.Fitness_responser(chat_history2);
+    print(response);
+    print(response);
+    if(response[2]=='fail'){
+      if(response[0]=='fail' || response[1]=='fail'){
+         Message errorMessage= Message(sender: 'Error', text: "There was an error in sending a message. Please try again later.", list: []);
+         messages.add(errorMessage);
+         messages.remove(true);
+      }else{
+        if(credits>0){
+          await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+        }
+        var sentence = response[0];
+        sentence = sentence.replaceAll('<END_OF_TURN>', '');
+        sentence = sentence.replaceAll('\n', '');
+
+        Message botMessage = Message(sender: 'Jack', text: sentence, list: []);
+          chat_history =
+              chat_history + "\n" + "Jack: " + botMessage.text + " <END_OF_TURN>";
+          chat_history2 = chat_history2 +
+              [
+                {"role": "assistant", "content": botMessage.text}
+              ];
+          setState(() {
+            messages.add(botMessage);
+             if (response[1] == '3') {
+              Message errorMessage = Message(sender: 'Error', text: "There was an error in finding exercises. Please try again later.", list: []);
+              messages.add(errorMessage);
+             }
+            messages.remove(true);
+          });
       }
-      messages.remove(true);
-    });
+    }
+    else{
+      if(credits>0){
+        await FirebaseFirestore.instance.collection('audios').doc('$user').update({'Credits': credits-1});
+      }
+      var sentence = response[0];
+      sentence = sentence.replaceAll('<END_OF_TURN>', '');
+      sentence = sentence.replaceAll('\n', '');
+
+      Message botMessage = Message(sender: 'Jack', text: sentence, list: []);
+        chat_history =
+            chat_history + "\n" + "Jack: " + botMessage.text + " <END_OF_TURN>";
+        chat_history2 = chat_history2 +
+            [
+              {"role": "assistant", "content": botMessage.text}
+            ];
+        setState(() {
+          messages.add(botMessage);
+          if (response[1] == '3') {
+            Message productMessage = Message(
+                sender: 'Trainer',
+                text: "Heres a few exercises you can add to your routine:",
+                list: response[2]);
+            messages.add(productMessage);
+          }
+          messages.remove(true);
+        });
+    }
     Future.delayed(Duration(seconds: 6), () {
       setState(() {
         _scrollToBottom();
       });
     });
   }
+  // Future<void> _simulateBotResponse() async {
+  //   // Simulating a delayed bot response
+  //   setState(() {
+  //     messages.add(true);
+  //   });
+  //   List<dynamic> response =
+  //       await Fitness_Functions.Fitness_responser(chat_history);
+  //   var sentence = response[0];
+  //   sentence = sentence.replaceAll('<END_OF_TURN>', '');
+  //   sentence = sentence.replaceAll('\n', '');
+  //   Message botMessage = Message(sender: 'Jack', text: sentence, list: []);
+  //   chat_history =
+  //       chat_history + "\n" + "Jack: " + botMessage.text + " <END_OF_TURN>";
+  //   chat_history2 = chat_history2 +
+  //       [
+  //         {"role": "assistant", "content": botMessage.text}
+  //       ];
+  //   setState(() {
+  //     messages.add(botMessage);
+  //     if (response[1] == '3') {
+  //       Message productMessage = Message(
+  //           sender: 'Trainer',
+  //           text: "Heres a few exercises you can add to your routine:",
+  //           list: response[2]);
+  //       print(response[2]);
+  //       messages.add(productMessage);
+  //     }
+  //     messages.remove(true);
+  //   });
+  //   Future.delayed(Duration(seconds: 6), () {
+  //     setState(() {
+  //       _scrollToBottom();
+  //     });
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
+        insetPadding: EdgeInsets.fromLTRB(0,0,0,0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
+          width: MediaQuery.of(context).size.width * 1,
+          height: MediaQuery.of(context).size.height * 1,
           decoration: BoxDecoration(color: Color.fromARGB(255, 237, 237, 237)),
           child: Column(
             children: <Widget>[
+              Container(height:MediaQuery.of(context).size.height*0.03),
+              Row(children:[
+                Container(width:MediaQuery.of(context).size.width*0.05),
+                Column(children:[
+                  Text('Credits: ${data['Credits']}', style:TextStyle(fontSize:12.0, color:Colors.black), textAlign: TextAlign.right),
+            TextButton(
+              child:Text("Add more?", style:TextStyle(fontSize:15), textAlign: TextAlign.right), 
+              style:TextButton.styleFrom(
+                minimumSize: Size.zero,
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed:(){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionPage(currentCredits:data['Credits'], user:user),
+                  ),
+                );
+              }
+            )
+                ]),
+                Container(width:MediaQuery.of(context).size.width*0.6),
+                Column(children:[
+                Align(alignment:Alignment.center, child:IconButton(icon:Icon(Icons.cancel, color:Colors.black, size:MediaQuery.of(context).size.width*0.1), onPressed: (){Navigator.pop(context);},)),
+                Container(height:MediaQuery.of(context).size.height*0.01),]),
+              ]),
+              Divider(color:Colors.black),
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
@@ -144,14 +282,14 @@ class _ChatDialogState extends State<ChatDialog> {
                           ]));
                     } else if (message.sender == 'You') {
                       return _buildMessageBubble(message);
-                    } else if (message.sender == 'Eva') {
-                      return _buildBotMessageBubble(message);
+                    } else if (message.sender == 'Jack') {
+                      return _buildBotMessageBubble(message, Color.fromARGB(255, 215, 215, 215));
                     } else if (message.sender == 'Trainer') {
                       print(messages);
                       return _buildExerciseListMessage(message);
-                    }
-                    return _buildExerciseListMessage(message);
-                  },
+                    }else if (message.sender == 'Error') {
+                      return _buildBotMessageBubble(message, Color.fromARGB(255, 255, 86, 74));
+                    }                  },
                 ),
               ),
               Container(
@@ -172,6 +310,9 @@ class _ChatDialogState extends State<ChatDialog> {
                   children: <Widget>[
                     Expanded(
                       child: TextField(
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(100),
+                        ],
                         controller: _textEditingController,
                         decoration: InputDecoration(
                           border: InputBorder.none,
@@ -183,7 +324,7 @@ class _ChatDialogState extends State<ChatDialog> {
                     IconButton(
                       icon: Icon(Icons.send,
                           color: Color.fromARGB(255, 11, 178, 255)),
-                      onPressed: _sendMessage,
+                      onPressed:(){ _sendMessage(user, data['Credits']);}
                     ),
                   ],
                 ),
@@ -227,14 +368,14 @@ class _ChatDialogState extends State<ChatDialog> {
     );
   }
 
-  Widget _buildBotMessageBubble(Message message) {
+  Widget _buildBotMessageBubble(Message message, color) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            message.sender,
+            'Jack',
             style: TextStyle(
               fontSize: 14.0,
               fontWeight: FontWeight.bold,
@@ -242,13 +383,34 @@ class _ChatDialogState extends State<ChatDialog> {
             ),
           ),
           SizedBox(height: 4.0),
-          Container(
+          color == Color.fromARGB(255, 255, 86, 74)
+          ?Container(
             padding: EdgeInsets.all(12.0),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.0),
+              color: color,
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topRight: Radius.circular(16)),
             ),
-            child: Text(
+            child:Text(
+              message.text,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.white,
+              ),
+            ),
+          )
+        :Container(
+            padding: EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                  topRight: Radius.circular(16)),
+            ),
+            child:Text(
               message.text,
               style: TextStyle(
                 fontSize: 16.0,
@@ -256,6 +418,7 @@ class _ChatDialogState extends State<ChatDialog> {
               ),
             ),
           ),
+
         ],
       ),
     );

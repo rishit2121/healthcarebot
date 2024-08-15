@@ -1,1 +1,1 @@
-var myGPTAPI='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';
+var myGPTAPI='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';
